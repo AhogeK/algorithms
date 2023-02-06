@@ -1,5 +1,9 @@
 package sort;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Random;
+
 /**
  * 排序工具类
  *
@@ -7,6 +11,16 @@ package sort;
  * @since 2023-02-06 18:21:10
  */
 public class SortUtil {
+
+    private static final Random RANDOM;
+
+    static {
+        try {
+            RANDOM = SecureRandom.getInstanceStrong();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private SortUtil() {
         throw new IllegalStateException("Utility Class");
@@ -25,6 +39,11 @@ public class SortUtil {
         nums[index2] = temp;
     }
 
+    /**
+     * 打印数组
+     *
+     * @param nums 被打印的数组
+     */
     public static void printArray(int[] nums) {
         System.out.print("[");
         for (int i = 0; i < nums.length; i++) {
@@ -34,5 +53,27 @@ public class SortUtil {
             }
         }
         System.out.println("]");
+    }
+
+    /**
+     * 生成随机数组
+     *
+     * @param len 数组长度
+     * @param min 数组中的最小值
+     * @param max 数组中的最大值
+     * @return 生成的随机数组
+     */
+    public static int[] generateRandomArray(int len, int min, int max) {
+        if (len <= 0) {
+            throw new IllegalArgumentException("Invalid len: " + len);
+        }
+        if (min > max) {
+            throw new IllegalArgumentException("Invalid min max, min need less equals max: " + len + max);
+        }
+        int[] randomArray = new int[len];
+        for (int i = 0; i < len; i++) {
+            randomArray[i] = min + RANDOM.nextInt(max - min + 1);
+        }
+        return randomArray;
     }
 }

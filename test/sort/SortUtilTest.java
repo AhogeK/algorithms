@@ -33,4 +33,15 @@ class SortUtilTest {
         System.setOut(old);
         Assertions.assertEquals("[1, 2, 3]\n", baos.toString());
     }
+
+    @Test
+    void generateRandomArrayTest() {
+        Assertions.assertDoesNotThrow(() -> {
+            int len = 10;
+            int min = -10;
+            int max = 10;
+            int[] randomArray = SortUtil.generateRandomArray(len, min, max);
+            SortUtil.printArray(randomArray);
+        });
+    }
 }
