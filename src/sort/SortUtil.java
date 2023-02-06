@@ -76,4 +76,23 @@ public class SortUtil {
         }
         return randomArray;
     }
+
+    /**
+     * 拷贝数组
+     *
+     * @param nums 待拷贝的数组
+     * @return 被拷贝的新数组
+     */
+    public static int[] copyArray(int[] nums) {
+        int[] newArr = new int[nums.length];
+        /*
+          Java 可以使用
+
+          System.arraycopy(nums, 0, newArr, 0, len)
+         */
+        for (int i = 0; i < nums.length; i++) {
+            newArr[i] = nums[i];
+        }
+        return newArr;
+    }
 }

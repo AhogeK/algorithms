@@ -44,4 +44,12 @@ class SortUtilTest {
             SortUtil.printArray(randomArray);
         });
     }
+
+    @Test
+    void copyArrayTest() {
+        int[] nums = {1, 2, 3};
+        int[] newArr = SortUtil.copyArray(nums);
+        Assertions.assertArrayEquals(nums, newArr);
+        Assertions.assertNotSame(nums, newArr);
+    }
 }
