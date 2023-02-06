@@ -95,4 +95,21 @@ public class SortUtil {
         }
         return newArr;
     }
+
+    /**
+     * 通过逐个比较的方式判断两个数组是否相等
+     *
+     * @param nums1 比较数组1
+     * @param nums2 比较数组2
+     */
+    public static void judgeArrayEquals(int[] nums1, int[] nums2) {
+        if (nums1.length != nums2.length) {
+            throw new RuntimeException("两个数组的不想等！");
+        }
+        for (int i = 0; i < nums1.length; i++) {
+            if (nums1[i] != nums2[i]) {
+                throw new RuntimeException("第" + i + "个元素不相等！");
+            }
+        }
+    }
 }

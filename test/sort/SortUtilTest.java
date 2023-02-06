@@ -52,4 +52,15 @@ class SortUtilTest {
         Assertions.assertArrayEquals(nums, newArr);
         Assertions.assertNotSame(nums, newArr);
     }
+
+    @Test
+    void judgeArrayEqualsTest() {
+        int[] nums1 = {1, 2, 3, 4};
+        var ref = new Object() {
+            int[] nums2 = {1, 2, 3};
+        };
+        Assertions.assertThrows(RuntimeException.class, () -> SortUtil.judgeArrayEquals(nums1, ref.nums2));
+        ref.nums2 = new int[]{1, 3, 4, 5};
+        Assertions.assertThrows(RuntimeException.class, () -> SortUtil.judgeArrayEquals(nums1, ref.nums2));
+    }
 }
