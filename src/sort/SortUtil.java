@@ -1,7 +1,12 @@
 package sort;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -63,9 +68,18 @@ public class SortUtil {
      * @param max 数组中的最大值
      * @return 生成的随机数组
      */
-    public static int[] generateRandomArray(int len, int min, int max) {
+    public static int[] generateRandomArray(Integer len, Integer min, Integer max) {
+        if (len == null) {
+            len = 1_000;
+        }
         if (len <= 0) {
             throw new IllegalArgumentException("Invalid len: " + len);
+        }
+        if (min == null) {
+            min = 0;
+        }
+        if (max == null) {
+            max = 1_000;
         }
         if (min > max) {
             throw new IllegalArgumentException("Invalid min max, min need less equals max: " + len + max);
@@ -110,6 +124,34 @@ public class SortUtil {
             if (nums1[i] != nums2[i]) {
                 throw new RuntimeException("第" + i + "个元素不相等！");
             }
+        }
+    }
+
+    /**
+     * 测试排序算法正确性、计算排序算法时间
+     *
+     * @param sortingAlgorithm 自己编写的排序算法实现
+     */
+    public static void testSortingAlgorithms(ISortingAlgorithm sortingAlgorithm) {
+        int len = 1_000;
+        int[] nums = generateRandomArray(len, 0, len);
+        int[] checkNums = copyArray(nums);
+        Instant startTime = Instant.now();
+        sortingAlgorithm.sortArray(nums);
+        Instant endTime = Instant.now();
+        long millis = Duration.between(startTime, endTime).toMillis();
+        // 向上取整
+        System.out.printf("耗时 %d 毫秒。\n", millis);
+        BigDecimal second = new BigDecimal(String.valueOf(millis)).divide(new BigDecimal(1000), 8,
+                RoundingMode.CEILING);
+        System.out.printf("耗时 %s 秒。\n", second);
+        Arrays.sort(checkNums);
+        if (!Arrays.equals(checkNums, nums)) {
+            System.out.println("结果:");
+            printArray(nums);
+            System.out.println("正确结果:");
+            printArray(checkNums);
+            throw new RuntimeException("算法错误");
         }
     }
 }

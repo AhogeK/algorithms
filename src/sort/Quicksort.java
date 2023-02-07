@@ -10,23 +10,32 @@ import java.util.Random;
  * @author AhogeK ahogek@gmail.com
  * @since 2023-02-01 16:37:42
  */
-public class Quicksort {
+public class Quicksort implements ISortingAlgorithm {
 
-    public int[] sortArray(int[] nums) throws NoSuchAlgorithmException {
-        quickSort(nums, 0, nums.length - 1);
-        return nums;
+    private static final Random RANDOM;
+
+    static {
+        try {
+            RANDOM = SecureRandom.getInstanceStrong();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private void quickSort(int[] nums, int l, int r) throws NoSuchAlgorithmException {
+    @Override
+    public void sortArray(int[] nums) {
+        quickSort(nums, 0, nums.length - 1);
+    }
+
+    private void quickSort(int[] nums, int l, int r) {
         if (r <= l) return;
         int q = partition(nums, l, r);
         quickSort(nums, l, q - 1);
         quickSort(nums, q + 1, r);
     }
 
-    private int partition(int[] nums, int l, int r) throws NoSuchAlgorithmException {
-        Random random = SecureRandom.getInstanceStrong();
-        int p = random.nextInt(r - l + 1) + l;
+    private int partition(int[] nums, int l, int r) {
+        int p = RANDOM.nextInt(r - l + 1) + l;
         swap(nums, p, r);
         int i = l;
         for (int j = l; j <= r - 1; j++) {
