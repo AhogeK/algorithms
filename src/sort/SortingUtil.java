@@ -15,9 +15,9 @@ import java.util.Random;
  * @author AhogeK ahogek@gmail.com
  * @since 2023-02-06 18:21:10
  */
-public class SortUtil {
+public class SortingUtil {
 
-    private static final Random RANDOM;
+    public static final Random RANDOM;
 
     static {
         try {
@@ -27,7 +27,7 @@ public class SortUtil {
         }
     }
 
-    private SortUtil() {
+    private SortingUtil() {
         throw new IllegalStateException("Utility Class");
     }
 

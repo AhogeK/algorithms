@@ -13,6 +13,6 @@ class QuicksortTest {
 
     @Test
     void caseOne() {
-        Assertions.assertDoesNotThrow(() -> SortUtil.testSortingAlgorithms(new Quicksort()));
+        Assertions.assertDoesNotThrow(() -> SortingUtil.testSortingAlgorithms(new Quicksort()));
     }
 }

@@ -12,12 +12,12 @@ import java.io.PrintStream;
  * @author AhogeK ahogek@gmail.com
  * @since 2023-02-06 18:26:05
  */
-class SortUtilTest {
+class SortingUtilTest {
 
     @Test
     void swapTest() {
         int[] nums = {1, 2, 3};
-        SortUtil.swap(nums, 0, 2);
+        SortingUtil.swap(nums, 0, 2);
         Assertions.assertArrayEquals(new int[]{3, 2, 1}, nums);
     }
 
@@ -28,7 +28,7 @@ class SortUtilTest {
         PrintStream ps = new PrintStream(baos);
         PrintStream old = System.out;
         System.setOut(ps);
-        SortUtil.printArray(nums);
+        SortingUtil.printArray(nums);
         System.out.flush();
         System.setOut(old);
         Assertions.assertEquals("[1, 2, 3]\n", baos.toString());
@@ -40,15 +40,15 @@ class SortUtilTest {
             int len = 10;
             int min = -10;
             int max = 10;
-            int[] randomArray = SortUtil.generateRandomArray(len, min, max);
-            SortUtil.printArray(randomArray);
+            int[] randomArray = SortingUtil.generateRandomArray(len, min, max);
+            SortingUtil.printArray(randomArray);
         });
     }
 
     @Test
     void copyArrayTest() {
         int[] nums = {1, 2, 3};
-        int[] newArr = SortUtil.copyArray(nums);
+        int[] newArr = SortingUtil.copyArray(nums);
         Assertions.assertArrayEquals(nums, newArr);
         Assertions.assertNotSame(nums, newArr);
     }
@@ -59,8 +59,8 @@ class SortUtilTest {
         var ref = new Object() {
             int[] nums2 = {1, 2, 3};
         };
-        Assertions.assertThrows(RuntimeException.class, () -> SortUtil.judgeArrayEquals(nums1, ref.nums2));
+        Assertions.assertThrows(RuntimeException.class, () -> SortingUtil.judgeArrayEquals(nums1, ref.nums2));
         ref.nums2 = new int[]{1, 3, 4, 5};
-        Assertions.assertThrows(RuntimeException.class, () -> SortUtil.judgeArrayEquals(nums1, ref.nums2));
+        Assertions.assertThrows(RuntimeException.class, () -> SortingUtil.judgeArrayEquals(nums1, ref.nums2));
     }
 }
