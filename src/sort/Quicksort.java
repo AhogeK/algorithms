@@ -1,5 +1,7 @@
 package sort;
 
+import sort.common.ISortingAlgorithm;
+
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Random;

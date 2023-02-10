@@ -1,4 +1,4 @@
-package sort;
+package sort.common;
 
 /**
  * 生成接近有序的数组

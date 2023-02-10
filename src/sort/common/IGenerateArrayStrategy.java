@@ -1,4 +1,4 @@
-package sort;
+package sort.common;
 
 /**
  * 生成用于验证排序算法测试用例的接口，采用策略设计模式

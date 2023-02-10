@@ -1,4 +1,4 @@
-package sort;
+package sort.common;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -6,8 +6,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*;
 
 /**
  * 排序工具类
@@ -17,7 +16,25 @@ import java.util.Random;
  */
 public class SortingUtil {
 
+    /**
+     * 随机数种子
+     */
     public static final Random RANDOM;
+
+    /**
+     * 测试方法执行的次数
+     */
+    private static final int TEST_TIMES = 10;
+
+    /**
+     * 将毫秒转化为秒的分母常量
+     */
+    private static final BigDecimal DIVISOR = new BigDecimal("1000");
+
+    /**
+     * 小数点后保留几位有效数
+     */
+    private static final int SCALE = 8;
 
     static {
         try {
@@ -134,24 +151,66 @@ public class SortingUtil {
      */
     public static void testSortingAlgorithms(ISortingAlgorithm sortingAlgorithm) {
         int len = 1_000;
-        int[] nums = generateRandomArray(len, 0, len);
-        int[] checkNums = copyArray(nums);
-        Instant startTime = Instant.now();
-        sortingAlgorithm.sortArray(nums);
-        Instant endTime = Instant.now();
-        long millis = Duration.between(startTime, endTime).toMillis();
-        // 向上取整
-        System.out.printf("耗时 %d 毫秒。\n", millis);
-        BigDecimal second = new BigDecimal(String.valueOf(millis)).divide(new BigDecimal(1000), 8,
-                RoundingMode.CEILING);
-        System.out.printf("耗时 %s 秒。\n", second);
-        Arrays.sort(checkNums);
-        if (!Arrays.equals(checkNums, nums)) {
-            System.out.println("结果:");
-            printArray(nums);
-            System.out.println("正确结果:");
-            printArray(checkNums);
-            throw new RuntimeException("算法错误");
+        testSortingAlgorithms(sortingAlgorithm, new GenerateRandomArrayStrategy(len, 0, len - 1));
+    }
+
+    /**
+     * 测试排序算法正确性、计算排序算法时间
+     *
+     * @param sortingAlgorithm 自己编写的排序算法实现
+     * @param generateArray    生成测试用例数组的策略对象
+     */
+    public static void testSortingAlgorithms(ISortingAlgorithm sortingAlgorithm, IGenerateArrayStrategy generateArray) {
+        System.out.printf("您使用的排序算法是：%s%n", sortingAlgorithm);
+        printGenerateArrayFeature(generateArray);
+        // 多运行几次，避免编写的算法恰好"蒙混过关"
+        List<Long> allTimingList = new ArrayList<>();
+        for (int i = 0; i < TEST_TIMES; i++) {
+            System.out.printf("生成第 %d 个数组，", i + 1);
+            // 根据一定的策略生成测试用例数组
+            int[] randomArray = generateArray.generateArray();
+            // 生成测试用例数组的拷贝
+            int[] randomArrayCopy = SortingUtil.copyArray(randomArray);
+            // 将计时逻辑封装到一个函数中，更好的做法是使用动态代理或者过滤器
+            long millis = timingSortingAlgorithm(sortingAlgorithm, randomArray);
+            allTimingList.add(millis);
+            // 使用系统库函数对 randomArrayCopy 进行排序
+            Arrays.sort(randomArrayCopy);
+            // 逐个比较两个排序以后的数组元素，以验证我们编写的排序算法的正确性
+            judgeArrayEquals(randomArray, randomArrayCopy);
         }
+        LongSummaryStatistics summaryMillisStatistics = allTimingList.stream().mapToLong(a -> a).summaryStatistics();
+        System.out.printf("%d 次计算平均耗时 %s 毫秒", TEST_TIMES, summaryMillisStatistics.getAverage());
+    }
+
+    /**
+     * 统计排序算法耗时
+     *
+     * @param sortingAlgorithm 排序算法，传入我们自己编写的排序算法实现
+     * @param randomArray      随机生成的待排序数组
+     * @return 本次计算的耗时
+     */
+    private static long timingSortingAlgorithm(ISortingAlgorithm sortingAlgorithm, int[] randomArray) {
+        // 使用我们的算法对 nums 进行排序
+        Instant startTime = Instant.now();
+        sortingAlgorithm.sortArray(randomArray);
+        Instant endTime = Instant.now();
+
+        // 以毫秒为单位
+        long millis = Duration.between(startTime, endTime).toMillis();
+        // 向上取整 用于打印秒
+        BigDecimal spendBigDecimal = new BigDecimal(String.valueOf(millis)).divide(DIVISOR, SCALE, RoundingMode.CEILING);
+        System.out.printf("耗时 %s 秒 / %d 毫秒。%n", spendBigDecimal, millis);
+        return millis;
+    }
+
+    /**
+     * 输出测试用例数组的特点
+     *
+     * @param generateArrayStrategy 生成随机数组的策略对象
+     */
+    private static void printGenerateArrayFeature(IGenerateArrayStrategy generateArrayStrategy) {
+        System.out.printf("测试用例特点：%s，规模：%d，最小值：%d，最大值：%d。%n", generateArrayStrategy.getFeature(),
+                generateArrayStrategy.getLen(), generateArrayStrategy.getMin(), generateArrayStrategy.getMax());
     }
 }

@@ -1,4 +1,4 @@
-package sort;
+package sort.common;
 
 /**
  * 生成一个逆序数组，这是一个极端测试用例

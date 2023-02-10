@@ -1,4 +1,4 @@
-package sort;
+package sort.common;
 
 /**
  * 排序算法标识

@@ -2,6 +2,7 @@ package sort;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import sort.common.SortingUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
