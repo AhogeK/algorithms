@@ -184,6 +184,35 @@ public class SortingUtil {
     }
 
     /**
+     * 比较排序算法的性能，使用随机生成数组
+     *
+     * @param sortingAlgorithms 排序算法的实现列表
+     */
+    public static void compareSortingAlgorithms(ISortingAlgorithm... sortingAlgorithms) {
+        compareSortingAlgorithms(new GenerateRandomArrayStrategy(), sortingAlgorithms);
+    }
+
+    /**
+     * 根据不同的随机策略测试用例，比较不同排序算法的性能
+     *
+     * @param generateRandomArrayStrategy 以对象的方式传入生成随机数组的策略：完全随机、部分有序、完全逆序、有大量重复元素
+     * @param sortingAlgorithms           排序算法的实例列表
+     */
+    private static void compareSortingAlgorithms(GenerateRandomArrayStrategy generateRandomArrayStrategy,
+                                                 ISortingAlgorithm... sortingAlgorithms) {
+        System.out.println("排序算法比较：");
+        int[] nums = generateRandomArrayStrategy.generateArray();
+        printGenerateArrayFeature(generateRandomArrayStrategy);
+        for (ISortingAlgorithm sortingAlgorithm : sortingAlgorithms) {
+            // 其实第 1 个排序算法没有必要复制数组，目前没有想到更好的写法
+            int[] numsCopy = copyArray(nums);
+            System.out.printf("%s：%n\t", sortingAlgorithm);
+            timingSortingAlgorithm(sortingAlgorithm, numsCopy);
+        }
+        System.out.println();
+    }
+
+    /**
      * 统计排序算法耗时
      *
      * @param sortingAlgorithm 排序算法，传入我们自己编写的排序算法实现
