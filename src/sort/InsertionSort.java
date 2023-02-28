@@ -50,10 +50,10 @@ public class InsertionSort {
             }
         }
         swap(nums, 0, minIndex);
-        for (int i = 1; i < nums.length; i++) {
+        for (int i = 2; i < nums.length; i++) {
             int temp = nums[i];
             int j = i;
-            while (nums[j - 1] > temp) {
+            while (j > 1 && nums[j - 1] > temp) {
                 nums[j] = nums[j - 1];
                 j--;
             }
