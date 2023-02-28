@@ -17,7 +17,7 @@ public class ShellSort {
             for (int i = 1; i < nums.length; i++) {
                 int temp = nums[i];
                 int j = i;
-                while (j > 0 && j - gap >= 0 && nums[j - gap] > temp) {
+                while (j - gap >= 0 && nums[j - gap] > temp) {
                     nums[j] = nums[j - gap];
                     j -= gap;
                 }
