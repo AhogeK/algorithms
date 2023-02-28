@@ -27,9 +27,14 @@ public class SortingUtil {
     private static final int TEST_TIMES = 10;
 
     /**
-     * 将毫秒转化为秒的分母常量
+     * 将纳秒转化为秒的分母常量
      */
-    private static final BigDecimal DIVISOR = new BigDecimal("1000");
+    private static final BigDecimal DIVISOR = new BigDecimal("1000000000");
+
+    /**
+     * 将纳秒转化为毫秒的分母常量
+     */
+    private static final BigDecimal MILLIS_DIVISOR = new BigDecimal("1000000");
 
     /**
      * 小数点后保留几位有效数
@@ -154,6 +159,10 @@ public class SortingUtil {
         testSortingAlgorithms(sortingAlgorithm, new GenerateRandomArrayStrategy(len, 0, len - 1));
     }
 
+    public static void testSortingAlgorithms(ISortingAlgorithm sortingAlgorithm, int len) {
+        testSortingAlgorithms(sortingAlgorithm, new GenerateRandomArrayStrategy(len, 0, len - 1));
+    }
+
     /**
      * 测试排序算法正确性、计算排序算法时间
      *
@@ -172,15 +181,15 @@ public class SortingUtil {
             // 生成测试用例数组的拷贝
             int[] randomArrayCopy = SortingUtil.copyArray(randomArray);
             // 将计时逻辑封装到一个函数中，更好的做法是使用动态代理或者过滤器
-            long millis = timingSortingAlgorithm(sortingAlgorithm, randomArray);
-            allTimingList.add(millis);
+            long nanos = timingSortingAlgorithm(sortingAlgorithm, randomArray);
+            allTimingList.add(nanos);
             // 使用系统库函数对 randomArrayCopy 进行排序
             Arrays.sort(randomArrayCopy);
             // 逐个比较两个排序以后的数组元素，以验证我们编写的排序算法的正确性
             judgeArrayEquals(randomArray, randomArrayCopy);
         }
         LongSummaryStatistics summaryMillisStatistics = allTimingList.stream().mapToLong(a -> a).summaryStatistics();
-        System.out.printf("%d 次计算平均耗时 %s 毫秒", TEST_TIMES, summaryMillisStatistics.getAverage());
+        System.out.printf("%d 次计算平均耗时 %s 纳秒", TEST_TIMES, summaryMillisStatistics.getAverage());
     }
 
     /**
@@ -226,11 +235,12 @@ public class SortingUtil {
         Instant endTime = Instant.now();
 
         // 以毫秒为单位
-        long millis = Duration.between(startTime, endTime).toMillis();
+        long nanos = Duration.between(startTime, endTime).toNanos();
         // 向上取整 用于打印秒
-        BigDecimal spendBigDecimal = new BigDecimal(String.valueOf(millis)).divide(DIVISOR, SCALE, RoundingMode.CEILING);
-        System.out.printf("耗时 %s 秒 / %d 毫秒。%n", spendBigDecimal, millis);
-        return millis;
+        BigDecimal spendBigDecimal = new BigDecimal(String.valueOf(nanos)).divide(DIVISOR, SCALE, RoundingMode.CEILING);
+        BigDecimal spendMillisBigDecimal = new BigDecimal(String.valueOf(nanos)).divide(MILLIS_DIVISOR, SCALE, RoundingMode.CEILING);
+        System.out.printf("耗时 %s 秒 / %s 毫秒 / %d 纳秒%n", spendBigDecimal, spendMillisBigDecimal, nanos);
+        return nanos;
     }
 
     /**
