@@ -80,3 +80,33 @@
         * 时间复杂度：O(logN)
             * [为什么说二分查找的时间复杂度是 O(logN)？](https://github.com/JasonGaoH/KnowledgeSummary/blob/master/Docs/Algorithm/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%AF%B4%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE%E7%9A%84%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6%E6%98%AFO(log%20n).md)
         * 空间复杂度：O(1)
+
+使用「递归」完成二分查找
+
+```java
+public class BinarySearch {
+
+    /**
+     * 二分查找 递归
+     *
+     * @param nums 用于查找的有序数组
+     * @param target 目标值
+     * @param left 左下标
+     * @param right 右下标
+     * @return 目标值在数组中的索引
+     */
+    private int binarySearchRecursive(int[] nums, int target, int left, int right) {
+        if (left > right) {
+            return -1;
+        }
+        int mid = left + (right - left) / 2;
+        if (nums[mid] == target) {
+            return mid;
+        } else if (nums[mid] < target) {
+            return binarySearchRecursive(nums, target, mid + 1, right);
+        } else {
+            return binarySearchRecursive(nums, target, left, mid - 1);
+        }
+    }
+}
+```

@@ -20,4 +20,12 @@ class BinarySearchTest {
         int result = binarySearch.search(nums, target);
         Assertions.assertEquals(4, result);
     }
+
+    @Test
+    void case2() {
+        int[] nums = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        int target = 5;
+        int result = binarySearch.search2(nums, target);
+        Assertions.assertEquals(4, result);
+    }
 }
