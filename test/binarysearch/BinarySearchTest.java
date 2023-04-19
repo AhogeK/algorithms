@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 class BinarySearchTest {
 
     private final BinarySearch binarySearch = new BinarySearch();
+    private final GuessNumber guessNumber = new GuessNumber();
 
     @Test
     void case1() {
@@ -27,5 +28,12 @@ class BinarySearchTest {
         int target = 5;
         int result = binarySearch.search2(nums, target);
         Assertions.assertEquals(4, result);
+    }
+
+    @Test
+    void guessNumberTestCase() {
+        int n = 100;
+        int result = guessNumber.guessNumber(n);
+        Assertions.assertNotEquals(-1, result);
     }
 }
