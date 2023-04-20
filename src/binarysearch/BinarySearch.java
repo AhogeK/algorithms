@@ -64,4 +64,26 @@ public class BinarySearch {
             return binarySearchRecursive(nums, target, left, mid - 1);
         }
     }
+
+    /**
+     * 704 二分查找思路2
+     *
+     * @param nums   有序数组
+     * @param target 目标值
+     * @return 目标值在数组中的索引
+     */
+    public int search3(int[] nums, int target) {
+        int len = nums.length;
+        int left = 0;
+        int right = len - 1;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        return left == right && nums[left] == target ? left : -1;
+    }
 }

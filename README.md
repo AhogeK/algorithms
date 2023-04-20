@@ -146,3 +146,57 @@ public class GuessNumber extends GuessGame {
     }
 }
 ```
+
+### 应用「排除法」写对二分查找问题
+
+> 思路2：在循环体中排除目标元素一定不存在的区间
+
+* 理解根据分支逻辑调整取中间数
+* 循环可以继续的条件是 `while(left < right)` 表示退出循环的时候`[left, right]`只有一个元素
+* 结果后处理
+
+```java
+public class Solution {
+    /**
+     * 704 二分查找思路2
+     *
+     * @param nums   有序数组
+     * @param target 目标值
+     * @return 目标值在数组中的索引
+     */
+    public int search3(int[] nums, int target) {
+        int len = nums.length;
+        int left = 0;
+        int right = len - 1;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        return left == right && nums[left] == target ? left : -1;
+    }
+}
+```
+
+上述代码反向同理，当`nums[mid] > target`时，`right = mid - 1`。但需要注意，取中间值需要向上取整，
+`int mid = left + (right - left + 1) / 2;`，否则会导致死循环。
+
+#### 取中间数可能需要上取整的原因
+
+因为当我使用 `nums[mid] > target` 条件时会需要使用到 `right = mid - 1` 的操作，而这样的操作当元素个数为偶数的时候，
+如果直接取中间的位置（默认的向下取整），则可能导致查找区间无法被缩小，从而进入死循环。例如当 `left = 2` `right = 3`时，
+直接取的化就是 `mid = (2 + 3) / 2 = 2`, 但是此时 `nums[mid] > target`，触发 `right = mid - 1 = 1`，
+从而 `left = 2` `right = 1` 无法继续缩小区间
+
+在思路2中的条件是 `while (left < right)`，因为我们不在循环体内判断是否找到了目标元素，因为当退出循环时，
+`[left, right]`区间内一定只有一个元素，我们已经排除了所有错误的答案，当只有一个的时候那它只需跟结果比较是否是目标元素即可
+
+#### 思路2「在循环体中排除目标元素一定不存在的区间」要点
+
+* 循环条件 `while(left < right)`
+* 循环体内不直接返回，而是缩小查找区间
+* 根据中间的数上下取整方式决定缩小区间的逻辑「当看到条件体里出现 `left = mid` 的时候说明时向上取整」
+* 退出循环后需要判断最后的元素是否是目标元素
