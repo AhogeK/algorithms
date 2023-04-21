@@ -200,3 +200,34 @@ public class Solution {
 * 循环体内不直接返回，而是缩小查找区间
 * 根据中间的数上下取整方式决定缩小区间的逻辑「当看到条件体里出现 `left = mid` 的时候说明时向上取整」
 * 退出循环后需要判断最后的元素是否是目标元素
+
+### 二分查找的典型问题（一）：二分下标
+
+* [力扣 35. 搜索插入位置](https://leetcode-cn.com/problems/search-insert-position/)
+
+```java
+public class Solution {
+
+    /**
+     * 35 搜索插入位置
+     *
+     * @param nums   有序数组
+     * @param target 目标值
+     * @return 目标值在数组中的索引
+     */
+    public int searchInsert(int[] nums, int target) {
+        int len = nums.length;
+        int left = 0;
+        int right = len - 1;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        return left == right && nums[left] == target ? left : left + 1;
+    }
+}
+```
