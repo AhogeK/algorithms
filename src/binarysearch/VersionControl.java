@@ -8,11 +8,11 @@ import java.util.Random;
  */
 public class VersionControl {
 
-    private final int badVersion;
+    private final int firstBadVersion;
 
     public VersionControl() {
         Random random = new Random();
-        this.badVersion = random.nextInt(101);
+        this.firstBadVersion = random.nextInt(101);
     }
 
     /**
@@ -22,6 +22,10 @@ public class VersionControl {
      * @return 是否错误
      */
     boolean isBadVersion(int version) {
-        return version >= badVersion;
+        return version >= firstBadVersion;
+    }
+
+    public int getFirstBadVersion() {
+        return firstBadVersion;
     }
 }
