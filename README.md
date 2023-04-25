@@ -1,6 +1,7 @@
 # Algorithms
 
-> 个人算法学习练习记录
+> 个人算法学习练习记录<br>
+> [零起步学算法](https://leetcode.cn/leetbook/detail/learning-algorithms-with-leetcode/)
 
 ## 二分查找
 
@@ -399,6 +400,29 @@ class Solution {
         }
 
         return nums[left] == target;
+    }
+}
+```
+
+* [278. 第一个错误的版本](https://leetcode.cn/problems/first-bad-version/description/)
+
+```java
+public class Solution extends VersionControl {
+    public int firstBadVersion(int n) {
+        int left = 1;
+        int right = n;
+        // 二分查找的终止条件是 left == right
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            // 如果中间值大于最右边的值，说明最小值在右边
+            if (isBadVersion(mid)) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+        // 此时 left == right，所以最小值为 nums[left] 或者 nums[right]
+        return left;
     }
 }
 ```
