@@ -44,7 +44,7 @@
 [【力扣】704. 二分查找](https://leetcode.cn/problems/binary-search/)
 
 * 思路1
-
+    * [BinarySearch](src/binarysearch/BinarySearch.java)
     ```java
     public class BinarySearch {
 
@@ -113,6 +113,8 @@ public class BinarySearch {
 ```
 
 「力扣」374. 猜数字大小
+
+[GuessNumber](src/binarysearch/GuessNumber.java)
 
 ```java
 /**
@@ -206,6 +208,8 @@ public class Solution {
 
 * [力扣 35. 搜索插入位置](https://leetcode-cn.com/problems/search-insert-position/)
 
+[SearchInsert](src/binarysearch/SearchInsert.java)
+
 ```java
 public class Solution {
 
@@ -234,6 +238,8 @@ public class Solution {
 ```
 
 * [力扣 34. 在排序数组中查找元素的第一个和最后一个位置](https://leetcode.cn/problems/find-first-and-last-position-of-element-in-sorted-array/description/)
+
+[SearchRange](src/binarysearch/SearchRange.java)
 
 ```java
 class Solution {
@@ -274,6 +280,8 @@ class Solution {
 
 * [153. 寻找旋转排序数组中的最小值](https://leetcode.cn/problems/find-minimum-in-rotated-sorted-array/description/)
 
+[FindMin](src/binarysearch/FindMin.java)
+
 ```java
 class Solution {
     public int findMin(int[] nums) {
@@ -293,6 +301,8 @@ class Solution {
 ```
 
 * [154. 寻找旋转排序数组中的最小值 II](https://leetcode.cn/problems/find-minimum-in-rotated-sorted-array-ii/description/)
+
+[FindMinII](src/binarysearch/FindMinII.java)
 
 ```java
 class Solution {
@@ -317,6 +327,8 @@ class Solution {
 ```
 
 * [33. 搜索旋转排序数组](https://leetcode.cn/problems/search-in-rotated-sorted-array/description/)
+
+[SearchRotatedSortedArray](src/binarysearch/SearchRotatedSortedArray.java)
 
 ```java
 class Solution {
@@ -366,6 +378,8 @@ class Solution {
 
 * [81. 搜索旋转排序数组 II](https://leetcode.cn/problems/search-in-rotated-sorted-array-ii/description/)
 
+[SearchRotatedSortedArrayII](src/binarysearch/SearchRotatedSortedArrayII.java)
+
 ```java
 class Solution {
     public boolean search(int[] nums, int target) {
@@ -406,6 +420,8 @@ class Solution {
 
 * [278. 第一个错误的版本](https://leetcode.cn/problems/first-bad-version/description/)
 
+[FirstBadVersion](src/binarysearch/FirstBadVersion.java)
+
 ```java
 public class Solution extends VersionControl {
     public int firstBadVersion(int n) {
@@ -428,6 +444,8 @@ public class Solution extends VersionControl {
 ```
 
 * [852. 山脉数组的峰顶索引](https://leetcode.cn/problems/peak-index-in-a-mountain-array/description/)
+
+[PeakIndexInMountainArray](src/binarysearch/PeakIndexInMountainArray.java)
 
 ```java
 class Solution {
@@ -452,6 +470,8 @@ class Solution {
 ```
 
 * [1095. 山脉数组中查找目标值](https://leetcode.cn/problems/find-in-mountain-array/description/)
+
+[FindInMountainArray](src/binarysearch/FindInMountainArray.java)
 
 ```java
 /**
@@ -545,6 +565,8 @@ class Solution {
 ```
 
 * [4. 寻找两个正序数组的中位数](https://leetcode.cn/problems/median-of-two-sorted-arrays/description/)
+
+[FindMedianSortedArrays](src/binarysearch/FindMedianSortedArrays.java)
 
 ```java
 class Solution {
