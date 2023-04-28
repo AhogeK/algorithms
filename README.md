@@ -645,3 +645,42 @@ class Solution {
     }
 }
 ```
+
+### 二分查找的典型问题（二）：二分答案
+
+> 二分答案的思路是：先确定答案的范围，然后在这个范围内进行二分查找，找到满足条件的答案。
+
+* [「力扣」第 69 题：x的平方根](https://leetcode.cn/problems/sqrtx/)
+
+[MySqrt](src/binarysearch/MySqrt.java)
+
+```java
+package binarysearch;
+
+/**
+ * 「力扣」第 69 题：x 的平方根
+ * <a href="https://leetcode-cn.com/problems/sqrtx/">题目地址</a>
+ *
+ * @author AhogeK ahogek@gmail.com
+ * @since 2023-04-28 23:25:54
+ */
+public class MySqrt {
+
+    public int mySqrt(int x) {
+        int left = 0;
+        int right = x;
+        int ans = -1;
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            // 防止乘法溢出
+            if ((long) mid * mid <= x) {
+                ans = mid;
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return ans;
+    }
+}
+```
