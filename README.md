@@ -756,3 +756,11 @@ public class FindBestValue {
     }
 }
 ```
+
+### 二分查找的典型问题（三）：判别条件复杂的二分查找
+
+> 当问题的判别条件相对复杂时，二分查找可以通过一些技巧进行调整和应用。
+> 在解决这些问题时，关键是定义好二分查找的判别条件，以及在满足条件时如何缩小搜索范围。
+
+* [「力扣」875. 爱吃香蕉的珂珂](https://leetcode.cn/problems/koko-eating-bananas/description/)
+
