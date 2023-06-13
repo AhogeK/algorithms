@@ -191,7 +191,7 @@ public class Solution {
 
 因为当我使用 `nums[mid] > target` 条件时会需要使用到 `right = mid - 1` 的操作，而这样的操作当元素个数为偶数的时候，
 如果直接取中间的位置（默认的向下取整），则可能导致查找区间无法被缩小，从而进入死循环。例如当 `left = 2` `right = 3`时，
-直接取的化就是 `mid = (2 + 3) / 2 = 2`, 但是此时 `nums[mid] > target`，触发 `right = mid - 1 = 1`，
+直接取的话就是 `mid = (2 + 3) / 2 = 2`, 但是此时 `nums[mid] > target`，触发 `right = mid - 1 = 1`，
 从而 `left = 2` `right = 1` 无法继续缩小区间
 
 在思路2中的条件是 `while (left < right)`，因为我们不在循环体内判断是否找到了目标元素，因为当退出循环时，
