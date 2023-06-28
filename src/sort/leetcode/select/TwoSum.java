@@ -1,4 +1,4 @@
-package sort.leetcode;
+package sort.leetcode.select;
 
 /**
  * <a href="https://leetcode.cn/problems/two-sum">
