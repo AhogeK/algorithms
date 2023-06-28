@@ -16,6 +16,7 @@
         + [二分查找的典型问题（二）：二分答案](#二分查找的典型问题二二分答案)
         + [二分查找的典型问题（三）：判别条件复杂的二分查找](#二分查找的典型问题三判别条件复杂的二分查找)
 - [基础排序算法](#基础排序算法)
+    * [选择排序](#选择排序)
 
 ## 二分查找
 
@@ -1100,3 +1101,81 @@ public class XiaozhangCodingPracticePlan {
 在排序算法的学习中，也能进一步对时间复杂度的理解
 
 这里有个关于数组的知识点，数组在内存中是连续存储的，我们可以通过下标直接访问，我们可以以O(1)的复杂度访问到元素，而这个特性叫作随机访问
+
+### 选择排序
+
+基本思想：从小到大依次选择出最小元素，通过交换达到选择排序的目的
+
+特点：运行时间与输入无关，交换次数最少
+
+思想：减而治之，贪心算法
+
+技巧：假设修正法（打擂台算法）
+
+循环不变式：证明贪心算法的依据
+
+优化：堆排序
+
+*参考案例*
+
+```java
+public class Solution {
+
+    // 「力扣」第 912 题：排序数组
+
+    public int[] sortArray(int[] nums) {
+        int len = nums.length;
+        // 最后一轮只有一个元素，一定是最大的元素，因此写 i < len - 1
+        for (int i = 0; i < len - 1; i++) {
+            // 在 [i + 1, len - 1] 区间里选择最小的元素的下标
+            int minIndex = i;
+            for (int j = i + 1; j < len; j++) {
+                if (nums[j] < nums[minIndex]) {
+                    minIndex = j;
+                }
+            }
+            swap(nums, minIndex, i);
+        }
+        return nums;
+    }
+
+    private void swap(int[] nums, int index1, int index2) {
+        int temp = nums[index1];
+        nums[index1] = nums[index2];
+        nums[index2] = temp;
+    }
+}
+```
+
+时间复杂度：O(n^2) 等差数列公式得出 (N−1)+(N−2)+⋯+1 = 1/2N(N-1) -> 1/2N(N-1) + (N-1) -> O(N^2)
+
+空间复杂度：O(1) 原地排序
+
+* [「力扣」1. 两数之和 （暴力求解）](https://leetcode.cn/problems/two-sum)
+
+[TwoSum.java](src/sort/leetcode/TwoSum.java)
+
+```java
+package sort.leetcode;
+
+/**
+ * <a href="https://leetcode.cn/problems/two-sum">
+ * 1. 两数之和 (选择排序思维，暴力求解)
+ * </a>
+ *
+ * @author AhogeK ahogek@gmail.com
+ * @since 2023-06-28 11:21:09
+ */
+public class TwoSum {
+
+    public int[] twoSum(int[] nums, int target) {
+        int n = nums.length;
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = i + 1; j < n; j++) {
+                if ((nums[i] + nums[j]) == target) return new int[]{i, j};
+            }
+        }
+        return new int[]{};
+    }
+}
+```
