@@ -17,6 +17,7 @@
         + [二分查找的典型问题（三）：判别条件复杂的二分查找](#二分查找的典型问题三判别条件复杂的二分查找)
 - [基础排序算法](#基础排序算法)
     * [选择排序](#选择排序)
+      + [相关阅读](#相关阅读)
 
 ## 二分查找
 
@@ -1211,3 +1212,49 @@ public class ContainerWithMostWater {
     }
 }
 ```
+
+* [使用冒泡排序完成「力扣」第 912 题：排序数组](https://leetcode-cn.com/problems/sort-an-array/)
+
+[BubbleSort.java](src/sort/leetcode/select/BubbleSort.java)
+
+```java
+package sort.leetcode.select;
+
+/**
+ * 使用冒泡排序完成 「力扣」912. 排序数组
+ *
+ * @author AhogeK ahogek@gmail.com
+ * @since 2023-06-29 20:55:40
+ */
+public class BubbleSort {
+
+    public int[] sortArray(int[] nums) {
+        int size = nums.length;
+
+        for (int i = 0; i < size - 1; i++) {
+            boolean swapped = false;
+            for (int j = 0; j < size - i - 1; j++) {
+                if (nums[j] > nums[j + 1]) {
+                    int temp = nums[j + 1];
+                    nums[j + 1] = nums[j];
+                    nums[j] = temp;
+                    swapped = true;
+                }
+            }
+            if (!swapped)
+                break;
+        }
+
+        return nums;
+    }
+}
+```
+
+**上面的冒泡排序使用了优化，如果已经排序好了会提前终止算法**
+
+#### 相关阅读
+
+* [Selection Sort Algorithm](https://www.programiz.com/dsa/selection-sort)
+* [Selection sort Wiki](https://en.wikipedia.org/wiki/Selection_sort)
+* [Bubble Sort](https://www.programiz.com/dsa/bubble-sort)
+* [Bubble sort Wiki](https://en.wikipedia.org/wiki/Bubble_sort)
