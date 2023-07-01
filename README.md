@@ -1150,6 +1150,8 @@ public class Solution {
 
 时间复杂度：O(n^2) 等差数列公式得出 (N−1)+(N−2)+⋯+1 = 1/2N(N-1) -> 1/2N(N-1) + (N-1) -> O(N^2)
 
+$$\displaystyle \sum _{i=1}^{n-1}i={\frac {(n-1)+1}{2}}(n-1)={\frac {1}{2}}n(n-1)={\frac {1}{2}}(n^{2}-n)$$
+
 空间复杂度：O(1) 原地排序
 
 * [「力扣」1. 两数之和 （暴力求解）](https://leetcode.cn/problems/two-sum)
