@@ -1,7 +1,11 @@
 <!-- TOC -->
-* [基础排序算法](#基础排序算法)
-  * [选择排序](#选择排序)
-    * [相关阅读](#相关阅读)
+- [基础排序算法](#基础排序算法)
+  - [选择排序](#选择排序)
+    - [相关阅读](#相关阅读)
+  - [插入排序](#插入排序)
+    - [基本思想](#基本思想)
+    - [特点](#特点)
+    - [优化](#优化)
 <!-- TOC -->
 
 # 基础排序算法
@@ -71,6 +75,34 @@ public class Solution {
 $$\displaystyle \sum _{i=1}^{n-1}i={\frac {(n-1)+1}{2}}(n-1)={\frac {1}{2}}n(n-1)={\frac {1}{2}}(n^{2}-n)$$
 
 空间复杂度：O(1) 原地排序
+
+[https://oi-wiki.org/basic/selection-sort/](https://oi-wiki.org/basic/selection-sort/)
+
+![选择排序](img/1.png)
+![选择排序](https://oi-wiki.org/basic/images/selection-sort-1-animate-example.svg)
+
+```java
+class Solution {
+    public int[] sortArray(int[] nums) {
+        for (int i = 0; i < nums.length - 1; i++) {
+            int minIndex = i;
+            for (int j = i + 1; j < nums.length; j++) {
+                if (nums[j] < nums[minIndex]) {
+                    minIndex = j;
+                }
+            }
+            swap(nums, minIndex, i);
+        }
+        return nums;
+    }
+
+    private void swap(int[] nums, int minIndex, int i) {
+        int temp = nums[minIndex];
+        nums[minIndex] = nums[i];
+        nums[i] = temp;
+    }
+}
+```
 
 * [「力扣」1. 两数之和 （暴力求解）](https://leetcode.cn/problems/two-sum)
 
@@ -178,3 +210,122 @@ public class BubbleSort {
 * [Selection sort Wiki](https://en.wikipedia.org/wiki/Selection_sort)
 * [Bubble Sort](https://www.programiz.com/dsa/bubble-sort)
 * [Bubble sort Wiki](https://en.wikipedia.org/wiki/Bubble_sort)
+
+## 插入排序
+
+### 基本思想
+
+插入排序是通过有序序列，对于未排序数据，在已排序序列中从后向前扫描，找到相应位置并插入。「减而治之」思想。
+
+### 特点
+
+* 内循环可以提前终止
+* 原始数组越接近有序，插入排序的时间性能越好
+* 小规模数组（构成逆序的对数少）可以视为近乎有序
+
+### 优化
+
+* 暂存，逐个向后赋值
+* 哨兵
+  * 回避边界条件的判断
+  * 减少分类讨论的分支
+  * 「单链表」中 「哨兵」的使用很常见
+* 希尔排序
+
+![插入排序](img/2.png)
+
+[Insertion Sort – Data Structure and Algorithm Tutorials](https://www.geeksforgeeks.org/insertion-sort/)
+
+![插入排序](img/3.png)
+![插入排序](img/4.png)
+
+[插入排序 - Hello 算法](https://www.hello-algo.com/chapter_sorting/insertion_sort/)
+
+```java
+class Solution {
+    public int[] sortArray(int[] nums) {
+        for (int i = 1; i < nums.length; i++) {
+            int j = i;
+            while (j > 0 && nums[j - 1] > nums[j]) {
+                swap(nums, j - 1, j);
+                j--;
+            }
+        }
+        return nums;
+    }
+
+    private void swap(int[] nums, int i, int j) {
+        int temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
+    }
+}
+```
+
+*逐个向后赋值的写法*
+
+```java
+public class Solution {
+    public int[] sortArray(int[] nums) {
+        int len = nums.length;
+        // 循环不变量：将 nums[i] 插入到区间 [0, i) 使之有序
+        for (int i = 1; i < len; i++) {
+            // 先暂存这个元素，然后之前数值严格小于 temp 的所有元素逐个后移
+            int temp = nums[i];
+            int j = i;
+            // 注意边界 j > 0
+            while (j > 0 && nums[j - 1] > temp) {
+                nums[j] = nums[j - 1];
+                j--;
+            }
+
+            // 最后这一步容易忽略
+            nums[j] = temp;
+        }
+        return nums;
+    }
+}
+```
+
+**插入排序内层循环可以提前终止，这一点是插入排序非常重要的性质。相比于前一种，该模式不会超时。**
+
+#### 插入排序的哨兵「Sentinel」模式
+
+*它能帮助我们：1、回避边界条件；2、减少分类讨论。*
+
+```java
+class Solution {
+    public int[] sortArray(int[] nums) {
+        if (nums.length == 1) {
+            return nums;
+        }
+
+        int minIndex = 0;
+        for (int i = 0; i < nums.length; i++) {
+            if (nums[i] < nums[minIndex]) {
+                minIndex = i;
+            }
+        }
+        if (minIndex != 0)
+            swap(nums, 0, minIndex);
+
+        for (int i = 2; i < nums.length; i++) {
+            int j = i;
+            int temp = nums[j];
+            while (j > 1 && nums[j - 1] > temp) {
+                nums[j] = nums[j - 1];
+                j--;
+            }
+            nums[j] = temp;
+        }
+
+        return nums;
+    }
+
+    private void swap(int[] nums, int a, int b) {
+        int temp = nums[a];
+        nums[a] = nums[b];
+        nums[b] = temp;
+    }
+}
+```
