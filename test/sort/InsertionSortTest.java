@@ -21,5 +21,9 @@ class InsertionSortTest {
         Assertions.assertArrayEquals(insertionSort.sortArray2(nums), result);
         nums = new int[]{5, 1, 1, 2, 0, 0};
         Assertions.assertArrayEquals(insertionSort.sortArray3(nums), result);
+        nums = new int[]{5, 1, 1, 2, 0, 0};
+        Assertions.assertArrayEquals(insertionSort.sortArray4(nums), result);
+        nums = new int[]{5, 1, 1, 2, 0, 0};
+        Assertions.assertArrayEquals(insertionSort.sortArray5(nums), result);
     }
 }

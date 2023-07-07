@@ -1,11 +1,13 @@
 <!-- TOC -->
-- [基础排序算法](#基础排序算法)
-  - [选择排序](#选择排序)
-    - [相关阅读](#相关阅读)
-  - [插入排序](#插入排序)
-    - [基本思想](#基本思想)
-    - [特点](#特点)
-    - [优化](#优化)
+* [基础排序算法](#基础排序算法)
+  * [选择排序](#选择排序)
+    * [相关阅读](#相关阅读)
+  * [插入排序](#插入排序)
+    * [基本思想](#基本思想)
+    * [特点](#特点)
+    * [优化](#优化)
+      * [插入排序的哨兵「Sentinel」模式](#插入排序的哨兵sentinel模式)
+      * [二分插入排序](#二分插入排序)
 <!-- TOC -->
 
 # 基础排序算法
@@ -326,6 +328,61 @@ class Solution {
         int temp = nums[a];
         nums[a] = nums[b];
         nums[b] = temp;
+    }
+}
+```
+
+#### 二分插入排序
+
+```java
+class Solution {
+    public int[] sortArray(int[] nums) {
+        for (int i = 1; i < nums.length; i++) {
+            int temp = nums[i];
+            // 使用二分查找查找插入的位置
+            int j = Math.abs(Arrays.binarySearch(nums, 0, i, temp) + 1);
+            // 将数组向右移动一个位置
+            System.arraycopy(nums, j, nums, j + 1, i - j);
+            // 将元素放置在其正确的位置上
+            nums[j] = temp;
+        }
+        return nums;
+    }
+}
+```
+
+**逐个向后赋值的写法**
+
+```java
+class Solution {
+    public int[] sortArray(int[] nums) {
+        for (int i = 1; i < nums.length; i++) {
+            int temp = nums[i];
+            int j = i - 1;
+
+            int loc = binarySearch(nums, temp, 0, j);
+
+            while (j >= loc) {
+                nums[j + 1] = nums[j];
+                j--;
+            }
+            nums[j + 1] = temp;
+        }
+        return nums;
+    }
+
+    private int binarySearch(int[] nums, int target, int low, int high) {
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (target == nums[mid])
+                return mid + 1;
+            else if (target > nums[mid])
+                low = mid + 1;
+            else
+                high = mid - 1;
+        }
+
+        return low;
     }
 }
 ```
