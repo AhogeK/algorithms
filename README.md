@@ -106,9 +106,9 @@ $T(n) = aT\left(\frac{n}{b}\right) + f(n)$
    a})$。
 2. **情况二：** 如果 $f(n) = \Theta(n^{\log_b a})$，这意味着分割和合并的工作与解决子问题的工作同样重要，那么$T(n) = \Theta(
    n^{\log_b a} \log n)$。
-3. **情况三：** 如果 $f(n) = \Omega(n^{\log_b a + \epsilon})$（对于某个正数 $\epsilon$），并且满足正则条件$af\left(
-   \frac{n}{b}\right) \leq kf(n)$对于某个常数$k < 1$和所有足够大的$n$，这意味着分割和合并的工作相比于解决子问题的工作来说是渐进大的，那么
-   $T(n) = \Theta(f(n))$。
+3. **情况三：** 如果 $f(n) = \Omega(n^{\log_b a + \epsilon})$（对于某个正数 $\epsilon$），并且满足正则条件 $af\left(
+   \frac{n}{b}\right) \leq kf(n)$ 对于某个常数 $k < 1$ 和所有足够大的 $n$ ，这意味着分割和合并的工作相比于解决子问题的工作来说是渐进大的，那么
+   $T(n) = \Theta(f(n))$ 。
 
 ---
 
