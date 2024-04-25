@@ -60,7 +60,7 @@ $$T(n) = aT\left(\frac{n}{b}\right) + f(n)$$
 
 *应用示例*
 
-**归并排序：** 归并排序的递归式可以表示为:$T(n) = 2T\left(\frac{n}{2}\right) + n$这里，$a = 2$，$b = 2$，$f(n) =
+**归并排序：** 归并排序的递归式可以表示为: $T(n) = 2T\left(\frac{n}{2}\right) + n$ 这里，$a = 2$，$b = 2$，$f(n) =
 n$。因此，$\log_b a = \log_2 2 = 1$。 由于$f(n) = n = n^{\log_2 2}$，符合主定理的第二种情况（$c = \log_b a$且$k =
 0$），所以：$T(n) = \Theta(n \log n)$
 
