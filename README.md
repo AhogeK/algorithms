@@ -86,7 +86,7 @@ $$
 
 𝑎代表每个节点的子节点数，而三个初始节点的运行时间是𝑇(𝑛/𝑏)的运行时间
 
-这棵树的深度为 $\log_b n$，且深度$i$包含 $a^i$ 个节点。因此，有 $a^{\log_b n} = n^{\log_b a}$ 个叶节点，因此运行时间是
+这棵树的深度为 $\log_b n$，且深度 $i$ 包含 $a^i$ 个节点。因此，有 $a^{\log_b n} = n^{\log_b a}$ 个叶节点，因此运行时间是
 $\Theta(n^{\log_b a})$。
 
 ![Master Theorem](https://ds055uzetaobb.cloudfront.net/brioche/uploads/it0XGmnWcb-mastertheorem.png?width=1200)
