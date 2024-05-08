@@ -122,6 +122,8 @@ public class BinarySearch {
 }
 ```
 
+---
+
 **使用主定理分析为什么是 $O(logn)$**
 
 在主定理的应用中，我们首先要确定递归式。对于这个二分查找算法，递归式可以表示为：
@@ -147,9 +149,11 @@ $T(n) = \Theta(\log n)$
 
 这是因为 $n^{\log_b a} = 1$ ，所以 $T(n) = \Theta(1 \cdot \log n) = \Theta(\log n)$ 。
 
+---
+
 「力扣」374. 猜数字大小
 
-[GuessNumber](src/binarysearch/GuessNumber.java)
+[GuessNumber](../src/binarysearch/GuessNumber.java)
 
 ```java
 /**
@@ -243,7 +247,7 @@ public class Solution {
 
 * [力扣 35. 搜索插入位置](https://leetcode-cn.com/problems/search-insert-position/)
 
-[SearchInsert](src/binarysearch/SearchInsert.java)
+[SearchInsert](../src/binarysearch/SearchInsert.java)
 
 ```java
 public class Solution {
