@@ -54,7 +54,7 @@
 [【力扣】704. 二分查找](https://leetcode.cn/problems/binary-search/)
 
 * 思路1
-  * [BinarySearch](src/binarysearch/BinarySearch.java)
+  * [BinarySearch](../src/binarysearch/BinarySearch.java)
     ```java
     public class BinarySearch {
 
@@ -278,7 +278,7 @@ public class Solution {
 
 * [力扣 34. 在排序数组中查找元素的第一个和最后一个位置](https://leetcode.cn/problems/find-first-and-last-position-of-element-in-sorted-array/description/)
 
-[SearchRange](src/binarysearch/SearchRange.java)
+[SearchRange](../src/binarysearch/SearchRange.java)
 
 ```java
 class Solution {
@@ -319,7 +319,7 @@ class Solution {
 
 * [153. 寻找旋转排序数组中的最小值](https://leetcode.cn/problems/find-minimum-in-rotated-sorted-array/description/)
 
-[FindMin](src/binarysearch/FindMin.java)
+[FindMin](../src/binarysearch/FindMin.java)
 
 ```java
 class Solution {
@@ -341,7 +341,7 @@ class Solution {
 
 * [154. 寻找旋转排序数组中的最小值 II](https://leetcode.cn/problems/find-minimum-in-rotated-sorted-array-ii/description/)
 
-[FindMinII](src/binarysearch/FindMinII.java)
+[FindMinII](../src/binarysearch/FindMinII.java)
 
 ```java
 class Solution {
@@ -367,7 +367,7 @@ class Solution {
 
 * [33. 搜索旋转排序数组](https://leetcode.cn/problems/search-in-rotated-sorted-array/description/)
 
-[SearchRotatedSortedArray](src/binarysearch/SearchRotatedSortedArray.java)
+[SearchRotatedSortedArray](../src/binarysearch/SearchRotatedSortedArray.java)
 
 ```java
 class Solution {
@@ -417,7 +417,7 @@ class Solution {
 
 * [81. 搜索旋转排序数组 II](https://leetcode.cn/problems/search-in-rotated-sorted-array-ii/description/)
 
-[SearchRotatedSortedArrayII](src/binarysearch/SearchRotatedSortedArrayII.java)
+[SearchRotatedSortedArrayII](../src/binarysearch/SearchRotatedSortedArrayII.java)
 
 ```java
 class Solution {
@@ -459,7 +459,7 @@ class Solution {
 
 * [278. 第一个错误的版本](https://leetcode.cn/problems/first-bad-version/description/)
 
-[FirstBadVersion](src/binarysearch/FirstBadVersion.java)
+[FirstBadVersion](../src/binarysearch/FirstBadVersion.java)
 
 ```java
 public class Solution extends VersionControl {
@@ -484,7 +484,7 @@ public class Solution extends VersionControl {
 
 * [852. 山脉数组的峰顶索引](https://leetcode.cn/problems/peak-index-in-a-mountain-array/description/)
 
-[PeakIndexInMountainArray](src/binarysearch/PeakIndexInMountainArray.java)
+[PeakIndexInMountainArray](../src/binarysearch/PeakIndexInMountainArray.java)
 
 ```java
 class Solution {
@@ -510,7 +510,7 @@ class Solution {
 
 * [1095. 山脉数组中查找目标值](https://leetcode.cn/problems/find-in-mountain-array/description/)
 
-[FindInMountainArray](src/binarysearch/FindInMountainArray.java)
+[FindInMountainArray](../src/binarysearch/FindInMountainArray.java)
 
 ```java
 /**
@@ -605,7 +605,7 @@ class Solution {
 
 * [4. 寻找两个正序数组的中位数](https://leetcode.cn/problems/median-of-two-sorted-arrays/description/)
 
-[FindMedianSortedArrays](src/binarysearch/FindMedianSortedArrays.java)
+[FindMedianSortedArrays](../src/binarysearch/FindMedianSortedArrays.java)
 
 ```java
 class Solution {
@@ -691,7 +691,7 @@ class Solution {
 
 * [「力扣」第 69 题：x的平方根](https://leetcode.cn/problems/sqrtx/)
 
-[MySqrt](src/binarysearch/MySqrt.java)
+[MySqrt](../src/binarysearch/MySqrt.java)
 
 ```java
 package binarysearch;
@@ -726,7 +726,7 @@ public class MySqrt {
 
 * [「力扣」第 287 题：寻找重复数](https://leetcode-cn.com/problems/find-the-duplicate-number/)
 
-[FindDuplicate](src/binarysearch/FindDuplicate.java)
+[FindDuplicate](../src/binarysearch/FindDuplicate.java)
 
 ```java
 public class FindDuplicate {
@@ -755,7 +755,7 @@ public class FindDuplicate {
 
 * [「力扣」第 1300 题：转变数组后最接近目标值的数组和](https://leetcode-cn.com/problems/sum-of-mutated-array-closest-to-target/)
 
-[FindBestValue](src/binarysearch/FindBestValue.java)
+[FindBestValue](../src/binarysearch/FindBestValue.java)
 
 ```java
 public class FindBestValue {
@@ -803,7 +803,7 @@ public class FindBestValue {
 
 * [「力扣」875. 爱吃香蕉的珂珂](https://leetcode.cn/problems/koko-eating-bananas/description/)
 
-[KokoEatingBananas.java](src/binarysearch/KokoEatingBananas.java)
+[KokoEatingBananas.java](../src/binarysearch/KokoEatingBananas.java)
 
 ```java
 /**
@@ -870,7 +870,7 @@ public class KokoEatingBananas {
 
 * [「力扣」410. 分割数组的最大值](https://leetcode.cn/problems/split-array-largest-sum/)
 
-[SplitArrayLargestSum.java](src/binarysearch/SplitArrayLargestSum.java)
+[SplitArrayLargestSum.java](../src/binarysearch/SplitArrayLargestSum.java)
 
 ```java
 package binarysearch;
@@ -931,7 +931,7 @@ public class SplitArrayLargestSum {
 
 * [「力扣」 1011. 在 D 天内送达包裹的能力](https://leetcode.cn/problems/capacity-to-ship-packages-within-d-days/)
 
-[CapacityToShipPackagesWithinDDays.java](src/binarysearch/CapacityToShipPackagesWithinDDays.java)
+[CapacityToShipPackagesWithinDDays.java](../src/binarysearch/CapacityToShipPackagesWithinDDays.java)
 
 ```java
 package binarysearch;
@@ -985,7 +985,7 @@ public class CapacityToShipPackagesWithinDDays {
 
 * [「力扣」1482. 制作 m 束花所需的最少天数](https://leetcode.cn/problems/minimum-number-of-days-to-make-m-bouquets/)
 
-[MinimumNumberOfDaysToMakeMBouquets.java](src/binarysearch/MinimumNumberOfDaysToMakeMBouquets.java)
+[MinimumNumberOfDaysToMakeMBouquets.java](../src/binarysearch/MinimumNumberOfDaysToMakeMBouquets.java)
 
 ```java
 package binarysearch;
@@ -1051,7 +1051,7 @@ public class MinimumNumberOfDaysToMakeMBouquets {
 
 * [「力扣」LCP 12. 小张刷题计划](https://leetcode.cn/problems/xiao-zhang-shua-ti-ji-hua)
 
-[XiaozhangCodingPracticePlan.java](src/binarysearch/XiaozhangCodingPracticePlan.java)
+[XiaozhangCodingPracticePlan.java](../src/binarysearch/XiaozhangCodingPracticePlan.java)
 
 ```java
 package binarysearch;
