@@ -138,6 +138,7 @@ $T(n) = T\left(\frac{n}{2}\right) + c$
 * $b = 2$
 * 因此， $\log_b a = \log_2 1 = 0$
 * 所以， $n^{\log_b a} = n^0 = 1$
+* $f(n) = O(n^{\log_b a - \epsilon})$
 
 现在，我们比较 $f(n) = c$ 和 $n^{\log_b a} = 1$ 。在这种情况下， $f(n)$ 是一个常数，而 $n^{\log_b a}$ 也是一个常数。根据主定理的第二种情况：
 
