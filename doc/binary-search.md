@@ -261,9 +261,8 @@ public class Solution {
      * @return 目标值在数组中的索引
      */
     public int searchInsert(int[] nums, int target) {
-        int len = nums.length;
         int left = 0;
-        int right = len - 1;
+        int right = nums.length - 1;
         while (left < right) {
             int mid = left + (right - left) / 2;
             if (nums[mid] < target) {
@@ -272,7 +271,7 @@ public class Solution {
                 right = mid;
             }
         }
-        return left == right && nums[left] == target ? left : left + 1;
+        return nums[left] < target ? left + 1 : left;
     }
 }
 ```
