@@ -17,10 +17,14 @@ class FindMedianSortedArraysTest {
         int[] nums2 = {2};
         double result = findMedianSortedArrays.findMedianSortedArrays(nums1, nums2);
         Assertions.assertEquals(2.0, result);
+        result = findMedianSortedArrays.findMedianSortedArrays2(nums1, nums2);
+        Assertions.assertEquals(2.0, result);
 
         nums1 = new int[]{1, 2};
         nums2 = new int[]{3, 4};
         result = findMedianSortedArrays.findMedianSortedArrays(nums1, nums2);
+        Assertions.assertEquals(2.5, result);
+        result = findMedianSortedArrays.findMedianSortedArrays2(nums1, nums2);
         Assertions.assertEquals(2.5, result);
     }
 }
