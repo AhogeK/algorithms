@@ -35,6 +35,28 @@ public class FindBestValue {
         return left;
     }
 
+    public int findBestValue2(int[] arr, int target) {
+        int max = 0;
+        for (int num : arr) max = Math.max(max, num);
+        int left = 0, right = max;
+        int result = 0, minDiff = Integer.MAX_VALUE;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            int sum = calculateSum(arr, mid);
+            int diff = Math.abs(sum - target);
+            if (diff < minDiff || (diff == minDiff && mid < result)) {
+                result = mid;
+                minDiff = diff;
+            }
+            if (sum < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return result;
+    }
+
     public int calculateSum(int[] arr, int threshold) {
         int sum = 0;
         for (int num : arr) {

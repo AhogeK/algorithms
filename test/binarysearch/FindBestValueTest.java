@@ -16,6 +16,8 @@ class FindBestValueTest {
         int[] arr = {60864, 25176, 27249, 21296, 20204};
         int target = 56803;
         int result = findBestValue.findBestValue(arr, target);
-        Assertions.assertEquals(113613, result);
+        Assertions.assertEquals(11361, result);
+        result = findBestValue.findBestValue2(arr, target);
+        Assertions.assertEquals(11361, result);
     }
 }
