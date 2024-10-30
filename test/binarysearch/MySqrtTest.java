@@ -17,5 +17,7 @@ class MySqrtTest {
         int expected = 2;
         int actual = mySqrt.mySqrt(x);
         Assertions.assertEquals(expected, actual);
+        actual = mySqrt.mySqrt2(x);
+        Assertions.assertEquals(expected, actual);
     }
 }
