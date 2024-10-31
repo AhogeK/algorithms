@@ -17,5 +17,7 @@ class KokoEatingBananasTest {
         int h = 8;
         int result = kokoEatingBananas.minEatingSpeed(piles, h);
         Assertions.assertEquals(4, result);
+        result = kokoEatingBananas.minEatingSpeed2(piles, h);
+        Assertions.assertEquals(4, result);
     }
 }

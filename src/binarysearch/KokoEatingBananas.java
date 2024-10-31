@@ -59,4 +59,30 @@ public class KokoEatingBananas {
         }
         return time <= h;
     }
+
+    public int minEatingSpeed2(int[] piles, int h) {
+        int left = 1;
+        int right = 1;
+        for (int pile : piles) right = Math.max(right, pile);
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+
+            boolean check = true;
+            int totalHours = 0;
+            for (int pile : piles) {
+                totalHours += (pile + mid - 1) / mid;
+                if (totalHours > h) {
+                    check = false;
+                    break;
+                }
+            }
+
+            if (check) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return left;
+    }
 }
