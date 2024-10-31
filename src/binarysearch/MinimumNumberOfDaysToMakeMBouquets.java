@@ -58,7 +58,7 @@ public class MinimumNumberOfDaysToMakeMBouquets {
     }
 
     public int minDays2(int[] bloomDay, int m, int k) {
-        if (m * k > bloomDay.length) return -1;
+        if ((long) m * k > bloomDay.length) return -1;
 
         int left = Integer.MAX_VALUE;
         int right = Integer.MIN_VALUE;
