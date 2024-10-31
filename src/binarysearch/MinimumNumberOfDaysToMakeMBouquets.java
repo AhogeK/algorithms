@@ -56,4 +56,43 @@ public class MinimumNumberOfDaysToMakeMBouquets {
 
         return bouquets >= m;
     }
+
+    public int minDays2(int[] bloomDay, int m, int k) {
+        if (m * k > bloomDay.length) return -1;
+
+        int left = Integer.MAX_VALUE;
+        int right = Integer.MIN_VALUE;
+        for (int day : bloomDay) {
+            left = Math.min(left, day);
+            right = Math.max(right, day);
+        }
+
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+
+            int bouquets = 0;
+            int flowers = 0;
+
+            for (int day : bloomDay) {
+                if (day <= mid) {
+                    flowers++;
+                    if (flowers == k) {
+                        bouquets++;
+                        flowers = 0;
+                        if (bouquets >= m) break;
+                    }
+                } else {
+                    flowers = 0;
+                }
+            }
+
+            if (bouquets < m) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+
+        return left;
+    }
 }

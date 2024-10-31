@@ -19,5 +19,7 @@ class MinimumNumberOfDaysToMakeMBouquetsTest {
         int k = 1;
         int result = minimumNumberOfDaysToMakeMBouquets.minDays(bloomDay, m, k);
         Assertions.assertEquals(3, result);
+        result = minimumNumberOfDaysToMakeMBouquets.minDays2(bloomDay, m, k);
+        Assertions.assertEquals(3, result);
     }
 }
