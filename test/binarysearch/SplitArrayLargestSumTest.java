@@ -16,5 +16,7 @@ class SplitArrayLargestSumTest {
         SplitArrayLargestSum splitArrayLargestSum = new SplitArrayLargestSum();
         int result = splitArrayLargestSum.splitArray(nums, m);
         Assertions.assertEquals(18, result);
+        result = splitArrayLargestSum.splitArray2(nums, m);
+        Assertions.assertEquals(18, result);
     }
 }

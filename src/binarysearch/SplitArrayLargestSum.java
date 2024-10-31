@@ -51,4 +51,42 @@ public class SplitArrayLargestSum {
         }
         return splits;
     }
+
+    public int splitArray2(int[] nums, int k) {
+        int left = 0;
+        int right = 0;
+
+        for (int num : nums) {
+            left = Math.max(left, num);
+            right += num;
+        }
+
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+
+            boolean check = true;
+            int count = 1;
+            int sum = 0;
+            for (int num : nums) {
+                if (sum + num > mid) {
+                    count++;
+                    sum = num;
+                    if (count > k) {
+                        check = false;
+                        break;
+                    }
+                } else {
+                    sum += num;
+                }
+            }
+
+            if (check) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+
+        return left;
+    }
 }
