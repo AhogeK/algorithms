@@ -50,4 +50,32 @@ public class XiaozhangCodingPracticePlan {
         }
         return m >= days;
     }
+
+    public int minTime2(int[] time, int m) {
+        int left = 0, right = 0;
+        for (int t : time) {
+            right += t;
+        }
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            int days = 1;
+            int sum = 0;
+            int maxTime = 0;
+            for (int t : time) {
+                sum += t;
+                maxTime = Math.max(maxTime, t);
+                if (sum - maxTime > mid) {
+                    days++;
+                    sum = t;
+                    maxTime = t;
+                }
+            }
+            if (days > m) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        return left;
+    }
 }

@@ -18,5 +18,7 @@ class XiaozhangCodingPracticePlanTest {
         int m = 2;
         int result = xiaozhangCodingPracticePlan.minTime(time, m);
         Assertions.assertEquals(3, result);
+        result = xiaozhangCodingPracticePlan.minTime2(time, m);
+        Assertions.assertEquals(3, result);
     }
 }
