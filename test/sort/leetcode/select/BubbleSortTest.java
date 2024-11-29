@@ -29,7 +29,7 @@ class BubbleSortTest {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             String line = reader.readLine();
             Assertions.assertNotNull(line);
-            Assertions.assertTrue(line.length() > 0);
+            Assertions.assertFalse(line.isEmpty());
             int[] nums = Stream.of(line.split(",")).mapToInt(Integer::parseInt).toArray();
 
             int[] result = bubbleSort.sortArray(nums);

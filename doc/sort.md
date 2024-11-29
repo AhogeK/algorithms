@@ -108,7 +108,7 @@ class Solution {
 
 * [「力扣」1. 两数之和 （暴力求解）](https://leetcode.cn/problems/two-sum)
 
-[TwoSum.java](src/sort/leetcode/select/TwoSum.java)
+[TwoSum.java](../src/sort/leetcode/select/TwoSum.java)
 
 ```java
 package sort.leetcode;
@@ -137,7 +137,7 @@ public class TwoSum {
 
 * [「力扣」11. 盛最多水的容器](https://leetcode.cn/problems/container-with-most-water)
 
-[ContainerWithMostWater.java](src/sort/leetcode/select/ContainerWithMostWater.java)
+[ContainerWithMostWater.java](../src/sort/leetcode/select/ContainerWithMostWater.java)
 
 ```java
 package sort.leetcode.select;

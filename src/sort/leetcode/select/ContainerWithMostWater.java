@@ -22,4 +22,25 @@ public class ContainerWithMostWater {
         }
         return ans;
     }
+
+    /**
+     * 用于学习，使用选择排序知识解题
+     */
+    public int maxArea2(int[] height) {
+        int n = height.length;
+        int maxWater = 0;
+        for (int i = 0; i < n - 1; i++) {
+            int maxAreaIndex = i + 1;
+            for (int j = i + 1; j < n; j++) {
+                int currentArea = Math.min(height[i], height[j]) * (j - i);
+                int maxIndexArea = Math.min(height[i], height[maxAreaIndex]) * (maxAreaIndex - i);
+                if (currentArea > maxIndexArea) maxAreaIndex = j;
+            }
+
+            int area = Math.min(height[i], height[maxAreaIndex]) * (maxAreaIndex - i);
+            maxWater = Math.max(maxWater, area);
+        }
+
+        return maxWater;
+    }
 }
