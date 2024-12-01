@@ -15,14 +15,35 @@ public class BubbleSort {
             boolean swapped = false;
             for (int j = 0; j < size - i - 1; j++) {
                 if (nums[j] > nums[j + 1]) {
-                    int temp = nums[j + 1];
-                    nums[j + 1] = nums[j];
-                    nums[j] = temp;
+                    int temp = nums[j];
+                    nums[j] = nums[j + 1];
+                    nums[j + 1] = temp;
                     swapped = true;
                 }
             }
-            if (!swapped)
-                break;
+            if (!swapped) break;
+        }
+
+        return nums;
+    }
+
+    /**
+     * while版但不如双for循环版，双for版循环的次数更少
+     */
+    public int[] sortArray2(int[] nums) {
+        boolean flag = true;
+
+        while (flag) {
+            flag = false;
+
+            for (int i = 0; i < nums.length - 1; i++) {
+                if (nums[i] > nums[i + 1]) {
+                    int temp = nums[i];
+                    nums[i] = nums[i + 1];
+                    nums[i + 1] = temp;
+                    flag = true;
+                }
+            }
         }
 
         return nums;

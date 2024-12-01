@@ -28,8 +28,13 @@ class ContainerWithMostWaterTest {
             // 去掉头尾的中括号
             line = line.substring(1, line.length() - 1);
             height = java.util.stream.Stream.of(line.split(",")).mapToInt(Integer::parseInt).toArray();
+            // 打印选择排序的耗时
+            long start = System.currentTimeMillis();
+            int maxArea2Result = containerWithMostWater.maxArea2(height);
+            long end = System.currentTimeMillis();
+            System.out.println("maxArea2 耗时：" + (end - start) + "ms");
             // 因选择排序在力扣存在超时，所以在这里检测结果是否一致
-            Assertions.assertEquals(containerWithMostWater.maxArea(height), containerWithMostWater.maxArea2(height));
+            Assertions.assertEquals(containerWithMostWater.maxArea(height), maxArea2Result);
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }

@@ -31,11 +31,19 @@ class BubbleSortTest {
             Assertions.assertNotNull(line);
             Assertions.assertFalse(line.isEmpty());
             int[] nums = Stream.of(line.split(",")).mapToInt(Integer::parseInt).toArray();
-
+            int[] nums2 = Arrays.copyOf(nums, nums.length);
+            int[] trueResult = Arrays.copyOf(nums, nums.length);
+            Arrays.sort(trueResult);
+            long start = System.currentTimeMillis();
             int[] result = bubbleSort.sortArray(nums);
-            int[] testNums = Arrays.copyOf(nums, nums.length);
-
-            Assertions.assertArrayEquals(testNums, result);
+            long end = System.currentTimeMillis();
+            System.out.println("sortArray 耗时：" + (end - start) + "ms");
+            Assertions.assertArrayEquals(trueResult, result);
+            start = System.currentTimeMillis();
+            int[] result2 = bubbleSort.sortArray2(nums2);
+            end = System.currentTimeMillis();
+            System.out.println("sortArray2 耗时：" + (end - start) + "ms");
+            Assertions.assertArrayEquals(trueResult, result2);
         } catch (IOException e) {
             e.printStackTrace();
         }
