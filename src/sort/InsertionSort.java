@@ -1,5 +1,7 @@
 package sort;
 
+import sort.common.SortingUtil;
+
 import java.util.Arrays;
 
 /**
@@ -30,13 +32,13 @@ public class InsertionSort {
     public int[] sortArray2(int[] nums) {
         for (int i = 1; i < nums.length; i++) {
             int temp = nums[i];
-            int j = i;
-            while (j > 0 && nums[j - 1] > temp) {
+            int j = i - 1;
+            while (j >= 0 && nums[j] > temp) {
                 // 无需交换减少赋值次数
-                nums[j] = nums[j - 1];
+                nums[j + 1] = nums[j];
                 j--;
             }
-            nums[j] = temp;
+            nums[j + 1] = temp;
         }
         return nums;
     }
@@ -65,9 +67,7 @@ public class InsertionSort {
     }
 
     private void swap(int[] nums, int a, int b) {
-        int temp = nums[a];
-        nums[a] = nums[b];
-        nums[b] = temp;
+        SortingUtil.swap(nums, a, b);
     }
 
     /**

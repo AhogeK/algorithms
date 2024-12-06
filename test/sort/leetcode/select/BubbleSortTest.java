@@ -32,6 +32,7 @@ class BubbleSortTest {
             Assertions.assertFalse(line.isEmpty());
             int[] nums = Stream.of(line.split(",")).mapToInt(Integer::parseInt).toArray();
             int[] nums2 = Arrays.copyOf(nums, nums.length);
+            int[] nums3 = Arrays.copyOf(nums, nums.length);
             int[] trueResult = Arrays.copyOf(nums, nums.length);
             Arrays.sort(trueResult);
             long start = System.currentTimeMillis();
@@ -44,6 +45,11 @@ class BubbleSortTest {
             end = System.currentTimeMillis();
             System.out.println("sortArray2 耗时：" + (end - start) + "ms");
             Assertions.assertArrayEquals(trueResult, result2);
+            start = System.currentTimeMillis();
+            int[] result3 = bubbleSort.sortArray3(nums3);
+            end = System.currentTimeMillis();
+            System.out.println("sortArray3 耗时：" + (end - start) + "ms");
+            Assertions.assertArrayEquals(trueResult, result3);
         } catch (IOException e) {
             e.printStackTrace();
         }

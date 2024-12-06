@@ -48,4 +48,45 @@ public class BubbleSort {
 
         return nums;
     }
+
+    /**
+     * 双向冒泡（鸡尾酒排序）版本
+     */
+    public int[] sortArray3(int[] nums) {
+        int left = 0;
+        int right = nums.length - 1;
+        boolean swapped = true;
+
+        while (swapped) {
+            swapped = false;
+
+            // 从左到右
+            for (int i = left; i < right; i++) {
+                if (nums[i] > nums[i + 1]) {
+                    int temp = nums[i];
+                    nums[i] = nums[i + 1];
+                    nums[i + 1] = temp;
+                    swapped = true;
+                }
+            }
+
+            if (!swapped) break;
+
+            swapped = false;
+            right--;
+
+            // 从右到左
+            for (int i = right; i > left; i--) {
+                if (nums[i] < nums[i - 1]) {
+                    int temp = nums[i];
+                    nums[i] = nums[i - 1];
+                    nums[i - 1] = temp;
+                    swapped = true;
+                }
+            }
+
+            left++;
+        }
+        return nums;
+    }
 }
