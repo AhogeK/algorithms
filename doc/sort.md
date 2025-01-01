@@ -169,7 +169,7 @@ public class ContainerWithMostWater {
 
 * [使用冒泡排序完成「力扣」第 912 题：排序数组](https://leetcode-cn.com/problems/sort-an-array/)
 
-[BubbleSort.java](src/sort/leetcode/select/BubbleSort.java)
+[BubbleSort.java](../src/sort/leetcode/select/BubbleSort.java)
 
 ```java
 package sort.leetcode.select;
