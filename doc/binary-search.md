@@ -195,7 +195,7 @@ public class GuessNumber extends GuessGame {
 > 思路2：在循环体中排除目标元素一定不存在的区间
 
 * 理解根据分支逻辑调整取中间数
-* 循环可以继续的条件是 `while(left < right)` 表示退出循环的时候`[left, right]`只有一个元素
+* 循环可以继续的条件是 `while(left < right)` 表示退出循环的时候 $[left, right]$ 只有一个元素
 * 结果后处理
 
 ```java
