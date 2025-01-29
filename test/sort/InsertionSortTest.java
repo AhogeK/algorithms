@@ -3,6 +3,12 @@ package sort;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.stream.Stream;
+
 /**
  * 插入排序测试
  *
@@ -13,17 +19,46 @@ class InsertionSortTest {
 
     @Test
     void caseOne() {
+        // 使用类加载器获取文件的输入流
+        InputStream inputStream = InsertionSortTest.class.getResourceAsStream("leetcode/select/test-array.txt");
+
+        Assertions.assertNotNull(inputStream);
+
         InsertionSort insertionSort = new InsertionSort();
-        int[] nums = {5, 1, 1, 2, 0, 0};
-        int[] result = {0, 0, 1, 1, 2, 5};
-        Assertions.assertArrayEquals(insertionSort.sortArray1(nums), result);
-        nums = new int[]{5, 1, 1, 2, 0, 0};
-        Assertions.assertArrayEquals(insertionSort.sortArray2(nums), result);
-        nums = new int[]{5, 1, 1, 2, 0, 0};
-        Assertions.assertArrayEquals(insertionSort.sortArray3(nums), result);
-        nums = new int[]{5, 1, 1, 2, 0, 0};
-        Assertions.assertArrayEquals(insertionSort.sortArray4(nums), result);
-        nums = new int[]{5, 1, 1, 2, 0, 0};
-        Assertions.assertArrayEquals(insertionSort.sortArray5(nums), result);
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            String line = reader.readLine();
+            Assertions.assertNotNull(line);
+            Assertions.assertFalse(line.isEmpty());
+            int[] nums = Stream.of(line.split(",")).mapToInt(Integer::parseInt).toArray();
+            int[] nums2 = Arrays.copyOf(nums, nums.length);
+            int[] nums3 = Arrays.copyOf(nums, nums.length);
+            int[] nums4 = Arrays.copyOf(nums, nums.length);
+            int[] nums5 = Arrays.copyOf(nums, nums.length);
+            int[] trueResult = Arrays.copyOf(nums, nums.length);
+            Arrays.sort(trueResult);
+            long start = System.currentTimeMillis();
+            Assertions.assertArrayEquals(insertionSort.sortArray1(nums), trueResult);
+            long end = System.currentTimeMillis();
+            System.out.println("sortArray1 耗时：" + (end - start) + "ms");
+            start = System.currentTimeMillis();
+            Assertions.assertArrayEquals(insertionSort.sortArray2(nums2), trueResult);
+            end = System.currentTimeMillis();
+            System.out.println("sortArray2 耗时：" + (end - start) + "ms");
+            start = System.currentTimeMillis();
+            Assertions.assertArrayEquals(insertionSort.sortArray3(nums3), trueResult);
+            end = System.currentTimeMillis();
+            System.out.println("sortArray3 耗时：" + (end - start) + "ms");
+            start = System.currentTimeMillis();
+            Assertions.assertArrayEquals(insertionSort.sortArray4(nums4), trueResult);
+            end = System.currentTimeMillis();
+            System.out.println("sortArray4 耗时：" + (end - start) + "ms");
+            start = System.currentTimeMillis();
+            Assertions.assertArrayEquals(insertionSort.sortArray5(nums5), trueResult);
+            end = System.currentTimeMillis();
+            System.out.println("sortArray5 耗时：" + (end - start) + "ms");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
