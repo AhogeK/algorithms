@@ -7,6 +7,11 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.logging.Formatter;
+import java.util.logging.*;
+import java.util.stream.Collectors;
+
+import static java.util.logging.Level.ALL;
 
 /**
  * 排序工具类
@@ -20,7 +25,7 @@ public class SortingUtil {
      * 随机数种子
      */
     public static final Random RANDOM;
-
+    private static final System.Logger logger = System.getLogger("SortingUtil");
     /**
      * 测试方法执行的次数
      */
@@ -44,8 +49,21 @@ public class SortingUtil {
     static {
         try {
             RANDOM = SecureRandom.getInstanceStrong();
+            Logger julLogger = Logger.getLogger("SortingUtil");
+            julLogger.setUseParentHandlers(false);
+
+            // 只移除控制台处理器，保留其他处理器
+            Arrays.stream(julLogger.getHandlers())
+                    .filter(ConsoleHandler.class::isInstance)
+                    .forEach(julLogger::removeHandler);
+
+            ConsoleHandler handler = new ConsoleHandler();
+            handler.setFormatter(new CustomFormatter());
+            handler.setLevel(ALL);
+            julLogger.addHandler(handler);
+            julLogger.setLevel(ALL);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("SecureRandom.getInstanceStrong() not available", e);
         }
     }
 
@@ -72,14 +90,13 @@ public class SortingUtil {
      * @param nums 被打印的数组
      */
     public static void printArray(int[] nums) {
-        System.out.print("[");
-        for (int i = 0; i < nums.length; i++) {
-            System.out.print(nums[i]);
-            if (i != nums.length - 1) {
-                System.out.print(", ");
-            }
-        }
-        System.out.println("]");
+        String arrayStr;
+        if (nums == null)
+            arrayStr = "null";
+        else
+            arrayStr = Arrays.stream(nums).filter(n -> n != 0).mapToObj(String::valueOf)
+                    .collect(Collectors.joining(", ", "[", "]"));
+        logger.log(System.Logger.Level.INFO, arrayStr);
     }
 
     /**
@@ -121,14 +138,7 @@ public class SortingUtil {
      */
     public static int[] copyArray(int[] nums) {
         int[] newArr = new int[nums.length];
-        /*
-          Java 可以使用
-
-          System.arraycopy(nums, 0, newArr, 0, len)
-         */
-        for (int i = 0; i < nums.length; i++) {
-            newArr[i] = nums[i];
-        }
+        System.arraycopy(nums, 0, newArr, 0, nums.length);
         return newArr;
     }
 
@@ -139,12 +149,19 @@ public class SortingUtil {
      * @param nums2 比较数组2
      */
     public static void judgeArrayEquals(int[] nums1, int[] nums2) {
+        if (nums1 == null || nums2 == null) {
+            throw new IllegalArgumentException("数组不能为null");
+        }
         if (nums1.length != nums2.length) {
-            throw new RuntimeException("两个数组的不想等！");
+            throw new IllegalArgumentException(
+                    "数组长度不相等: nums1.length=" + nums1.length + ", nums2.length=" + nums2.length
+            );
         }
         for (int i = 0; i < nums1.length; i++) {
             if (nums1[i] != nums2[i]) {
-                throw new RuntimeException("第" + i + "个元素不相等！");
+                throw new IllegalArgumentException(
+                        "第 " + i + " 个元素不相等: nums1[" + i + "]=" + nums1[i] + ", nums2[" + i + "]=" + nums2[i]
+                );
             }
         }
     }
@@ -170,26 +187,20 @@ public class SortingUtil {
      * @param generateArray    生成测试用例数组的策略对象
      */
     public static void testSortingAlgorithms(ISortingAlgorithm sortingAlgorithm, IGenerateArrayStrategy generateArray) {
-        System.out.printf("您使用的排序算法是：%s%n", sortingAlgorithm);
+        logger.log(System.Logger.Level.INFO, String.format("您使用的排序算法是：%s", sortingAlgorithm));
         printGenerateArrayFeature(generateArray);
-        // 多运行几次，避免编写的算法恰好"蒙混过关"
         List<Long> allTimingList = new ArrayList<>();
         for (int i = 0; i < TEST_TIMES; i++) {
-            System.out.printf("生成第 %d 个数组，", i + 1);
-            // 根据一定的策略生成测试用例数组
+            logger.log(System.Logger.Level.INFO, String.format("生成第 %d 个数组，", i + 1));
             int[] randomArray = generateArray.generateArray();
-            // 生成测试用例数组的拷贝
             int[] randomArrayCopy = SortingUtil.copyArray(randomArray);
-            // 将计时逻辑封装到一个函数中，更好的做法是使用动态代理或者过滤器
             long nanos = timingSortingAlgorithm(sortingAlgorithm, randomArray);
             allTimingList.add(nanos);
-            // 使用系统库函数对 randomArrayCopy 进行排序
             Arrays.sort(randomArrayCopy);
-            // 逐个比较两个排序以后的数组元素，以验证我们编写的排序算法的正确性
             judgeArrayEquals(randomArray, randomArrayCopy);
         }
         LongSummaryStatistics summaryMillisStatistics = allTimingList.stream().mapToLong(a -> a).summaryStatistics();
-        System.out.printf("%d 次计算平均耗时 %s 纳秒", TEST_TIMES, summaryMillisStatistics.getAverage());
+        logger.log(System.Logger.Level.INFO, String.format("%d 次计算平均耗时 %s 纳秒", TEST_TIMES, summaryMillisStatistics.getAverage()));
     }
 
     /**
@@ -204,42 +215,37 @@ public class SortingUtil {
     /**
      * 根据不同的随机策略测试用例，比较不同排序算法的性能
      *
-     * @param generateRandomArrayStrategy 以对象的方式传入生成随机数组的策略：完全随机、部分有序、完全逆序、有大量重复元素
+     * @param generateRandomArrayStrategy 生成随机数组的策略对象
      * @param sortingAlgorithms           排序算法的实例列表
      */
     private static void compareSortingAlgorithms(GenerateRandomArrayStrategy generateRandomArrayStrategy,
                                                  ISortingAlgorithm... sortingAlgorithms) {
-        System.out.println("排序算法比较：");
+        logger.log(System.Logger.Level.INFO, "排序算法比较：");
         int[] nums = generateRandomArrayStrategy.generateArray();
         printGenerateArrayFeature(generateRandomArrayStrategy);
         for (ISortingAlgorithm sortingAlgorithm : sortingAlgorithms) {
-            // 其实第 1 个排序算法没有必要复制数组，目前没有想到更好的写法
             int[] numsCopy = copyArray(nums);
-            System.out.printf("%s：%n\t", sortingAlgorithm);
+            logger.log(System.Logger.Level.INFO, String.format("%s：", sortingAlgorithm));
             timingSortingAlgorithm(sortingAlgorithm, numsCopy);
         }
-        System.out.println();
     }
 
     /**
      * 统计排序算法耗时
      *
-     * @param sortingAlgorithm 排序算法，传入我们自己编写的排序算法实现
+     * @param sortingAlgorithm 排序算法
      * @param randomArray      随机生成的待排序数组
      * @return 本次计算的耗时
      */
     private static long timingSortingAlgorithm(ISortingAlgorithm sortingAlgorithm, int[] randomArray) {
-        // 使用我们的算法对 nums 进行排序
         Instant startTime = Instant.now();
         sortingAlgorithm.sortArray(randomArray);
         Instant endTime = Instant.now();
 
-        // 以毫秒为单位
         long nanos = Duration.between(startTime, endTime).toNanos();
-        // 向上取整 用于打印秒
         BigDecimal spendBigDecimal = new BigDecimal(String.valueOf(nanos)).divide(DIVISOR, SCALE, RoundingMode.CEILING);
         BigDecimal spendMillisBigDecimal = new BigDecimal(String.valueOf(nanos)).divide(MILLIS_DIVISOR, SCALE, RoundingMode.CEILING);
-        System.out.printf("耗时 %s 秒 / %s 毫秒 / %d 纳秒%n", spendBigDecimal, spendMillisBigDecimal, nanos);
+        logger.log(System.Logger.Level.INFO, String.format("耗时 %s 秒 / %s 毫秒 / %d 纳秒", spendBigDecimal, spendMillisBigDecimal, nanos));
         return nanos;
     }
 
@@ -249,7 +255,107 @@ public class SortingUtil {
      * @param generateArrayStrategy 生成随机数组的策略对象
      */
     private static void printGenerateArrayFeature(IGenerateArrayStrategy generateArrayStrategy) {
-        System.out.printf("测试用例特点：%s，规模：%d，最小值：%d，最大值：%d。%n", generateArrayStrategy.getFeature(),
-                generateArrayStrategy.getLen(), generateArrayStrategy.getMin(), generateArrayStrategy.getMax());
+        logger.log(System.Logger.Level.INFO, String.format("测试用例特点：%s，规模：%d，最小值：%d，最大值：%d。", generateArrayStrategy.getFeature(),
+                generateArrayStrategy.getLen(), generateArrayStrategy.getMin(), generateArrayStrategy.getMax()));
+    }
+}
+
+class CustomFormatter extends Formatter {
+
+    private static final String BRIGHT_WHITE = "\u001B[97m";
+
+    private static final ColorProfile ANSI_PROFILE = new AnsiColorProfile(
+            "\u001B[90m",  // Dark Gray - Time
+            "\u001B[36m",  // Cyan - Class Name
+            BRIGHT_WHITE,  // Bright White - Message
+            "\u001B[0m",   // RESET
+            BRIGHT_WHITE,  // Bright White - Level Bracket
+            BRIGHT_WHITE   // Bright White - Colon
+    );
+    private static final ColorProfile NO_COLOR_PROFILE = new NoColorProfile();
+
+    @Override
+    public String format(LogRecord logRecord) {
+        ColorProfile color = isColorEnabled() ? ANSI_PROFILE : NO_COLOR_PROFILE;
+        return buildLogMessage(logRecord, color);
+    }
+
+    private String buildLogMessage(LogRecord logRecord, ColorProfile color) {
+        return switch (color) {
+            case AnsiColorProfile p -> buildAnsiMessage(logRecord, p);
+            case NoColorProfile p -> buildPlainMessage(logRecord);
+            default -> throw new IllegalStateException("Unexpected value: " + color);
+        };
+    }
+
+    private String buildAnsiMessage(LogRecord logRecord, AnsiColorProfile color) {
+        String levelColor = getLevelColor(logRecord.getLevel());
+        String messageColor = getMessageColor(logRecord.getLevel());
+
+        return String.format(
+                "%s%tT %s[%s%s%s] %s%s%s:%s %s%s%n",
+                color.timeColor(),
+                new Date(logRecord.getMillis()),
+                color.levelBracketColor(),
+                levelColor,
+                logRecord.getLevel().getLocalizedName(),
+                color.levelBracketColor(),
+                color.classNameColor(),
+                logRecord.getSourceClassName(),
+                color.colonColor(),
+                messageColor,
+                logRecord.getMessage(),
+                color.resetCode()
+        );
+    }
+
+    private String buildPlainMessage(LogRecord logRecord) {
+        return String.format(
+                "%tT [%s] %s : %s%n",
+                new Date(logRecord.getMillis()),
+                logRecord.getLevel().getLocalizedName(),
+                logRecord.getSourceClassName(),
+                logRecord.getMessage()
+        );
+    }
+
+    private String getLevelColor(Level level) {
+        return switch (level.getName()) {
+            case "SEVERE" -> "\u001B[31;1m";
+            case "ERROR" -> "\u001B[31m";
+            case "WARNING" -> "\u001B[33m";
+            case "INFO" -> "\u001B[32m";
+            default -> "\u001B[0m";
+        };
+    }
+
+    private String getMessageColor(Level level) {
+        return switch (level.getName()) {
+            case "SEVERE", "ERROR" -> "\u001B[31m";
+            case "WARNING" -> "\u001B[33m";
+            case "INFO" -> "\u001B[32m";
+            default -> "\u001B[37m";
+        };
+    }
+
+    private boolean isColorEnabled() {
+        String osName = System.getProperty("os.name");
+        return (osName != null && !osName.startsWith("Windows")) || Boolean.getBoolean("color.log.enabled");
+    }
+
+    private sealed interface ColorProfile permits AnsiColorProfile, NoColorProfile {
+    }
+
+    private record AnsiColorProfile(
+            String timeColor,
+            String classNameColor,
+            String messageColor,
+            String resetCode,
+            String levelBracketColor,
+            String colonColor
+    ) implements ColorProfile {
+    }
+
+    private record NoColorProfile() implements ColorProfile {
     }
 }
