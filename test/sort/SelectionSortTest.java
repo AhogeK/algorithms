@@ -16,6 +16,7 @@ class SelectionSortTest {
         SelectionSort selectionSort = new SelectionSort();
         int[] nums = {5, 1, 1, 2, 0, 0};
         int[] result = {0, 0, 1, 1, 2, 5};
-        Assertions.assertArrayEquals(selectionSort.sortArray(nums), result);
+        selectionSort.sortArray(nums);
+        Assertions.assertArrayEquals(nums, result);
     }
 }

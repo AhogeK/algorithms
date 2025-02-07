@@ -8,7 +8,9 @@ package sort.common;
  */
 public class GenerateReversedArrayStrategy implements IGenerateArrayStrategy {
 
-    int len = 1_000;
+    private int len = 1_000;
+    private int min = 0;
+    private int max = 1_000;
 
     public GenerateReversedArrayStrategy() {
     }
@@ -20,6 +22,15 @@ public class GenerateReversedArrayStrategy implements IGenerateArrayStrategy {
         this.len = len;
     }
 
+    public GenerateReversedArrayStrategy(int len, int min, int max) {
+        if (len <= 0) throw new IllegalArgumentException("数组长度必须大于 0");
+        if (min > max) throw new IllegalArgumentException("min 必须小于等于 max");
+
+        this.len = len;
+        this.min = min;
+        this.max = max;
+    }
+
     @Override
     public String getFeature() {
         return "逆序数组";
@@ -27,11 +38,13 @@ public class GenerateReversedArrayStrategy implements IGenerateArrayStrategy {
 
     @Override
     public int[] generateArray() {
-        int[] reversedArray = new int[len];
-        for (int i = len - 1; i >= 0; i--) {
-            reversedArray[i] = i;
+        int[] array = new int[len];
+        // 逆序填充数组，范围在 [min, max]
+        int step = (max - min) / (len - 1);
+        for (int i = 0; i < len; i++) {
+            array[i] = max - i * step; // 逆序填充
         }
-        return reversedArray;
+        return array;
     }
 
     @Override

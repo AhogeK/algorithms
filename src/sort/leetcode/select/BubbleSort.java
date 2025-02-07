@@ -1,14 +1,17 @@
 package sort.leetcode.select;
 
+import sort.common.ISortingAlgorithm;
+
 /**
  * 使用冒泡排序完成 「力扣」912. 排序数组
  *
  * @author AhogeK ahogek@gmail.com
  * @since 2023-06-29 20:55:40
  */
-public class BubbleSort {
+public class BubbleSort implements ISortingAlgorithm {
 
-    public int[] sortArray(int[] nums) {
+    @Override
+    public void sortArray(int[] nums) {
         int size = nums.length;
 
         for (int i = 0; i < size - 1; i++) {
@@ -23,8 +26,6 @@ public class BubbleSort {
             }
             if (!swapped) break;
         }
-
-        return nums;
     }
 
     /**

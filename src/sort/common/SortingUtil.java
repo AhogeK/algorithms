@@ -188,6 +188,13 @@ public class SortingUtil {
      */
     public static void testSortingAlgorithms(ISortingAlgorithm sortingAlgorithm, IGenerateArrayStrategy generateArray) {
         logger.log(System.Logger.Level.INFO, String.format("您使用的排序算法是：%s", sortingAlgorithm));
+
+        // 预热运行：生成数据并排序，触发 JVM 加载类、JIT 编译
+        int[] warmUpArray = generateArray.generateArray();
+        for (int i = 0; i < 3; i++) { // 预热 3 次
+            sortingAlgorithm.sortArray(Arrays.copyOf(warmUpArray, warmUpArray.length));
+        }
+
         printGenerateArrayFeature(generateArray);
         List<Long> allTimingList = new ArrayList<>();
         for (int i = 0; i < TEST_TIMES; i++) {

@@ -2,6 +2,10 @@ package sort;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import sort.common.GenerateRandomArrayStrategy;
+import sort.common.IGenerateArrayStrategy;
+import sort.common.ISortingAlgorithm;
+import sort.common.SortingUtil;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -38,7 +42,8 @@ class InsertionSortTest {
             int[] trueResult = Arrays.copyOf(nums, nums.length);
             Arrays.sort(trueResult);
             long start = System.currentTimeMillis();
-            Assertions.assertArrayEquals(insertionSort.sortArray1(nums), trueResult);
+            insertionSort.sortArray(nums);
+            Assertions.assertArrayEquals(nums, trueResult);
             long end = System.currentTimeMillis();
             System.out.println("sortArray1 耗时：" + (end - start) + "ms");
             start = System.currentTimeMillis();
@@ -60,5 +65,16 @@ class InsertionSortTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    void exerciseOne() {
+        int len = 1000;
+        int min = 0;
+        int max = 1000;
+
+        ISortingAlgorithm selectionSort = new SelectionSort();
+        IGenerateArrayStrategy randomStrategy = new GenerateRandomArrayStrategy(len, min, max);
+        SortingUtil.testSortingAlgorithms(selectionSort, randomStrategy);
     }
 }

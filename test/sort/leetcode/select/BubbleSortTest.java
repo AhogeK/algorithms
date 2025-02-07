@@ -36,10 +36,10 @@ class BubbleSortTest {
             int[] trueResult = Arrays.copyOf(nums, nums.length);
             Arrays.sort(trueResult);
             long start = System.currentTimeMillis();
-            int[] result = bubbleSort.sortArray(nums);
+            bubbleSort.sortArray(nums);
             long end = System.currentTimeMillis();
             System.out.println("sortArray 耗时：" + (end - start) + "ms");
-            Assertions.assertArrayEquals(trueResult, result);
+            Assertions.assertArrayEquals(trueResult, nums);
             start = System.currentTimeMillis();
             int[] result2 = bubbleSort.sortArray2(nums2);
             end = System.currentTimeMillis();

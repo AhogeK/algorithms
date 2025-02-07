@@ -1,5 +1,6 @@
 package sort;
 
+import sort.common.ISortingAlgorithm;
 import sort.common.SortingUtil;
 
 import java.util.Arrays;
@@ -10,12 +11,13 @@ import java.util.Arrays;
  * @author AhogeK ahogek@gmail.com
  * @since 2023-02-01 18:19:51
  */
-public class InsertionSort {
+public class InsertionSort implements ISortingAlgorithm {
 
     /**
      * 一个一个向前交换
      */
-    public int[] sortArray1(int[] nums) {
+    @Override
+    public void sortArray(int[] nums) {
         for (int i = 1; i < nums.length; i++) {
             int j = i;
             while (j > 0 && nums[j] < nums[j - 1]) {
@@ -23,7 +25,6 @@ public class InsertionSort {
                 j--;
             }
         }
-        return nums;
     }
 
     /**

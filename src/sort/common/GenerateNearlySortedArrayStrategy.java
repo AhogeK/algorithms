@@ -9,7 +9,11 @@ package sort.common;
  * @since 2023-02-09 19:40:56
  */
 public class GenerateNearlySortedArrayStrategy implements IGenerateArrayStrategy {
+
     private int len = 1_000;
+    private int min = 0;
+    private int max = 1_000;
+
     /**
      * 有序的百分比，有序因子
      */
@@ -47,27 +51,38 @@ public class GenerateNearlySortedArrayStrategy implements IGenerateArrayStrategy
         this.orderlyFactor = orderlyFactor;
     }
 
+    public GenerateNearlySortedArrayStrategy(int len, int min, int max, double orderlyFactor) {
+        if (len <= 0) throw new IllegalArgumentException("数组长度必须大于 0");
+        if (min > max) throw new IllegalArgumentException("min 必须小于等于 max");
+        if (orderlyFactor < 0 || orderlyFactor > 1)
+            throw new IllegalArgumentException("orderlyFactor 需在 [0, 1] 之间");
+
+        this.len = len;
+        this.min = min;
+        this.max = max;
+        this.orderlyFactor = orderlyFactor;
+    }
+
     @Override
     public String getFeature() {
-        return String.format("接近有序（有序程度百分比 %d%%)", (int) (this.orderlyFactor * 100));
+        return String.format("接近有序（有序程度百分比 %.2f%%)", this.orderlyFactor * 100);
     }
 
     @Override
     public int[] generateArray() {
-        int[] nearlySortedArray = new int[len];
-        // 步骤1：先生成顺序数组
+        int[] array = new int[len];
+        // 生成初始化有序数组，范围在 [min, max]
+        int step = (max - min) / (len - 1);
         for (int i = 0; i < len; i++) {
-            nearlySortedArray[i] = i;
+            array[i] = min + i * step;
         }
-        // 步骤2：1 - percent 表示无序的百分比，乘以 len，就表示要制造多少逆序对
-        int swapTimes = (int) (len * (1 - orderlyFactor));
+        // 随机交换 swapTimes 次，使用 Fisher-Yates 部分洗牌
+        int swapTimes = Math.min((int) (len * (1 - orderlyFactor)), len - 1);
         for (int i = 0; i < swapTimes; i++) {
-            // nextInt(n) 生成 [0, n) 的随机整数
-            int index1 = SortingUtil.RANDOM.nextInt(len);
-            int index2 = SortingUtil.RANDOM.nextInt(len);
-            SortingUtil.swap(nearlySortedArray, index1, index2);
+            int j = i + SortingUtil.RANDOM.nextInt(len - i);
+            SortingUtil.swap(array, i, j);
         }
-        return nearlySortedArray;
+        return array;
     }
 
     @Override
