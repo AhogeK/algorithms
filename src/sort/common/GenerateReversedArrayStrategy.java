@@ -44,6 +44,7 @@ public class GenerateReversedArrayStrategy implements IGenerateArrayStrategy {
         for (int i = 0; i < len; i++) {
             array[i] = max - i * step; // 逆序填充
         }
+        array[len - 1] = min;
         return array;
     }
 

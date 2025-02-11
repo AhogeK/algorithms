@@ -222,14 +222,14 @@ public class SortingUtil {
     /**
      * 根据不同的随机策略测试用例，比较不同排序算法的性能
      *
-     * @param generateRandomArrayStrategy 生成随机数组的策略对象
-     * @param sortingAlgorithms           排序算法的实例列表
+     * @param strategy          生成随机数组的策略对象
+     * @param sortingAlgorithms 排序算法的实例列表
      */
-    private static void compareSortingAlgorithms(GenerateRandomArrayStrategy generateRandomArrayStrategy,
-                                                 ISortingAlgorithm... sortingAlgorithms) {
+    public static void compareSortingAlgorithms(IGenerateArrayStrategy strategy,
+                                                ISortingAlgorithm... sortingAlgorithms) {
         logger.log(System.Logger.Level.INFO, "排序算法比较：");
-        int[] nums = generateRandomArrayStrategy.generateArray();
-        printGenerateArrayFeature(generateRandomArrayStrategy);
+        int[] nums = strategy.generateArray();
+        printGenerateArrayFeature(strategy);
         for (ISortingAlgorithm sortingAlgorithm : sortingAlgorithms) {
             int[] numsCopy = copyArray(nums);
             logger.log(System.Logger.Level.INFO, String.format("%s：", sortingAlgorithm));
@@ -245,6 +245,15 @@ public class SortingUtil {
      * @return 本次计算的耗时
      */
     private static long timingSortingAlgorithm(ISortingAlgorithm sortingAlgorithm, int[] randomArray) {
+        // 预热
+        int[] copy;
+        if (randomArray.length >= 100) {
+            copy = Arrays.copyOfRange(randomArray, 0, 100);
+        } else {
+            copy = copyArray(randomArray);
+        }
+        sortingAlgorithm.sortArray(copy);
+
         Instant startTime = Instant.now();
         sortingAlgorithm.sortArray(randomArray);
         Instant endTime = Instant.now();

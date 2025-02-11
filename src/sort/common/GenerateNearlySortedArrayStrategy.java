@@ -76,6 +76,7 @@ public class GenerateNearlySortedArrayStrategy implements IGenerateArrayStrategy
         for (int i = 0; i < len; i++) {
             array[i] = min + i * step;
         }
+        array[len - 1] = max;
         // 随机交换 swapTimes 次，使用 Fisher-Yates 部分洗牌
         int swapTimes = Math.min((int) (len * (1 - orderlyFactor)), len - 1);
         for (int i = 0; i < swapTimes; i++) {

@@ -2,10 +2,8 @@ package sort;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import sort.common.GenerateRandomArrayStrategy;
-import sort.common.IGenerateArrayStrategy;
-import sort.common.ISortingAlgorithm;
-import sort.common.SortingUtil;
+import sort.common.*;
+import sort.leetcode.select.BubbleSort;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -73,8 +71,25 @@ class InsertionSortTest {
         int min = 0;
         int max = 1000;
 
-        ISortingAlgorithm selectionSort = new SelectionSort();
         IGenerateArrayStrategy randomStrategy = new GenerateRandomArrayStrategy(len, min, max);
+        IGenerateArrayStrategy nearlySortedStrategy = new GenerateNearlySortedArrayStrategy(len, min, max, 0.8);
+        IGenerateArrayStrategy reverseStrategy = new GenerateReversedArrayStrategy(len, min, max);
+
+        ISortingAlgorithm selectionSort = new SelectionSort();
         SortingUtil.testSortingAlgorithms(selectionSort, randomStrategy);
+        SortingUtil.testSortingAlgorithms(selectionSort, nearlySortedStrategy);
+        SortingUtil.testSortingAlgorithms(selectionSort, reverseStrategy);
+
+        ISortingAlgorithm bubbleSort = new BubbleSort();
+        SortingUtil.testSortingAlgorithms(bubbleSort, randomStrategy);
+        SortingUtil.testSortingAlgorithms(bubbleSort, nearlySortedStrategy);
+        SortingUtil.testSortingAlgorithms(bubbleSort, reverseStrategy);
+
+        ISortingAlgorithm insertionSort = new InsertionSort();
+        SortingUtil.testSortingAlgorithms(insertionSort, randomStrategy);
+        SortingUtil.testSortingAlgorithms(insertionSort, nearlySortedStrategy);
+        SortingUtil.testSortingAlgorithms(insertionSort, reverseStrategy);
+
+        SortingUtil.compareSortingAlgorithms(randomStrategy, selectionSort, bubbleSort, insertionSort);
     }
 }
