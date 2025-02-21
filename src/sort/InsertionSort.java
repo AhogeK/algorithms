@@ -107,6 +107,29 @@ public class InsertionSort implements ISortingAlgorithm {
         return nums;
     }
 
+    /**
+     * 折半插入排序，单独写
+     */
+    public void binaryInsertionSort(int[] arr) {
+        int n = arr.length;
+        for (int i = 1; i < n; i++) {
+            int key = arr[i];
+            int left = 0;
+            int right = i - 1;
+            while (left <= right) {
+                int mid = left + (right - left) / 2;
+                if (arr[mid] > key) {
+                    right = mid - 1;
+                } else {
+                    left = mid + 1;
+                }
+            }
+            int pos = left;
+            System.arraycopy(arr, pos, arr, pos + 1, i - pos);
+            arr[pos] = key;
+        }
+    }
+
     private int binarySearch(int[] nums, int target, int low, int high) {
         while (low <= high) {
             int mid = low + (high - low) / 2;

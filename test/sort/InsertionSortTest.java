@@ -37,6 +37,7 @@ class InsertionSortTest {
             int[] nums3 = Arrays.copyOf(nums, nums.length);
             int[] nums4 = Arrays.copyOf(nums, nums.length);
             int[] nums5 = Arrays.copyOf(nums, nums.length);
+            int[] nums6 = Arrays.copyOf(nums, nums.length);
             int[] trueResult = Arrays.copyOf(nums, nums.length);
             Arrays.sort(trueResult);
             long start = System.currentTimeMillis();
@@ -60,6 +61,11 @@ class InsertionSortTest {
             Assertions.assertArrayEquals(insertionSort.sortArray5(nums5), trueResult);
             end = System.currentTimeMillis();
             System.out.println("sortArray5 耗时：" + (end - start) + "ms");
+            start = System.currentTimeMillis();
+            insertionSort.binaryInsertionSort(nums6);
+            Assertions.assertArrayEquals(nums6, trueResult);
+            end = System.currentTimeMillis();
+            System.out.println("binaryInsertionSort 耗时：" + (end - start) + "ms");
         } catch (Exception e) {
             e.printStackTrace();
         }

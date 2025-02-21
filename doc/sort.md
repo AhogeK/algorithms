@@ -331,7 +331,7 @@ class Solution {
 }
 ```
 
-#### 二分插入排序
+#### [二分插入排序/折半插入排序](../src/sort/InsertionSort.java)
 
 ```java
 class Solution {
@@ -348,6 +348,15 @@ class Solution {
         return nums;
     }
 }
+```
+
+```
+arr = [3, 1, 4, 2]
+i = 1
+arr[i] = 1
+so pos = 0
+so System.arraycopy will [3, 3, 4, 2]
+then arr[pos] = arr[i] => [1, 3, 4, 2]
 ```
 
 **逐个向后赋值的写法**
