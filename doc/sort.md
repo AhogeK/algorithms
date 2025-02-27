@@ -1,19 +1,22 @@
 <!-- TOC -->
+
 * [基础排序算法](#基础排序算法)
-  * [选择排序](#选择排序)
-    * [相关阅读](#相关阅读)
-  * [插入排序](#插入排序)
-    * [基本思想](#基本思想)
-    * [特点](#特点)
-    * [优化](#优化)
-      * [插入排序的哨兵「Sentinel」模式](#插入排序的哨兵sentinel模式)
-      * [二分插入排序](#二分插入排序)
+    * [选择排序](#选择排序)
+        * [相关阅读](#相关阅读)
+    * [插入排序](#插入排序)
+        * [基本思想](#基本思想)
+        * [特点](#特点)
+        * [优化](#优化)
+            * [插入排序的哨兵「Sentinel」模式](#插入排序的哨兵sentinel模式)
+            * [二分插入排序](#二分插入排序)
+
 <!-- TOC -->
 
 # 基础排序算法
 
 排序算法包括如「选择排序」「冒泡排序」「插入排序」（插入排序可以作为高级排序的子过程，是一个需要重点学习的排序算法）
-「希尔排序」（希尔排序是插入排序的优化）「归并排序」（理解递归，也是重点学习的排序算法）「快速排序」(同样是理解递归，重点学习的排序算法)
+「希尔排序」（希尔排序是插入排序的优化）「归并排序」（理解递归，也是重点学习的排序算法）「快速排序」(
+同样是理解递归，重点学习的排序算法)
 「堆排序」（选择排序的优化，也是重点学习的排序算法）
 
 除此之外还有非比较排序，包括「计数排序」「基数排序」「桶排序」
@@ -24,7 +27,8 @@
 
 在排序算法的学习中，也能进一步对时间复杂度的理解
 
-这里有个关于数组的知识点，数组在内存中是连续存储的，我们可以通过下标直接访问，我们可以以O(1)的时间复杂度访问到元素，而这个特性叫作*随机访问*
+这里有个关于数组的知识点，数组在内存中是连续存储的，我们可以通过下标直接访问，我们可以以O(1)的时间复杂度访问到元素，而这个特性叫作
+*随机访问*
 
 ## 选择排序
 
@@ -228,9 +232,9 @@ public class BubbleSort {
 
 * 暂存，逐个向后赋值
 * 哨兵
-  * 回避边界条件的判断
-  * 减少分类讨论的分支
-  * 「单链表」中 「哨兵」的使用很常见
+    * 回避边界条件的判断
+    * 减少分类讨论的分支
+    * 「单链表」中 「哨兵」的使用很常见
 * 希尔排序
 
 ![插入排序](img/2.png)
@@ -394,6 +398,185 @@ class Solution {
     }
 }
 ```
+
+## [希尔排序](https://oi-wiki.org/basic/shell-sort/)
+
+### [基础简单实现](../src/sort/ShellSort.java)
+
+```java
+public class ShellSort {
+
+    public void sortArray(int[] nums) {
+        // 边界处理
+        if (nums.length <= 1) {
+            return;
+        }
+        // 初始化间隔
+        int gap = nums.length / 2;
+        // 主循环
+        while (gap > 0) {
+            // 分组遍历
+            for (int i = gap; i < nums.length; i++) {
+                // 待比较的插入元素
+                int temp = nums[i];
+                // 当前下标，后续通过 [- gap] 操作位移比较
+                int j = i;
+                // 一直往前直到遇到比待插入大的
+                while (j - gap >= 0 && nums[j - gap] > temp) {
+                    nums[j] = nums[j - gap];
+                    j -= gap;
+                }
+                nums[j] = temp;
+            }
+            // 每次循环间隔减半
+            gap /= 2;
+        }
+    }
+}
+```
+
+#### Hibbard序列（时间复杂度$O(n^{3/2})$）
+
+数学表达式：
+$$h_k = 2^k - 1 \quad (序列递减顺序)$$
+
+```java
+public void sortArray(int[] nums) {
+    int k = (int) (Math.log(nums.length) / Math.log(2));
+    while (k >= 1) {
+        int gap = (int) (Math.pow(2, k) - 1);
+        for (int i = gap; i < nums.length; i++) {
+            int temp = nums[i];
+            int j = i;
+            while (j >= gap && nums[j - gap] > temp) {
+                nums[j] = nums[j - gap];
+                j -= gap;
+            }
+            nums[j] = temp;
+        }
+        k--;
+    }
+}
+```
+
+在Hibbard希尔排序中，这两行代码是生成递减间隔序列的核心：
+
+1. `int k = (int) (Math.log(nums.length) / Math.log(2));`
+    * 这是计算以2为底的数组长度的对数，取整数部分
+    * 相当于求满足 $2^k \leq n$ 的最大整数k（其中n是数组长度）
+    * 例如：当数组长度=100时，$k = \lfloor log_2(100) \rfloor = 6$，因为$2^6=64 \leq 100$
+
+2. `int gap = (int) (Math.pow(2, k) - 1);`
+    * 根据Hibbard提出的间隔序列公式生成gap值
+    * 实际生成的是 $gap = 2^k - 1$ 的序列
+    * 例如：当k=6时，gap=63；k=5时，gap=31，依此类推
+
+示意图：
+
+$$\begin{array}{ccc} \text{初始间隔序列} & \xrightarrow{\text{递减过程}} & \text{最终间隔} \\\ \underbrace{63,31,15,7,3,1} & \leftarrow \text{Hibbard序列} & \xrightarrow{\text{最后一次是插入排序}} \end{array}$$
+
+#### Knuth序列（$O(n^{5/4})$）
+
+数学表达式：
+$$h_{k+1} = 3h_k +1 \quad (初始h_0=1)$$
+
+```java
+public void sortArray(int[] nums) {
+    int gap = 1;
+    while (gap < nums.length / 3) {
+        gap = gap * 3 + 1; // 生成最大可用间隔
+    }
+
+    while (gap >= 1) {
+        for (int i = gap; i < nums.length; i++) {
+            int temp = nums[i];
+            int j = i;
+            while (j >= gap && nums[j - gap] > temp) {
+                nums[j] = nums[j - gap];
+                j -= gap;
+            }
+            nums[j] = temp;
+        }
+        gap = (gap - 1) / 3;
+    }
+}
+```
+
+#### Sedgewick序列（平均$O(n^{4/3})$）
+
+递推公式：
+
+$h_k = \begin{cases} 1 & k=0 \\\ 9(4^{k} - 2^{k}) +1 & k>0 \end{cases}$
+
+```java
+public void sortArray(int[] nums) {
+    if (nums.length <= 1) return;
+
+    Set<Integer> gapSet = new LinkedHashSet<>();
+    int k = 0;
+
+    while (true) {
+        int t = (k % 2 == 0) ? k / 2 : (k + 1) / 2;
+        int gap = (k % 2 == 0)
+                ? 9 * (int) (Math.pow(4, t) - Math.pow(2, t)) + 1
+                : (int) (Math.pow(4, t + 1) - 3 * Math.pow(2, t + 1)) + 1;
+
+        // gap无效时立即退出
+        if (gap > nums.length || gap <= 0) break;
+
+        gapSet.add(gap);
+        k++;
+    }
+
+    // 保障基础间隔（至少包含gap=1）
+    gapSet.add(1);
+
+    // 降序排列并执行排序
+    List<Integer> gaps = new ArrayList<>(gapSet);
+    gaps.sort(Collections.reverseOrder());
+    for (int gap : gaps) {
+        for (int i = gap; i < nums.length; i++) {
+            int temp = nums[i];
+            int j = i;
+            while (j >= gap && nums[j - gap] > temp) {
+                nums[j] = nums[j - gap];
+                j -= gap;
+            }
+            nums[j] = temp;
+        }
+    }
+}
+```
+
+Sedgewick提出的最优间隔序列公式为：
+
+$$g_k = \begin{cases} 4^{k} + 3 \cdot 2^{k-1} + 1, & k \text{为奇数} \\\ 9 \cdot (4^{k} - 2^{k}) + 1, & k \text{为偶数} \end{cases}$$
+
+#### Ciura最优序列（经验优化序列）
+
+```java
+public void sortArray(int[] nums) {
+    int[] ciuraGaps = {701, 301, 132, 57, 23, 10, 4, 1};
+
+    for (int gap : ciuraGaps) {
+        if (gap > nums.length) continue;
+        for (int i = gap; i < nums.length; i++) {
+            int temp = nums[i];
+            int j = i;
+            while (j >= gap && nums[j - gap] > temp) {
+                nums[j] = nums[j - gap];
+                j -= gap;
+            }
+            nums[j] = temp;
+        }
+    }
+}
+```
+
+经验公式：
+
+$$\begin{aligned} \\h_{k+1} = \lfloor 2.25h_k \rfloor \\\ &\text{初始序列：[701, 301, 132, 57, 23, 10, 4, 1]} \end{aligned}$$
+
 
 ---
 

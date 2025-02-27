@@ -7,6 +7,7 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Formatter;
 import java.util.logging.*;
 import java.util.stream.Collectors;
@@ -207,7 +208,16 @@ public class SortingUtil {
             judgeArrayEquals(randomArray, randomArrayCopy);
         }
         LongSummaryStatistics summaryMillisStatistics = allTimingList.stream().mapToLong(a -> a).summaryStatistics();
-        logger.log(System.Logger.Level.INFO, String.format("%d 次计算平均耗时 %s 纳秒", TEST_TIMES, summaryMillisStatistics.getAverage()));
+        double averageNanos = summaryMillisStatistics.getAverage();
+        double seconds = averageNanos / TimeUnit.SECONDS.toNanos(1);
+        double milliseconds = averageNanos / TimeUnit.MILLISECONDS.toNanos(1);
+        logger.log(System.Logger.Level.INFO, String.format(
+                "%d 次计算平均耗时 %.3f 秒（%.3f 毫秒）[原始纳秒值：%.0f]",
+                TEST_TIMES,
+                seconds,
+                milliseconds,
+                averageNanos
+        ));
     }
 
     /**

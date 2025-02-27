@@ -2,6 +2,7 @@ package sort;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import sort.common.SortingUtil;
 
 /**
  * @author AhogeK ahogek@gmail.com
@@ -11,9 +12,6 @@ class ShellSortTest {
 
     @Test
     void caseOne() {
-        int[] nums = {5, 1, 1, 2, 0, 0};
-        int[] result = {0, 0, 1, 1, 2, 5};
-        ShellSort shellSort = new ShellSort();
-        Assertions.assertArrayEquals(shellSort.sortArray(nums), result);
+        Assertions.assertDoesNotThrow(() -> SortingUtil.testSortingAlgorithms(new ShellSort(), 1_000_000));
     }
 }
