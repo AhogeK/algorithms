@@ -10,9 +10,9 @@
       * [二分插入排序/折半插入排序](#二分插入排序折半插入排序)
   * [希尔排序](#希尔排序)
     * [基础简单实现](#基础简单实现)
-      * [Hibbard序列（时间复杂度$O(n^{3/2})$）](#hibbard序列时间复杂度on32)
-      * [Knuth序列（$O(n^{5/4})$）](#knuth序列on54)
-      * [Sedgewick序列（平均$O(n^{4/3})$）](#sedgewick序列平均on43)
+      * [Hibbard序列（时间复杂度 $O(n^{3/2})$ ）](#hibbard序列时间复杂度on32)
+      * [Knuth序列（ $O(n^{5/4})$ ）](#knuth序列on54)
+      * [Sedgewick序列（平均 $O(n^{4/3})$ ）](#sedgewick序列平均on43)
       * [Ciura最优序列（经验优化序列）](#ciura最优序列经验优化序列)
   * [排序算法的评价指标](#排序算法的评价指标)
   * [循环不变量](#循环不变量)
@@ -442,7 +442,7 @@ public class ShellSort {
 }
 ```
 
-#### Hibbard序列（时间复杂度$O(n^{3/2})$）
+#### Hibbard序列（时间复杂度 $O(n^{3/2})$ ）
 
 数学表达式：
 $$h_k = 2^k - 1 \quad (序列递减顺序)$$
@@ -471,7 +471,7 @@ public void sortArray(int[] nums) {
 1. `int k = (int) (Math.log(nums.length) / Math.log(2));`
     * 这是计算以2为底的数组长度的对数，取整数部分
     * 相当于求满足 $2^k \leq n$ 的最大整数k（其中n是数组长度）
-    * 例如：当数组长度=100时，$k = \lfloor log_2(100) \rfloor = 6$，因为$2^6=64 \leq 100$
+    * 例如：当数组长度=100时， $k = \lfloor log_2(100) \rfloor = 6$ ，因为 $2^6=64 \leq 100$
 
 2. `int gap = (int) (Math.pow(2, k) - 1);`
     * 根据Hibbard提出的间隔序列公式生成gap值
@@ -482,7 +482,7 @@ public void sortArray(int[] nums) {
 
 $$\begin{array}{ccc} \text{初始间隔序列} & \xrightarrow{\text{递减过程}} & \text{最终间隔} \\\ \underbrace{63,31,15,7,3,1} & \leftarrow \text{Hibbard序列} & \xrightarrow{\text{最后一次是插入排序}} \end{array}$$
 
-#### Knuth序列（$O(n^{5/4})$）
+#### Knuth序列（ $O(n^{5/4})$ ）
 
 数学表达式：
 $$h_{k+1} = 3h_k +1 \quad (初始h_0=1)$$
@@ -509,7 +509,7 @@ public void sortArray(int[] nums) {
 }
 ```
 
-#### Sedgewick序列（平均$O(n^{4/3})$）
+#### Sedgewick序列（平均 $O(n^{4/3})$ ）
 
 递推公式：
 
