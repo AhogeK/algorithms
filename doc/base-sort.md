@@ -513,7 +513,7 @@ public void sortArray(int[] nums) {
 
 递推公式：
 
-$h_k = \begin{cases} 1 & k=0 \\\ 9(4^{k} - 2^{k}) +1 & k>0 \end{cases}$
+$$h_k = \begin{cases} 1 & k=0 \\\ 9(4^{k} - 2^{k}) +1 & k>0 \end{cases}$$
 
 ```java
 public void sortArray(int[] nums) {
