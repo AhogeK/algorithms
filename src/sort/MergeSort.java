@@ -28,7 +28,7 @@ public class MergeSort implements ISortingAlgorithm {
         int mid = left + (right - left) / 2;
         mergeSort(nums, left, mid);
         mergeSort(nums, mid + 1, right);
-        mergeOfTwoArray(nums, left, mid, right);
+        mergeOfTwoSortedArray(nums, left, mid, right);
     }
 
     /**
@@ -39,7 +39,7 @@ public class MergeSort implements ISortingAlgorithm {
      * @param mid   中间值
      * @param right 右边界
      */
-    private void mergeOfTwoArray(int[] nums, int left, int mid, int right) {
+    private void mergeOfTwoSortedArray(int[] nums, int left, int mid, int right) {
         int[] temp = new int[right - left + 1];
         int i = left, j = mid + 1, k = 0;
         while (i <= mid && j <= right) {

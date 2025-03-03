@@ -155,4 +155,5 @@ $T(n) = aT\left(\frac{n}{b}\right) + f(n)$
 ---
 
 - [二分查找](doc/binary-search.md)
-- [基础排序算法](doc/sort.md)
+- [基础排序算法](doc/base-sort)
+- [高级排序算法](doc/advanced-sort.md)
