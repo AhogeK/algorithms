@@ -27,6 +27,12 @@
           * [缺点](#缺点)
   * [归并排序的优化](#归并排序的优化)
     * [代码编写](#代码编写)
+      * [「力扣」《剑指 Offer》第 51 题：数组中的逆序对 (对应493：翻转对，但略有不同)](#力扣剑指-offer第-51-题数组中的逆序对-对应493翻转对但略有不同)
+        * [翻转对的准确定义](#翻转对的准确定义)
+        * [合并过程](#合并过程)
+        * [第二步：合并单个元素](#第二步合并单个元素)
+        * [第三步：合并更大子数组](#第三步合并更大子数组)
+        * [计数](#计数)
 <!-- TOC -->
 
 # 高级排序算法
@@ -207,38 +213,38 @@ public class RotateArray {
 
 ```java
  public void sortArray(int[] nums) {
-     int n = nums.length;
-     int[] temp = new int[n];
+    int n = nums.length;
+    int[] temp = new int[n];
 
-     // 子数组大小从1开始，每次翻倍
-     for (int size = 1; size < n; size *= 2) {
-         // 对于当前size，合并相邻的子数组
-         for (int leftStart = 0; leftStart < n - size; leftStart += 2 * size) {
-             int mid  = leftStart + size - 1;
-             int rightEnd = Math.min(leftStart + 2 * size - 1, n - 1);
-             merge(nums, temp, leftStart, mid, rightEnd);
-         }
-     }
- }
+    // 子数组大小从1开始，每次翻倍
+    for (int size = 1; size < n; size *= 2) {
+        // 对于当前size，合并相邻的子数组
+        for (int leftStart = 0; leftStart < n - size; leftStart += 2 * size) {
+            int mid = leftStart + size - 1;
+            int rightEnd = Math.min(leftStart + 2 * size - 1, n - 1);
+            merge(nums, temp, leftStart, mid, rightEnd);
+        }
+    }
+}
 
- // 合并两个已排序的子数组
- private void merge(int[] arr, int[] temp, int left, int mid, int right) {
-     // 复制到辅助数组
-     for (int i = left; i <= right; i++) temp[i] = arr[i];
+// 合并两个已排序的子数组
+private void merge(int[] arr, int[] temp, int left, int mid, int right) {
+    // 复制到辅助数组
+    for (int i = left; i <= right; i++) temp[i] = arr[i];
 
-     int i = left; // 左边数组的起始索引
-     int j = mid + 1; // 右边数组的起始索引
-     int k = left; // 原始数组的当前索引
+    int i = left; // 左边数组的起始索引
+    int j = mid + 1; // 右边数组的起始索引
+    int k = left; // 原始数组的当前索引
 
-     // 合并两个子数组
-     while (i <= mid && j <= right) {
-         if (temp[i] <= temp[j]) arr[k++] = temp[i++];
-         else arr[k++] = temp[j++];
-     }
+    // 合并两个子数组
+    while (i <= mid && j <= right) {
+        if (temp[i] <= temp[j]) arr[k++] = temp[i++];
+        else arr[k++] = temp[j++];
+    }
 
-     // 复制左边子数组的剩余的元素（右边数组剩余元素已经在正确的位置）
-     while (i <= mid) arr[k++] = temp[i++];
- }
+    // 复制左边子数组的剩余的元素（右边数组剩余元素已经在正确的位置）
+    while (i <= mid) arr[k++] = temp[i++];
+}
 ```
 
 自底向上的归并排序采用迭代方式，不使用递归：
@@ -253,25 +259,25 @@ public class RotateArray {
 
 ```java
  public int findMin(int[] nums) {
-     int left = 0;
-     int right = nums.length - 1;
+    int left = 0;
+    int right = nums.length - 1;
 
-     while (left < right) {
-         int mid = left + (right - left) / 2;
+    while (left < right) {
+        int mid = left + (right - left) / 2;
 
-         // 与有边界元素比较
-         if (nums[mid] > nums[right]) {
-             // 最小值在又半部分
-             left = mid + 1;
-         } else {
-             // 最小值在左半部分（包括mid）
-             right = mid;
-         }
-     }
+        // 与有边界元素比较
+        if (nums[mid] > nums[right]) {
+            // 最小值在又半部分
+            left = mid + 1;
+        } else {
+            // 最小值在左半部分（包括mid）
+            right = mid;
+        }
+    }
 
-     // 当left==right时，即找到最小值
-     return nums[left];
- }
+    // 当left==right时，即找到最小值
+    return nums[left];
+}
 ```
 
 分治思想的核心是将问题分解为更小的子问题，解决子问题后再合并结果。在这道题中，我们可以使用二分查找来实现分治：
@@ -392,17 +398,17 @@ public class HanoiTower {
             System.out.println("移动盘子 1 从 " + source + " 到 " + target);
             return;
         }
-        
+
         // 将n-1个盘子从source移到auxiliary，借助target
         hanoi(n - 1, source, target, auxiliary);
-        
+
         // 将最大的盘子从source移到target
         System.out.println("移动盘子 " + n + " 从 " + source + " 到 " + target);
-        
+
         // 将n-1个盘子从auxiliary移到target，借助source
         hanoi(n - 1, auxiliary, source, target);
     }
-    
+
     public static void main(String[] args) {
         int n = 3; // 盘子数量
         hanoi(n, 'A', 'B', 'C');
@@ -528,6 +534,106 @@ public class Solution {
     }
 }
 ```
+
+#### 「力扣」《剑指 Offer》第 51 题：数组中的逆序对 (对应[493：翻转对](https://leetcode.cn/problems/reverse-pairs)，但略有不同)
+
+[../src/sort/leetcode/ReversePairs.java](../src/sort/leetcode/ReversePairs.java)
+
+```java
+public class ReversePairs {
+
+    public int reversePairs(int[] nums) {
+        if (nums == null || nums.length < 2) return 0;
+        return mergeSort(nums, 0, nums.length - 1, new int[nums.length]);
+    }
+
+    private int mergeSort(int[] nums, int left, int right, int[] temp) {
+        // 基本情况：单个元素没有翻转对
+        if (left >= right) return 0;
+
+        // 分治：将数组分成两半
+        int mid = left + (right - left) / 2;
+
+        // 递归解决左右两半，并累加翻转对数量
+        int count = mergeSort(nums, left, mid, temp) +
+                mergeSort(nums, mid + 1, right, temp);
+
+        // 计算跨越左右两部分的翻转对
+        count += countCrossPairs(nums, left, mid, right);
+
+        // 合并两个有序的子数组
+        merge(nums, left, mid, right, temp);
+
+        return count;
+    }
+
+    private void merge(int[] nums, int left, int mid, int right, int[] temp) {
+        // 复制到临时数组
+        for (int i = left; i <= right; i++) temp[i] = nums[i];
+
+        // 合并回原数组
+        int i = left, j = mid + 1;
+        for (int k = left; k <= right; k++) {
+            if (i > mid) {
+                nums[k] = temp[j++];
+            } else if (j > right) {
+                nums[k] = temp[i++];
+            } else if (temp[i] <= temp[j]) {
+                nums[k] = temp[i++];
+            } else {
+                nums[k] = temp[j++];
+            }
+        }
+    }
+
+    private int countCrossPairs(int[] nums, int left, int mid, int right) {
+        int count = 0;
+        int j = mid + 1;
+
+        // 对于左半部分的每个元素
+        for (int i = left; i <= mid; i++) {
+            // 找出右半部分的每个元素
+            while (j <= right && nums[i] > 2L * nums[j]) j++;
+            // j - 1 是最后一个满足条件的位置
+            // 从 mid + 1 到 j - 1 的所有元素都能与 nums[i] 构成翻转对
+            count += (j - (mid + 1));
+        }
+        return count;
+    }
+}
+```
+
+##### 翻转对的准确定义
+
+首先明确翻转对的定义：如果 `i < j` 且 `nums[i] > 2 * nums[j]`，则 `(i, j)` 是一个翻转对。
+
+##### 合并过程
+
+对于数组 `[1,3,2,3,1]`：
+
+##### 第二步：合并单个元素
+
+1. 合并 `[1]` 和 `[3]`：
+    * 检查：`1 > 2*3 = 6`? 不满足，无翻转对
+2. 合并 `[2]` 和 `[3]`：
+    * 检查：`2 > 2*3 = 6`? 不满足，无翻转对
+3. 合并 `[2,3]` 和 `[1]`：
+    * 对于 `2`：`2 > 2*1 = 2`? **等于不满足**，不是翻转对
+    * 对于 `3`：`3 > 2*1 = 2`? 满足，count+1 (原索引3比4小)
+
+##### 第三步：合并更大子数组
+
+* 合并 `[1,3]` 和 `[1,2,3]`：
+    * 对于 `1`：`1 > 2*1 = 2`? 不满足
+    * 对于 `3`：`3 > 2*1 = 2`? 满足，count+1 (原索引1比4小)
+    * 对后面的元素无满足条件的
+
+##### 计数
+
+从正确的计算中，我们只有两个翻转对：
+
+1. `(3,4)`：`nums[3]=3 > 2*nums[4]=2`
+2. `(1,4)`：`nums[1]=3 > 2*nums[4]=2`
 
 ---
 
