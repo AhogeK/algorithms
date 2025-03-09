@@ -1182,6 +1182,33 @@ public class SpecialMedianOfThreeQuickSort implements ISortingAlgorithm {
 }
 ```
 
+#### 自行编写测试用例，完成下面的实验：在输入数据接近有序的时候，没有实现「随机选择切分元素」的快速排序比归并排序慢很多
+
+[../test/sort/QuickSortTest.java](../test/sort/QuickSortTest.java)
+
+```java
+@Test
+void orderedComparisonSortTest() {
+    // 测试在输入数据接近有序的时候，没有实现「随机选择切分元素」的快速排序比归并排序慢很多
+    Assertions.assertDoesNotThrow(() -> SortingUtil.compareSortingAlgorithms(
+            new GenerateNearlySortedArrayStrategy(31_000), new QuickSort(), new MergeSort())
+    );
+}
+```
+
+输出：
+
+```text
+16:55:56 [INFO] sort.common.SortingUtil: 排序算法比较：
+16:55:56 [INFO] sort.common.SortingUtil: 测试用例特点：接近有序（有序程度百分比 90.00%)，规模：31000，最小值：0，最大值：30999。
+16:55:56 [INFO] sort.common.SortingUtil: sort.QuickSort@1139b2f3：
+16:55:56 [INFO] sort.common.SortingUtil: 耗时 0.08885000 秒 / 88.85000000 毫秒 / 88850000 纳秒
+16:55:56 [INFO] sort.common.SortingUtil: 归并排序：
+16:55:56 [INFO] sort.common.SortingUtil: 耗时 0.00204300 秒 / 2.04300000 毫秒 / 2043000 纳秒
+```
+
+*注意：过大的数组规模会导致快速排序在接近有序的数组中出现栈溢出问题*
+
 ---
 
 [返回](../README.md)
