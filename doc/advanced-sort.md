@@ -61,6 +61,11 @@
       * [原地排序与空间复杂度的区别](#原地排序与空间复杂度的区别)
     * [练习](#练习)
       * [使用「三数取中法」选择 partition 过程的切分元素](#使用三数取中法选择-partition-过程的切分元素)
+      * [自行编写测试用例，完成下面的实验：在输入数据接近有序的时候，没有实现「随机选择切分元素」的快速排序比归并排序慢很多](#自行编写测试用例完成下面的实验在输入数据接近有序的时候没有实现随机选择切分元素的快速排序比归并排序慢很多)
+      * [完成「力扣」第 215 题：数组中的第 K 个最大元素](#完成力扣第-215-题数组中的第-k-个最大元素)
+        * [核心思想](#核心思想)
+        * [算法细节与优化](#算法细节与优化)
+        * [时间复杂度分析](#时间复杂度分析-1)
 <!-- TOC -->
 
 # 高级排序算法
@@ -1208,6 +1213,124 @@ void orderedComparisonSortTest() {
 ```
 
 *注意：过大的数组规模会导致快速排序在接近有序的数组中出现栈溢出问题*
+
+#### 完成「力扣」第 215 题：[数组中的第 K 个最大元素](https://leetcode.cn/problems/kth-largest-element-in-an-array/)
+
+[../src/sort/leetcode/KthLargestElementInAnArray.java](../src/sort/leetcode/KthLargestElementInAnArray.java)
+
+```java
+public class KthLargestElementInAnArray {
+
+    public int findKthLargest(int[] nums, int k) {
+        return quickSelect(nums, 0, nums.length - 1, nums.length - k);
+    }
+
+    private int quickSelect(int[] nums, int left, int right, int targetIndex) {
+        if (left == right) return nums[left];
+
+        // 随机选择pivot
+        int randomIndex = left + (int) (Math.random() * (right - left + 1));
+        swap(nums, left, randomIndex);
+
+        // 三向切分
+        int[] equalRange = threeWayPartition(nums, left, right);
+        int ltPivot = equalRange[0]; // less than pivot的右边界
+        int gtPivot = equalRange[1]; // greater than pivot的左边界
+
+        // 根据目标索引位置，决定在哪个区域继续查找
+        if (targetIndex >= ltPivot && targetIndex <= gtPivot) {
+            // 目标在等于pivot的区域内，直接返回pivot值
+            return nums[ltPivot];
+        } else if (targetIndex < ltPivot) {
+            // 目标在小于pivot的区域
+            return quickSelect(nums, left, ltPivot - 1, targetIndex);
+        } else {
+            // 目标在大于pivot的区域
+            return quickSelect(nums, gtPivot + 1, right, targetIndex);
+        }
+    }
+
+    /**
+     * 三向切分
+     *
+     * @return 返回等于pivot区域的[开始索引, 结束索引]
+     */
+    private int[] threeWayPartition(int[] nums, int left, int right) {
+        int pivot = nums[left];
+        int lt = left;      // less than pivot右边界（初始为left）
+        int i = left + 1;   // 当前处理的元素
+        int gt = right;     // greater than pivot左边界（初始为right）
+
+        // 将数组分成三部分：<pivot, =pivot, >pivot
+        while (i <= gt) {
+            if (nums[i] < pivot) {
+                swap(nums, lt, i);
+                lt++;
+                i++;
+            } else if (nums[i] > pivot) {
+                swap(nums, i, gt);
+                gt--;
+                // 注意：这里i不增加，因为交换后i位置的元素还未处理
+            } else {
+                // nums[i] == pivot
+                i++;
+            }
+        }
+
+        return new int[]{lt, gt};
+    }
+
+    private void swap(int[] nums, int i, int j) {
+        int temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
+    }
+}
+```
+
+本题代码采用了**快速选择(Quick Select)算法**，特别是使用了三向切分的变体，能更好地处理有重复元素的情况。
+
+##### 核心思想
+
+1. 第 $k$ 大的元素等价于第 $(n-k)$ 小的元素（索引为 $n-k$ ）
+2. 利用快速选择，只需要递归地在一边继续查找，而不需要完整排序
+
+关键点：
+
+1. 随机选择pivot，避免最坏情况下的 $O(n^2)$ 时间复杂度
+2. 使用三向切分将数组分为 $\<pivot$ 、 $=pivot$ 、 $>pivot$ 三部分
+3. 根据目标索引的位置，决定在哪个区域继续递归查找
+
+三向切分的重点：
+
+1. lt指针：小于pivot区域的右边界
+2. gt指针：大于pivot区域的左边界
+3. i指针：当前处理的元素
+
+经过切分后，数组被分为三部分：
+
+* 索引 $[left, lt-1]$ 的元素 $< pivot$
+* 索引 $[lt, gt]$ 的元素 $= pivot$
+* 索引 $[gt+1, right]$ 的元素 $> pivot$
+
+##### 算法细节与优化
+
+1. **随机选择pivot**：避免最坏情况下的 $O(n^2)$ 时间复杂度，使平均时间复杂度保持在 $O(n)$
+2. **三向切分**：
+    * 普通的快速选择在处理有大量重复元素的数组时效率较低
+    * 三向切分可以将相等的元素归为一组，减少不必要的递归
+3. **交换操作的顺序**：
+    * 处理 $nums[i] > pivot$ 时，i不自增，因为交换后的元素还未被处理
+    * 处理 $nums[i] < pivot$ 和 $nums[i] == pivot$ 时，i自增，继续处理下一个元素
+4. **边界情况处理**：
+    * 当left==right时，表示区间内只有一个元素，直接返回
+    * 当目标索引位于pivot相等区域时，直接返回pivot值，无需继续递归
+
+##### 时间复杂度分析
+
+* 平均时间复杂度： $O(n)$
+* 最坏时间复杂度： $O(n^2)$ （极少出现，因为使用了随机pivot）
+* 空间复杂度： $O(\log n)$ （递归调用栈的深度）
 
 ---
 
