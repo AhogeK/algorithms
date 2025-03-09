@@ -1005,9 +1005,9 @@ private int partition(int[] nums, int left, int right) {
 
 当从一个长度为 $n$ 的数组中随机选择 pivot 时：
 
-* pivot 是数组中最小元素的概率：$\frac{1}{n}$
-* pivot 是数组中最大元素的概率：$\frac{1}{n}$
-* pivot 是最小或最大元素的概率：$\frac{2}{n}$
+* pivot 是数组中最小元素的概率： $\frac{1}{n}$
+* pivot 是数组中最大元素的概率： $\frac{1}{n}$
+* pivot 是最小或最大元素的概率： $\frac{2}{n}$
 
 所以单次划分遇到最极端不平衡的概率是 $\frac{2}{n}$。
 
