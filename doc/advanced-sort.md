@@ -59,6 +59,8 @@
       * [时间复杂度分析](#时间复杂度分析)
       * [空间复杂度分析](#空间复杂度分析)
       * [原地排序与空间复杂度的区别](#原地排序与空间复杂度的区别)
+    * [练习](#练习)
+      * [使用「三数取中法」选择 partition 过程的切分元素](#使用三数取中法选择-partition-过程的切分元素)
 <!-- TOC -->
 
 # 高级排序算法
@@ -1064,6 +1066,121 @@ $$P(\text{完全最坏情况}) = \frac{2^{n-1}}{n!}$$
 | 希尔排序 | $O(N^2)$      | $O(n^{1.25}) \sim O(1.6 n^{1.25})$ | （没有相关研究）      | $O(1)$      | 不稳定 | 原地排序   |
 | 归并排序 | $O(N \log N)$ | $O(N \log N)$                      | $O(N \log N)$ | $O(N)$      | 稳定  | 非原地排序  |
 | 快速排序 | $O(N^2)$      | $O(N \log N)$                      | $O(N \log N)$ | $O(\log N)$ | 不稳定 | 原地排序   |
+
+### 练习
+
+#### 使用「三数取中法」选择 partition 过程的切分元素
+
+[../src/sort/MedianOfThreeQuickSort.java](../src/sort/MedianOfThreeQuickSort.java)
+
+```java
+public class MedianOfThreeQuickSort implements ISortingAlgorithm {
+
+    @Override
+    public void sortArray(int[] nums) {
+        int len = nums.length;
+        quickSort(nums, 0, len - 1);
+    }
+
+    private void quickSort(int[] nums, int left, int right) {
+        if (left >= right) return;
+
+        int p = partition(nums, left, right);
+
+        quickSort(nums, left, p - 1);
+        quickSort(nums, p + 1, right);
+    }
+
+    private int partition(int[] nums, int left, int right) {
+        // 使用三数取中法选择pivot
+        int mid = left + (right - left) / 2;
+
+        // 将三个元素按顺序排列
+        // 保证 nums[left] <= nums[mid] <= nums[right]
+        if (nums[left] > nums[mid]) swap(nums, left, mid);
+        if (nums[left] > nums[right]) swap(nums, left, right);
+        if (nums[mid] > nums[right]) swap(nums, mid, right);
+
+        // 此时 nums[mid] 是三个数种的中间值
+        // 将中间值与 left + 1 位置交换，作为pivot
+        swap(nums, mid, left + 1);
+
+        // 使用 left + 1 位置的元素作为 pivot
+        int pivot = nums[left + 1];
+        swap(nums, left, left + 1);
+
+        int lt = left;
+        for (int i = left + 1; i <= right; i++) {
+            if (nums[i] < pivot) {
+                lt++;
+                swap(nums, i, lt);
+            }
+        }
+
+        swap(nums, left, lt);
+        return lt;
+    }
+}
+```
+
+*在取中的方法上还可以使用异或的方式：*
+
+[../src/sort/SpecialMedianOfThreeQuickSort.java](../src/sort/SpecialMedianOfThreeQuickSort.java)
+
+```java
+public class SpecialMedianOfThreeQuickSort implements ISortingAlgorithm {
+
+    @Override
+    public void sortArray(int[] nums) {
+        int len = nums.length;
+        quickSort(nums, 0, len - 1);
+    }
+
+    private void quickSort(int[] nums, int left, int right) {
+        if (left >= right) return;
+
+        int p = partition(nums, left, right);
+
+        quickSort(nums, left, p - 1);
+        quickSort(nums, p + 1, right);
+    }
+
+    private int partition(int[] nums, int left, int right) {
+        // 使用三数取中法选择pivot
+        if (right - left > 2) {
+            int mid = left + (right - left) / 2;
+            int medianIndex = medianOfThree(nums, left, mid, right);
+            // 将中间值与left位置交换
+            swap(nums, left, medianIndex);
+        }
+
+        int pivot = nums[left];
+        int lt = left;
+
+        for (int i = left + 1; i <= right; i++) {
+            if (nums[i] < pivot) {
+                lt++;
+                swap(nums, i, lt);
+            }
+        }
+
+        swap(nums, left, lt);
+        return lt;
+    }
+
+    private int medianOfThree(int[] nums, int a, int b, int c) {
+        // 使用异或运算判断中间值
+        // 如果a大于b和c中的一个（且仅一个），那么a就是中间值
+        if ((nums[a] > nums[b]) ^ (nums[a] > nums[c])) return a;
+
+        // 如果b小于a和c中的一个（且仅一个），那么b就是中间值
+        else if ((nums[b] < nums[a]) ^ (nums[b] < nums[c])) return b;
+
+        // 否则c是中间值
+        else return c;
+    }
+}
+```
 
 ---
 
