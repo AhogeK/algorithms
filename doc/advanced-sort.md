@@ -66,6 +66,9 @@
         * [核心思想](#核心思想)
         * [算法细节与优化](#算法细节与优化)
         * [时间复杂度分析](#时间复杂度分析-1)
+      * [完成「力扣」第 26 题：删除排序数组中的重复项](#完成力扣第-26-题删除排序数组中的重复项)
+        * [算法步骤](#算法步骤)
+        * [复杂度分析](#复杂度分析)
 <!-- TOC -->
 
 # 高级排序算法
@@ -1331,6 +1334,70 @@ public class KthLargestElementInAnArray {
 * 平均时间复杂度： $O(n)$
 * 最坏时间复杂度： $O(n^2)$ （极少出现，因为使用了随机pivot）
 * 空间复杂度： $O(\log n)$ （递归调用栈的深度）
+
+#### 完成「力扣」第 26 题：[删除排序数组中的重复项](https://leetcode.cn/problems/remove-duplicates-from-sorted-array)
+
+[../src/sort/leetcode/RemoveDuplicatesFromSortedArray.java](../src/sort/leetcode/RemoveDuplicatesFromSortedArray.java)
+
+```java
+public int removeDuplicates(int[] nums) {
+    // 处理空数组情况
+    if (nums.length == 0) return 0;
+    
+    int slow = 0; // 慢指针，指向新数组的末尾
+    
+    // 从第二个元素开始遍历
+    for (int fast = 1; fast < nums.length; fast++) {
+        // 发现不重复的元素
+        if (nums[fast] != nums[slow]) {
+            // 慢指针向前移动，并保存这个不重复的元素
+            slow++;
+            nums[slow] = nums[fast];
+        }
+        // 重复元素会被跳过
+    }
+    
+    // 新数组的长度
+    return slow + 1;
+}
+```
+
+**循环不变量**是一个在循环执行过程中始终保持为真的条件。它帮助我们:
+
+* 验证算法的正确性
+* 理清循环的目的和边界条件
+* 保证循环结束时能得到预期结果
+
+在解决这个问题时，我们可以定义如下循环不变量：
+
+> 对于索引范围 $[0, slow]$ 的元素，它们都是没有重复的原数组元素，且保持有序
+
+* **初始状态**：循环开始前，`slow = 0`，`nums[0...0]`（即只有`nums[0]`）是无重复的。
+* **维护过程**：每次迭代中，当发现 `nums[fast] != nums[slow]` 时：
+    * 将 `slow` 加 1
+    * 将 `nums[fast]` 复制到 `nums[slow]`
+    * 保证 `nums[0...slow]` 仍然是无重复的
+* **结束状态**：循环结束后，`nums[0...slow]` 包含原数组中所有不重复的元素
+
+我们采用快慢指针技术来解决这个问题：
+
+* `slow` 指针：指向当前无重复元素的数组的末尾位置
+* `fast` 指针：用于遍历原始数组
+
+##### 算法步骤
+
+1. 如果数组为空，直接返回 0
+2. 初始化 `slow = 0`（因为第一个元素肯定是不重复的）
+3. 从索引 1 开始，使用 `fast` 指针遍历数组
+4. 比较 `nums[fast]` 和 `nums[slow]`：
+    * 如果不相等，说明找到一个新的不重复元素
+    * 将 `slow` 指针前进一位，并将新元素复制到 `slow` 指针位置
+5. 返回 `slow + 1`（新数组长度）
+
+##### 复杂度分析
+
+* **时间复杂度**：$O(n)$，其中 $n$ 是数组长度，只需遍历一次数组
+* **空间复杂度**：$O(1)$，只使用了两个指针，不需要额外空间
 
 ---
 
