@@ -1461,6 +1461,85 @@ public int removeDuplicates(int[] nums) {
 * **时间复杂度**：$O(n)$，其中 $n$ 是数组长度，只需遍历一次数组
 * **空间复杂度**：$O(1)$，只使用了常数额外空间
 
+### 指针对撞的快速排序
+
+> "指针对撞"（双指针或Hoare分区方案）是实现快速排序中分区操作的一种经典方法。
+
+"指针对撞"是指在分区过程中使用两个指针从数组两端向中间移动，完成元素交换的技术。
+
+#### 指针对撞分区步骤
+
+1. 选择一个元素作为基准(通常是第一个元素或随机选择)
+2. 设置两个指针：左指针(`left`)从数组左端开始，右指针(`right`)从数组右端开始
+3. 右指针向左移动寻找**小于**基准的元素
+4. 左指针向右移动寻找**大于**基准的元素
+5. 如果左指针小于右指针，交换这两个元素
+6. 重复步骤3-5，直到左右指针相遇
+7. 交换基准元素与左指针所指向的元素（将基准放到最终位置）
+8. 返回基准元素的最终位置，用于递归排序
+
+[../src/sort/TwoWayQuickSort.java](../src/sort/TwoWayQuickSort.java)
+
+```java
+public class TwoWayQuickSort implements ISortingAlgorithm {
+
+    private static final Random RANDOM = new Random();
+
+    @Override
+    public void sortArray(int[] nums) {
+        int len = nums.length;
+        quickSort(nums, 0, len - 1);
+    }
+
+    private void quickSort(int[] nums, int left, int right) {
+        if (left >= right) return;
+
+        int p = partition(nums, left, right);
+        quickSort(nums, left, p - 1);
+        quickSort(nums, p + 1, right);
+    }
+
+    private int partition(int[] nums, int left, int right) {
+        int randomIndex = left + RANDOM.nextInt(right - left + 1);
+        swap(nums, randomIndex, left);
+
+        // 循环不变量
+        // all in [left + 1, le) <= pivot
+        // all in (ge, right] >= pivot
+        // le > ge 的时候终止
+        int pivot = nums[left];
+        int le = left + 1;
+        int ge = right;
+        while (true) {
+            // 注意：这里一定是 nums[le] < pivot，等于 pivot 的元素是被交换过来得到的
+            while (le <= ge && nums[le] < pivot) {
+                le++;
+            }
+            // 此时 le 来到第1个大于等于 pivot 的位置
+            while (le <= ge && nums[ge] > pivot) {
+                ge--;
+            }
+            // 此时 ge 来到第一个小于等于 pivot 的位置
+            if (le > ge) {
+                break;
+            }
+
+            swap(nums, le, ge);
+            le++;
+            ge--;
+        }
+        swap(nums, left, ge);
+        return ge;
+    }
+}
+```
+
+#### 算法的关键点
+
+1. **双指针对撞**：这种双指针从两端向中间移动的方式是快速排序的经典实现之一。
+2. **随机选择pivot**：这是一个重要的优化措施。直接选择第一个或最后一个元素作为pivot可能导致在已排序数组上达到最坏的$O(n^2)$时间复杂度。随机化可以有效避免这种情况。
+3. **元素相等时的处理**：代码中的实现在遇到等于pivot的元素时，将其分散到数组两侧，这有助于避免在有大量重复元素时的性能退化。
+
 ---
 
 [返回](../README.md)

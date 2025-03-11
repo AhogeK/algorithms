@@ -17,6 +17,7 @@ class QuickSortTest {
         Assertions.assertDoesNotThrow(() -> SortingUtil.testSortingAlgorithms(new RandomWayQuickSort(), 10_000_000));
         Assertions.assertDoesNotThrow(() -> SortingUtil.testSortingAlgorithms(new MedianOfThreeQuickSort(), 10_000_000));
         Assertions.assertDoesNotThrow(() -> SortingUtil.testSortingAlgorithms(new SpecialMedianOfThreeQuickSort(), 10_000_000));
+        Assertions.assertDoesNotThrow(() -> SortingUtil.testSortingAlgorithms(new TwoWayQuickSort(), 10_000_000));
     }
 
     @Test
