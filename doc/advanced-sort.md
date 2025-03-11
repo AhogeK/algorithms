@@ -74,6 +74,11 @@
         * [循环不变量的维护](#循环不变量的维护)
         * [算法步骤](#算法步骤-1)
         * [复杂度分析](#复杂度分析-1)
+    * [指针对撞的快速排序](#指针对撞的快速排序)
+      * [指针对撞分区步骤](#指针对撞分区步骤)
+      * [算法的关键点](#算法的关键点)
+    * [练习-2](#练习-2)
+      * [自行编写测试用例，完成下面的实验：在输入数据有大量重复元素的时候，这一节介绍的快速排序能起到优化的效果](#自行编写测试用例完成下面的实验在输入数据有大量重复元素的时候这一节介绍的快速排序能起到优化的效果)
 <!-- TOC -->
 
 # 高级排序算法
@@ -1539,6 +1544,237 @@ public class TwoWayQuickSort implements ISortingAlgorithm {
 1. **双指针对撞**：这种双指针从两端向中间移动的方式是快速排序的经典实现之一。
 2. **随机选择pivot**：这是一个重要的优化措施。直接选择第一个或最后一个元素作为pivot可能导致在已排序数组上达到最坏的$O(n^2)$时间复杂度。随机化可以有效避免这种情况。
 3. **元素相等时的处理**：代码中的实现在遇到等于pivot的元素时，将其分散到数组两侧，这有助于避免在有大量重复元素时的性能退化。
+
+### 练习-2
+
+#### 自行编写测试用例，完成下面的实验：在输入数据有大量重复元素的时候，这一节介绍的快速排序能起到优化的效果
+
+通过新写的数组生成策略生成大量重复的数组
+
+```java
+package sort.common;
+
+/**
+ * 用于生成包含大量重复元素的随机数组
+ *
+ * @author AhogeK
+ * @since 2025-03-11 16:58:51
+ */
+public class GenerateDuplicateArrayStrategy implements IGenerateArrayStrategy {
+
+    private final int len;
+    // 主要重复的元素值
+    private final int dominantValue;
+    private int min = 0;
+    private int max;
+    // 主要重复元素的占比，默认为90%
+    private double duplicateRatio = 0.9;
+
+    /**
+     * 默认构造函数
+     * 随机长度，90%元素相同
+     */
+    public GenerateDuplicateArrayStrategy() {
+        this.len = SortingUtil.RANDOM.nextInt(1000) + 100; // 避免太大的随机值
+        this.max = len;
+        this.dominantValue = min + SortingUtil.RANDOM.nextInt(max - min + 1);
+    }
+
+    /**
+     * 指定数组长度，90%元素相同
+     *
+     * @param len 自定义的数组长度
+     */
+    public GenerateDuplicateArrayStrategy(int len) {
+        this.len = len;
+        this.max = len;
+        this.dominantValue = min + SortingUtil.RANDOM.nextInt(max - min + 1);
+    }
+
+    /**
+     * 指定数组长度和范围，90%元素相同
+     *
+     * @param len 自定义数组长度
+     * @param min 自定义最小值
+     * @param max 自定义最大值
+     */
+    public GenerateDuplicateArrayStrategy(int len, int min, int max) {
+        this.len = len;
+        this.min = min;
+        this.max = max;
+        this.dominantValue = min + SortingUtil.RANDOM.nextInt(max - min + 1);
+    }
+
+    /**
+     * 指定数组长度、范围和重复元素占比
+     *
+     * @param len            自定义数组长度
+     * @param min            自定义最小值
+     * @param max            自定义最大值
+     * @param duplicateRatio 重复元素的占比(0.0-1.0)
+     */
+    public GenerateDuplicateArrayStrategy(int len, int min, int max, double duplicateRatio) {
+        this.len = len;
+        this.min = min;
+        this.max = max;
+        this.duplicateRatio = Math.clamp(duplicateRatio, 0.0, 1.0); // 确保在0到1之间
+        this.dominantValue = min + SortingUtil.RANDOM.nextInt(max - min + 1);
+    }
+
+    /**
+     * 指定数组长度、范围、重复元素占比和主要重复值
+     *
+     * @param len            自定义数组长度
+     * @param min            自定义最小值
+     * @param max            自定义最大值
+     * @param duplicateRatio 重复元素的占比(0.0-1.0)
+     * @param dominantValue  主要重复的元素值
+     */
+    public GenerateDuplicateArrayStrategy(int len, int min, int max, double duplicateRatio, int dominantValue) {
+        this.len = len;
+        this.min = min;
+        this.max = max;
+        this.duplicateRatio = Math.clamp(duplicateRatio, 0.0, 1.0); // 确保在0到1之间
+        this.dominantValue = dominantValue;
+    }
+
+    @Override
+    public String getFeature() {
+        return String.format("大量连续重复元素(%.0f%%为%d)", duplicateRatio * 100, dominantValue);
+    }
+
+    @Override
+    public int[] generateArray() {
+        // 参数校验
+        assert len > 0;
+        if (min > max) {
+            int temp = max;
+            max = min;
+            min = temp;
+        }
+
+        int[] array = new int[len];
+
+        // 计算重复元素的数量
+        int duplicateCount = (int) (len * duplicateRatio);
+
+        // 1. 先填充主要重复元素
+        for (int i = 0; i < duplicateCount; i++) {
+            array[i] = dominantValue;
+        }
+
+        // 2. 其余位置填充随机值
+        for (int i = duplicateCount; i < len; i++) {
+            // 生成一个不等于dominantValue的随机值
+            int randomValue;
+            do {
+                randomValue = min + SortingUtil.RANDOM.nextInt(max - min + 1);
+            } while (randomValue == dominantValue && max > min); // 如果可能，避免生成与主要值相同的数
+
+            array[i] = randomValue;
+        }
+
+        // 3. 打乱数组，创建一些连续区段（可选）
+        shuffleWithBias(array, duplicateCount);
+
+        return array;
+    }
+
+    /**
+     * 特殊打乱算法，倾向于保持一些连续的重复元素片段
+     *
+     * @param array          要打乱的数组
+     * @param duplicateCount 重复元素的数量
+     */
+    private void shuffleWithBias(int[] array, int duplicateCount) {
+        // 决定是否创建长连续段
+        boolean createLongSequences = SortingUtil.RANDOM.nextBoolean();
+
+        if (createLongSequences) {
+            // 创建较少但较长的连续段
+            int segmentCount = Math.max(1, len / 20); // 大约5%的位置作为段的起点
+
+            for (int i = 0; i < segmentCount; i++) {
+                int start = SortingUtil.RANDOM.nextInt(len);
+                int segmentLength = Math.min(duplicateCount / segmentCount, len - start);
+
+                // 确保这个位置开始有足够空间放置一个段
+                if (segmentLength > 3) { // 只有当段长度至少为3时才创建
+                    for (int j = 0; j < segmentLength; j++) {
+                        if (start + j < len) {
+                            array[start + j] = dominantValue;
+                        }
+                    }
+                }
+            }
+        } else {
+            // 标准的Fisher-Yates洗牌算法
+            for (int i = len - 1; i > 0; i--) {
+                int j = SortingUtil.RANDOM.nextInt(i + 1);
+                SortingUtil.swap(array, i, j);
+            }
+        }
+    }
+
+    @Override
+    public int getLen() {
+        return len;
+    }
+
+    @Override
+    public int getMin() {
+        return min;
+    }
+
+    @Override
+    public int getMax() {
+        return max;
+    }
+
+    /**
+     * 获取重复元素的占比
+     *
+     * @return 重复元素的占比
+     */
+    public double getDuplicateRatio() {
+        return duplicateRatio;
+    }
+
+    /**
+     * 获取主要重复的元素值
+     *
+     * @return 主要重复的元素值
+     */
+    public int getDominantValue() {
+        return dominantValue;
+    }
+}
+```
+
+然后即可测试
+
+```java
+@Test
+void orderedComparisonSortTest() {
+    // 大量重复元素的数组比较对撞与普通
+    Assertions.assertDoesNotThrow(() -> SortingUtil.compareSortingAlgorithms(
+            new GenerateDuplicateArrayStrategy(20_000), new QuickSort(), new TwoWayQuickSort())
+    );
+}
+```
+
+输出：
+
+```text
+17:21:12 [INFO] sort.common.SortingUtil: 排序算法比较：
+17:21:12 [INFO] sort.common.SortingUtil: 测试用例特点：大量连续重复元素(90%为9542)，规模：20000，最小值：0，最大值：20000。
+17:21:12 [INFO] sort.common.SortingUtil: sort.QuickSort@64cd705f：
+17:21:12 [INFO] sort.common.SortingUtil: 耗时 0.08936900 秒 / 89.36900000 毫秒 / 89369000 纳秒
+17:21:12 [INFO] sort.common.SortingUtil: sort.TwoWayQuickSort@9225652：
+17:21:12 [INFO] sort.common.SortingUtil: 耗时 0.00170500 秒 / 1.70500000 毫秒 / 1705000 纳秒
+```
+
+可以看到面对大量的重复元素，优化效果非常明显，速度提升了 $\boxed{52.42 \text{ 倍}}$ ，节省了 $\boxed{98.08 \text{ %}}$ 的时间
 
 ---
 
