@@ -79,6 +79,11 @@
       * [算法的关键点](#算法的关键点)
     * [练习-2](#练习-2)
       * [自行编写测试用例，完成下面的实验：在输入数据有大量重复元素的时候，这一节介绍的快速排序能起到优化的效果](#自行编写测试用例完成下面的实验在输入数据有大量重复元素的时候这一节介绍的快速排序能起到优化的效果)
+    * [三向切分的快速排序](#三向切分的快速排序)
+      * [基本原理](#基本原理)
+      * [三向划分的核心机制](#三向划分的核心机制)
+      * [三向切分的优势](#三向切分的优势)
+      * [算法复杂度](#算法复杂度)
 <!-- TOC -->
 
 # 高级排序算法
@@ -1191,10 +1196,10 @@ public class SpecialMedianOfThreeQuickSort implements ISortingAlgorithm {
         // 如果a大于b和c中的一个（且仅一个），那么a就是中间值
         if ((nums[a] > nums[b]) ^ (nums[a] > nums[c])) return a;
 
-        // 如果b小于a和c中的一个（且仅一个），那么b就是中间值
+            // 如果b小于a和c中的一个（且仅一个），那么b就是中间值
         else if ((nums[b] < nums[a]) ^ (nums[b] < nums[c])) return b;
 
-        // 否则c是中间值
+            // 否则c是中间值
         else return c;
     }
 }
@@ -1205,6 +1210,7 @@ public class SpecialMedianOfThreeQuickSort implements ISortingAlgorithm {
 [../test/sort/QuickSortTest.java](../test/sort/QuickSortTest.java)
 
 ```java
+
 @Test
 void orderedComparisonSortTest() {
     // 测试在输入数据接近有序的时候，没有实现「随机选择切分元素」的快速排序比归并排序慢很多
@@ -1353,9 +1359,9 @@ public class KthLargestElementInAnArray {
 public int removeDuplicates(int[] nums) {
     // 处理空数组情况
     if (nums.length == 0) return 0;
-    
+
     int slow = 0; // 慢指针，指向新数组的末尾
-    
+
     // 从第二个元素开始遍历
     for (int fast = 1; fast < nums.length; fast++) {
         // 发现不重复的元素
@@ -1366,7 +1372,7 @@ public int removeDuplicates(int[] nums) {
         }
         // 重复元素会被跳过
     }
-    
+
     // 新数组的长度
     return slow + 1;
 }
@@ -1417,9 +1423,9 @@ public int removeDuplicates(int[] nums) {
 public int removeDuplicates(int[] nums) {
     // 处理特殊情况
     if (nums.length <= 2) return nums.length;
-    
+
     int slow = 2; // 慢指针，指向应该放置新元素的位置
-    
+
     // 从第三个元素开始遍历
     for (int fast = 2; fast < nums.length; fast++) {
         // 判断当前元素是否应该保留
@@ -1429,7 +1435,7 @@ public int removeDuplicates(int[] nums) {
         }
         // 如果当前元素与slow-2位置的元素相同，说明是第3次出现，跳过
     }
-    
+
     return slow; // 新数组的长度
 }
 ```
@@ -1542,7 +1548,9 @@ public class TwoWayQuickSort implements ISortingAlgorithm {
 #### 算法的关键点
 
 1. **双指针对撞**：这种双指针从两端向中间移动的方式是快速排序的经典实现之一。
-2. **随机选择pivot**：这是一个重要的优化措施。直接选择第一个或最后一个元素作为pivot可能导致在已排序数组上达到最坏的$O(n^2)$时间复杂度。随机化可以有效避免这种情况。
+2. **随机选择pivot**
+   ：这是一个重要的优化措施。直接选择第一个或最后一个元素作为pivot可能导致在已排序数组上达到最坏的$O(n^2)$
+   时间复杂度。随机化可以有效避免这种情况。
 3. **元素相等时的处理**：代码中的实现在遇到等于pivot的元素时，将其分散到数组两侧，这有助于避免在有大量重复元素时的性能退化。
 
 ### 练习-2
@@ -1754,6 +1762,7 @@ public class GenerateDuplicateArrayStrategy implements IGenerateArrayStrategy {
 然后即可测试
 
 ```java
+
 @Test
 void orderedComparisonSortTest() {
     // 大量重复元素的数组比较对撞与普通
@@ -1775,6 +1784,134 @@ void orderedComparisonSortTest() {
 ```
 
 可以看到面对大量的重复元素，优化效果非常明显，速度提升了 $\boxed{52.42 \text{ 倍}}$ ，节省了 $\boxed{98.08 \text{ %}}$ 的时间
+
+### 三向切分的快速排序
+
+[../src/sort/ThreeWayQuickSort.java](../src/sort/ThreeWayQuickSort.java)
+
+```java
+public class ThreeWayQuickSort implements ISortingAlgorithm {
+
+    private static final int INSERTION_THRESHOLD = 16; // 插入排序阈值
+
+    @Override
+    public void sortArray(int[] nums) {
+        if (nums == null || nums.length == 0) return;
+        quickSort(nums, 0, nums.length - 1);
+    }
+
+    private void quickSort(int[] nums, int left, int right) {
+        // 小数组使用插入排序优化
+        if (right - left < INSERTION_THRESHOLD) {
+            insertionSort(nums, left, right);
+            return;
+        }
+
+        // 调用三数取中算法获取枢轴索引
+        int pivotIndex = medianOfThree(nums, left, (left + right) >>> 1, right);
+        swap(nums, left, pivotIndex); // 将枢轴交换到首位
+
+        int pivotValue = nums[left];
+        int lt = left;      // 小于区的右边界
+        int gt = right;     // 大于区的左边界
+        int i = left + 1;   // 当前元素指针
+
+        // 三向分区操作（Dijkstra三路划分法）
+        while (i <= gt) {
+            int cmp = nums[i] - pivotValue;
+            if (cmp < 0) {
+                swap(nums, lt++, i++);
+            } else if (cmp > 0) {
+                swap(nums, i, gt--);
+            } else {
+                i++;
+            }
+        }
+
+        // 递归处理子区间
+        quickSort(nums, left, lt - 1);
+        quickSort(nums, gt + 1, right);
+    }
+
+    private int medianOfThree(int[] nums, int a, int b, int c) {
+        int aVal = nums[a], bVal = nums[b], cVal = nums[c];
+
+        // 异或运算判断中间值 (等价于两次比较)
+        if ((aVal < bVal) ^ (aVal < cVal)) return a;
+        if ((bVal > aVal) ^ (bVal > cVal)) return b;
+        return c;
+    }
+
+    private void insertionSort(int[] nums, int left, int right) {
+        for (int i = left + 1; i <= right; i++) {
+            int key = nums[i];
+            int j = i - 1;
+            while (j >= left && nums[j] > key) {
+                nums[j + 1] = nums[j];
+                j--;
+            }
+            nums[j + 1] = key;
+        }
+    }
+
+    private void swap(int[] nums, int i, int j) {
+        int temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
+    }
+}
+```
+
+三向切分的快速排序(Three-way QuickSort)是快速排序的一种变体，也被称为"荷兰国旗问题算法"(Dutch National Flag)
+。这种算法由计算机科学家Dijkstra提出，特别适合处理含有大量重复元素的数组。
+
+#### 基本原理
+
+与传统快速排序将数组分成两部分(小于枢轴和大于枢轴)不同，三向切分快速排序将数组分成三部分：
+
+1. 小于枢轴的元素
+2. 等于枢轴的元素
+3. 大于枢轴的元素
+
+这种方法在处理有大量重复元素的数组时特别高效，因为等于枢轴的元素不需要再参与排序。
+
+#### 三向划分的核心机制
+
+三向划分是该算法的核心，它使用三个指针维护数组的四个区域：
+
+* `lt` (less than)：指向小于区域的右边界
+* `gt` (greater than)：指向大于区域的左边界
+* `i`：当前扫描的元素位置
+
+在任意时刻，数组被划分为以下四个区域：
+
+1. `[left, lt-1]`：小于枢轴的元素
+2. `[lt, i-1]`：等于枢轴的元素
+3. `[i, gt]`：待处理的元素
+4. `[gt+1, right]`：大于枢轴的元素
+
+算法处理逻辑如下：
+
+* 如果当前元素 `< 枢轴`：交换 `lt` 和 `i` 位置的元素，然后 `lt++` 和 `i++`
+* 如果当前元素 `> 枢轴`：交换 `i` 和 `gt` 位置的元素，然后 `gt--`（注意此时 `i` 不变，因为交换来的元素还未检查）
+* 如果当前元素 `= 枢轴`：只移动 `i++`，保持元素在原位置
+
+这种方式确保了相等元素会被聚集在一起，而且这些相等元素不需要再参与后续的递归排序
+
+#### 三向切分的优势
+
+1. **重复元素处理更高效**：当数组包含大量重复元素时，传统快排会对所有元素进行排序，而三向切分快排只需要处理不等于枢轴的部分。
+2. **减少比较次数**：由于等于枢轴的元素被直接放置到最终位置，不需要再参与比较，可以大幅减少比较和交换操作的次数。
+3. **改进最坏情况行为**：通过三数取中法和三向划分，算法在处理各类数据时表现更稳定。
+
+#### 算法复杂度
+
+* **时间复杂度**：
+    * 平均情况： $O(n \log n)$
+    * 最坏情况： $O(n^2)$ ，但通过枢轴选择优化，这种情况出现概率大大降低
+    * 对于大量重复元素的数组，可以接近线性时间 $O(n)$
+* **空间复杂度**：
+    * $O(\log n)$ ，递归调用栈的开销
 
 ---
 
