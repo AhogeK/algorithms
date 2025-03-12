@@ -30,7 +30,7 @@ class QuickSortTest {
         );
         // 大量重复元素的数组比较对撞与普通
         Assertions.assertDoesNotThrow(() -> SortingUtil.compareSortingAlgorithms(
-                new GenerateDuplicateArrayStrategy(20_000), new QuickSort(), new TwoWayQuickSort())
+                new GenerateDuplicateArrayStrategy(20_000), new QuickSort(), new TwoWayQuickSort(), new ThreeWayQuickSort())
         );
     }
 }

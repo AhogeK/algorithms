@@ -84,6 +84,8 @@
       * [三向划分的核心机制](#三向划分的核心机制)
       * [三向切分的优势](#三向切分的优势)
       * [算法复杂度](#算法复杂度)
+    * [练习-3](#练习-3)
+      * [自行编写测试用例，完成下面的实验：在输入数据有大量重复元素的时候，这一节介绍的三向切分的快速排序能起到优化的效果](#自行编写测试用例完成下面的实验在输入数据有大量重复元素的时候这一节介绍的三向切分的快速排序能起到优化的效果)
 <!-- TOC -->
 
 # 高级排序算法
@@ -1912,6 +1914,36 @@ public class ThreeWayQuickSort implements ISortingAlgorithm {
     * 对于大量重复元素的数组，可以接近线性时间 $O(n)$
 * **空间复杂度**：
     * $O(\log n)$ ，递归调用栈的开销
+
+### 练习-3
+
+#### 自行编写测试用例，完成下面的实验：在输入数据有大量重复元素的时候，这一节介绍的三向切分的快速排序能起到优化的效果
+
+依旧是利用之前用过的测试用例，可直接测试三向切分
+
+```java
+@Test
+void orderedComparisonSortTest() {
+    // 大量重复元素的数组比较对撞与普通
+    Assertions.assertDoesNotThrow(() -> SortingUtil.compareSortingAlgorithms(
+            new GenerateDuplicateArrayStrategy(20_000), new QuickSort(), new TwoWayQuickSort(), new ThreeWayQuickSort())
+    );
+}
+```
+
+输出
+
+```text
+21:34:39 [INFO] sort.common.SortingUtil: 测试用例特点：大量连续重复元素(90%为16039)，规模：20000，最小值：0，最大值：20000。
+21:34:39 [INFO] sort.common.SortingUtil: sort.QuickSort@7a69b07：
+21:34:39 [INFO] sort.common.SortingUtil: 耗时 0.08459600 秒 / 84.59600000 毫秒 / 84596000 纳秒
+21:34:39 [INFO] sort.common.SortingUtil: sort.TwoWayQuickSort@5e82df6a：
+21:34:39 [INFO] sort.common.SortingUtil: 耗时 0.00199600 秒 / 1.99600000 毫秒 / 1996000 纳秒
+21:34:39 [INFO] sort.common.SortingUtil: sort.ThreeWayQuickSort@3f197a46：
+21:34:39 [INFO] sort.common.SortingUtil: 耗时 0.00079000 秒 / 0.79000000 毫秒 / 790000 纳秒
+```
+
+可以看到三向切分比指针对撞又快了一个档次。速度提升了 $\boxed{2.53 \text{ 倍}}$ ，节省了 $\boxed{60.42 \text{ %}}$ 的时间
 
 ---
 
