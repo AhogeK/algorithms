@@ -86,6 +86,10 @@
       * [算法复杂度](#算法复杂度)
     * [练习-3](#练习-3)
       * [自行编写测试用例，完成下面的实验：在输入数据有大量重复元素的时候，这一节介绍的三向切分的快速排序能起到优化的效果](#自行编写测试用例完成下面的实验在输入数据有大量重复元素的时候这一节介绍的三向切分的快速排序能起到优化的效果)
+      * [完成「力扣」第 75 题：颜色分类](#完成力扣第-75-题颜色分类)
+        * [核心思路](#核心思路-1)
+        * [关键点解析](#关键点解析)
+        * [复杂度分析](#复杂度分析-2)
 <!-- TOC -->
 
 # 高级排序算法
@@ -1922,6 +1926,7 @@ public class ThreeWayQuickSort implements ISortingAlgorithm {
 依旧是利用之前用过的测试用例，可直接测试三向切分
 
 ```java
+
 @Test
 void orderedComparisonSortTest() {
     // 大量重复元素的数组比较对撞与普通
@@ -1944,6 +1949,69 @@ void orderedComparisonSortTest() {
 ```
 
 可以看到三向切分比指针对撞又快了一个档次。速度提升了 $\boxed{2.53 \text{ 倍}}$ ，节省了 $\boxed{60.42 \text{ %}}$ 的时间
+
+#### 完成「力扣」第 75 题：[颜色分类](https://leetcode.cn/problems/sort-colors)
+
+[../src/sort/leetcode/SortColors.java](../src/sort/leetcode/SortColors.java)
+
+```java
+public class SortColors {
+
+    public void sortColors(int[] nums) {
+        int lt = 0; // 0区的右边界
+        int gt = nums.length - 1; // 2区的左边界
+        int i = 0; // 当前遍历指针
+
+        while (i <= gt) {
+            if (nums[i] == 0) {
+                swap(nums, lt++, i++); // 将0交换到左区
+            } else if (nums[i] == 2) {
+                swap(nums, i, gt--); // 将2交换到右区
+            } else {
+                i++; // 1保持不动
+            }
+        }
+    }
+
+    private void swap(int[] nums, int i, int j) {
+        int temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
+    }
+}
+```
+
+##### 核心思路
+
+采用**三向切分快速排序**的变种：
+
+1. **三指针法**：
+    * `lt` (low tail)：标记0的右边界（初始为0）
+    * `gt` (high head)：标记2的左边界（初始为n-1）
+    * `i`：遍历指针（初始为0）
+2. **分区逻辑**：
+    * 当`nums[i] == 0`：交换到`lt`区，`lt`和`i`右移
+    * 当`nums[i] == 2`：交换到`gt`区，`gt`左移（`i`不动）
+    * 当`nums[i] == 1`：直接跳过，`i`右移
+
+##### 关键点解析
+
+1. 指针移动策略
+
+   | 情况           | 操作                | 逻辑说明              |
+       |--------------|-------------------|-------------------|
+   | `nums[i]==0` | `swap(lt++, i++)` | 确保左区全0，已处理区域无需复查  |
+   | `nums[i]==2` | `swap(i, gt--)`   | 右区边界左移，交换后需复查当前元素 |
+   | `nums[i]==1` | `i++`             | 中区直接跳过            |
+
+2. 循环终止条件
+
+   `i <= gt` 确保处理完所有未分类元素，`gt`之后的元素已确定为2。
+
+##### 复杂度分析
+
+* **时间复杂度**： $O(n)$ ，每个元素最多被访问2次
+* **空间复杂度**： $O(1)$ ，仅使用常数级指针变量
 
 ---
 
