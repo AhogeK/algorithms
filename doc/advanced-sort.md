@@ -90,6 +90,11 @@
         * [核心思路](#核心思路-1)
         * [关键点解析](#关键点解析)
         * [复杂度分析](#复杂度分析-2)
+      * [完成「力扣」第 451 题：根据字符出现频率排序](#完成力扣第-451-题根据字符出现频率排序)
+        * [解题思路](#解题思路)
+        * [性能分析](#性能分析)
+          * [时间复杂度](#时间复杂度)
+          * [空间复杂度](#空间复杂度)
 <!-- TOC -->
 
 # 高级排序算法
@@ -1999,7 +2004,7 @@ public class SortColors {
 1. 指针移动策略
 
    | 情况           | 操作                | 逻辑说明              |
-   |--------------|-------------------|-------------------|
+      |--------------|-------------------|-------------------|
    | `nums[i]==0` | `swap(lt++, i++)` | 确保左区全0，已处理区域无需复查  |
    | `nums[i]==2` | `swap(i, gt--)`   | 右区边界左移，交换后需复查当前元素 |
    | `nums[i]==1` | `i++`             | 中区直接跳过            |
@@ -2012,6 +2017,77 @@ public class SortColors {
 
 * **时间复杂度**： $O(n)$ ，每个元素最多被访问2次
 * **空间复杂度**： $O(1)$ ，仅使用常数级指针变量
+
+#### 完成「力扣」第 451 题：[根据字符出现频率排序](https://leetcode.cn/problems/sort-characters-by-frequency)
+
+[../src/sort/leetcode/SortCharactersByFrequency.java](../src/sort/leetcode/SortCharactersByFrequency.java)
+
+```java
+public class SortCharactersByFrequency {
+
+    public String frequencySort(String s) {
+        // 使用128长度的数组统计ASCII字符频率
+        int[] freq = new int[128];
+        char[] arr = s.toCharArray();
+        for (char c : arr) {
+            freq[c]++;
+        }
+
+        // 创建字符-频率对列表（避免Map.Entry开销）
+        List<int[]> charFreqList = new ArrayList<>();
+        for (int i = 0; i < freq.length; i++) {
+            if (freq[i] > 0) {
+                charFreqList.add(new int[]{i, freq[i]});
+            }
+        }
+
+        // 按频率降序排序（Collections.sort比优先队列更快）
+        Collections.sort(charFreqList, (a, b) -> b[1] - a[1]);
+
+        // 直接操作字符数组（比StringBuilder更快）
+        char[] result = new char[arr.length];
+        int idx = 0;
+        for (int[] pair : charFreqList) {
+            char c = (char) pair[0];
+            int count = pair[1];
+            Arrays.fill(result, idx, idx + count, c);
+            idx += count;
+        }
+        return new String(result);
+    }
+}
+```
+
+##### 解题思路
+
+1. 基于数组进行字符频率的统计
+    * ASCII字符集只有128个字符，使用固定大小的数组进行统计比哈希表更高效
+2. 构建并排序字符频率列表
+    * ``freq[i] > 0``表示该i字符存在，存入频率列表并使用``Collections.sort()``进行排序，``b[1] - a[1]``代表倒叙符合题意
+    * *这里也可以用优先队列``PriorityQueue``，但这道题使用优先队列并不是最佳选择，效率没``Collections.sort()``
+      高，优先队列有一个插入和取出的两个过程*
+3. 结果字符串构建
+    * 首先这里没有使用StringBuilder，因为其动态扩容和方法调用的开销很大。因此可以使用字符数组，通过``Arrays.fill()``
+      组成结果字符数组最后转成字符串
+
+##### 性能分析
+
+###### 时间复杂度
+
+* **整体时间复杂度**：$O(n + k \log k)$，实际上因为$k \leq 128$（常数），所以接近$O(n)$
+* **各步骤详解**：
+    1. 字符统计： $O(n)$
+    2. 构建频率列表： $O(k) \approx O(1)$ （常数级）
+    3. 排序： $O(k \log k) \approx O(1)$ （实际上最多排序128个元素）
+    4. 重建字符串： $O(n)$
+
+###### 空间复杂度
+
+* **整体空间复杂度**： $O(n)$
+* **明细**：
+    * 频率数组： $O(1)$ （固定大小128）
+    * 字符频率列表： $O(k) \approx O(1)$ （最多128个元素）
+    * 结果字符数组： $O(n)$
 
 ---
 
