@@ -21,6 +21,13 @@
         * [第2轮（十位排序）：](#第2轮十位排序)
         * [第3轮（百位排序）：](#第3轮百位排序)
       * [复杂度分析](#复杂度分析)
+  * [桶排序](#桶排序)
+    * [基本流程](#基本流程)
+    * [适用条件](#适用条件-1)
+    * [代码](#代码-2)
+    * [复杂度](#复杂度)
+      * [时间复杂度分析](#时间复杂度分析)
+      * [空间复杂度](#空间复杂度)
 <!-- TOC -->
 
 # 非比较排序算法
@@ -412,3 +419,124 @@ public class LSDRadixSort implements ISortingAlgorithm {
 | 快速排序 | $O(N^2)$      | $O(N \log N)$                      | $O(N \log N)$ | $O(\log N)$ | 不稳定 | 原地排序   |
 | 计数排序 | $O(N + K)$    | $O(N + K)$                         | $O(N + K)$    | $O(N + K)$  | 稳定  | 非原地排序  |
 | 基数排序 | $O(KN)$       | $O(KN)$                            | $O(N^2)$      | $O(K + N)$  | 稳定  | 非原地排序  |
+
+## 桶排序
+
+> 桶排序是一种将数据分到有限数量的容器（桶）中，再对每个桶单独排序的分布式排序算法。
+> 其核心思想是通过合理的数据分布策略，将排序任务分解为多个小规模问题处理。
+
+### 基本流程
+
+1. **分桶策略**：根据数据范围创建空桶
+2. **数据分配**：将元素映射到对应桶中
+3. **桶内排序**：对每个非空桶单独排序
+4. **合并结果**：按桶顺序拼接结果
+
+### 适用条件
+
+1. 数据分布必须满足均匀分布
+2. 需提前知道数据范围
+3. 非负整数(负数需要调整分桶公式)
+
+### 代码
+
+[../src/sort/BucketSort.java](../src/sort/BucketSort.java)
+
+```java
+public class BucketSort implements ISortingAlgorithm {
+
+    @Override
+    public void sortArray(int[] nums) {
+        if (nums == null || nums.length <= 1) {
+            return;
+        }
+
+        // 1. 找到最大值和最小值
+        int max = nums[0], min = nums[0];
+        for (int num : nums) {
+            max = Math.max(max, num);
+            min = Math.min(min, num);
+        }
+
+        // 2. 计算桶大小和数量
+        int n = nums.length;
+        int bucketSize = Math.max(1, (max - min) / (int) Math.sqrt(n)); // 避免bucketSize为0
+        int bucketCount = (max - min) / bucketSize + 1;
+
+        // 3. 统计每个桶需要的大小
+        int[] bucketSizes = new int[bucketCount];
+        for (int num : nums) {
+            int bucketIndex = (num - min) / bucketSize; // 使用bucketSize计算
+            bucketSizes[bucketIndex]++;
+        }
+
+        // 4. 创建桶
+        int[][] buckets = new int[bucketCount][];
+        for (int i = 0; i < bucketCount; i++) {
+            buckets[i] = new int[bucketSizes[i]];
+            bucketSizes[i] = 0; // 重置计数器
+        }
+
+        // 5. 将元素放入桶中
+        for (int num : nums) {
+            int bucketIndex = (num - min) / bucketSize; // 使用bucketSize计算
+            buckets[bucketIndex][bucketSizes[bucketIndex]++] = num;
+        }
+
+        // 6. 对每个桶进行排序 (使用插入排序保持稳定性)
+        for (int[] bucket : buckets) {
+            insertionSort(bucket);
+        }
+
+        // 7. 将排序后的元素收集回原数组
+        int index = 0;
+        for (int[] bucket : buckets) {
+            for (int num : bucket) {
+                nums[index++] = num;
+            }
+        }
+    }
+
+    private void insertionSort(int[] arr) {
+        if (arr == null || arr.length <= 1) return;
+
+        for (int i = 1; i < arr.length; i++) {
+            int current = arr[i];
+            int j = i;
+
+            while (j > 0 && arr[j - 1] > current) {
+                arr[j] = arr[j - 1];
+                j--;
+            }
+
+            arr[j] = current;
+        }
+    }
+}
+```
+
+### 复杂度
+
+#### 时间复杂度分析
+
+$$\begin{aligned} \text{最佳情况} & : O(n + k) \quad (\text{均匀分布且桶数量 } k \approx n) \\\ \text{平均情况} & : O(n + \frac{n^2}{k} + k) \quad (\text{一般分布}) \\\ \text{最坏情况} & : O(n^2) \quad (\text{极端集中分布}) \end{aligned}$$
+
+#### 空间复杂度
+
+$$O(n + k)$$
+
+* $n$：存储元素的额外空间
+* $k$：桶指针数组空间
+
+
+|      | 最坏时间复杂度       | 平均时间复杂度                            | 最好时间复杂度       | 额外空间复杂度     | 稳定性 | 是否原地排序 |
+|------|---------------|------------------------------------|---------------|-------------|-----|--------|
+| 选择排序 | $O(N^2)$      | $O(N^2)$                           | $O(N^2)$      | $O(1)$      | 不稳定 | 原地排序   |
+| 冒泡排序 | $O(N^2)$      | $O(N^2)$                           | $O(N)$        | $O(1)$      | 稳定  | 原地排序   |
+| 插入排序 | $O(N^2)$      | $O(N^2)$                           | $O(N)$        | $O(1)$      | 稳定  | 原地排序   |
+| 希尔排序 | $O(N^2)$      | $O(n^{1.25}) \sim O(1.6 n^{1.25})$ | (没有相关研究)      | $O(1)$      | 不稳定 | 原地排序   |
+| 归并排序 | $O(N \log N)$ | $O(N \log N)$                      | $O(N \log N)$ | $O(N)$      | 稳定  | 非原地排序  |
+| 快速排序 | $O(N^2)$      | $O(N \log N)$                      | $O(N \log N)$ | $O(\log N)$ | 不稳定 | 原地排序   |
+| 计数排序 | $O(N + K)$    | $O(N + K)$                         | $O(N + K)$    | $O(N + K)$  | 稳定  | 非原地排序  |
+| 基数排序 | $O(KN)$       | $O(KN)$                            | $O(N^2)$      | $O(K + N)$  | 稳定  | 非原地排序  |
+| 桶排序  | $O(N^2)$      | $O(N)$                             | $O(N)$        | 根据情况定       | 稳定  | 非原地排序  |
