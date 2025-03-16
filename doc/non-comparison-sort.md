@@ -28,6 +28,10 @@
     * [复杂度](#复杂度)
       * [时间复杂度分析](#时间复杂度分析)
       * [空间复杂度](#空间复杂度)
+    * [完成「力扣」第 41 题：缺失的第一个正数](#完成力扣第-41-题缺失的第一个正数)
+      * [1. 理论基础：鸽巢原理](#1-理论基础鸽巢原理)
+      * [2. 算法核心思想](#2-算法核心思想)
+      * [复杂度分析](#复杂度分析-1)
 <!-- TOC -->
 
 # 非比较排序算法
@@ -540,3 +544,64 @@ $$O(n + k)$$
 | 计数排序 | $O(N + K)$    | $O(N + K)$                         | $O(N + K)$    | $O(N + K)$  | 稳定  | 非原地排序  |
 | 基数排序 | $O(KN)$       | $O(KN)$                            | $O(N^2)$      | $O(K + N)$  | 稳定  | 非原地排序  |
 | 桶排序  | $O(N^2)$      | $O(N)$                             | $O(N)$        | 根据情况定       | 稳定  | 非原地排序  |
+
+### 完成「力扣」第 41 题：[缺失的第一个正数](https://leetcode.cn/problems/first-missing-positive/)
+
+[../src/sort/leetcode/FirstMissingPositive.java](../src/sort/leetcode/FirstMissingPositive.java)
+
+```java
+public class Solution {
+    public int firstMissingPositive(int[] nums) {
+        int n = nums.length;
+
+        // 将每个数值交换到正确的位置
+        for (int i = 0; i < n; i++) {
+            // 持续交换直到当前元素无法再移动
+            while (nums[i] >= 1 && nums[i] <= n && nums[nums[i] - 1] != nums[i]) {
+                swap(nums, i, nums[i] - 1);
+            }
+        }
+
+        // 查找第一个不匹配的位置
+        for (int i = 0; i < n; i++) {
+            if (nums[i] != i + 1) {
+                return i + 1;
+            }
+        }
+        return n + 1;
+    }
+
+    private void swap(int[] nums, int i, int j) {
+        int temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
+    }
+}
+```
+
+采用原地哈希算法的思路解题
+
+#### 1. 理论基础：鸽巢原理
+
+假设数组长度为 $n$，则答案范围必定是：
+
+$$\text{缺失的正数} \in \\{1, 2, ..., n+1\\}$$
+
+**证明**：
+
+* 若数组中包含 $1$ 到 $n$ → 返回 $n+1$
+* 若缺失某个数 → 返回最小的缺失数
+
+#### 2. 算法核心思想
+
+将数值 $x$ 映射到索引 $x-1$，构建理想状态：
+
+$$\forall i \in [0,n), \quad \text{目标：} \ nums[i] = i+1$$
+
+#### 复杂度分析
+
+| 步骤       | 时间复杂度  | 空间复杂度  |
+|----------|--------|--------|
+| 数组预处理    | $O(n)$ | $O(1)$ |
+| 查找缺失值    | $O(n)$ | $O(1)$ |
+| **总复杂度** | $O(n)$ | $O(1)$ |
