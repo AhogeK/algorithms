@@ -605,3 +605,45 @@ $$\forall i \in [0,n), \quad \text{目标：} \ nums[i] = i+1$$
 | 数组预处理    | $O(n)$ | $O(1)$ |
 | 查找缺失值    | $O(n)$ | $O(1)$ |
 | **总复杂度** | $O(n)$ | $O(1)$ |
+
+### 完成「力扣」第 268 题：[缺失数字](https://leetcode.cn/problems/missing-number/)
+
+[../src/sort/leetcode/MissingNumber.java](../src/sort/leetcode/MissingNumber.java)
+
+```java
+public class MissingNumber {
+
+    public int missingNumber(int[] nums) {
+        int n = nums.length;
+        long total = (long) n * (n + 1) / 2; // 避免整数溢出
+        long sum = 0;
+        for (int num : nums) {
+            sum += num;
+        }
+        return (int) (total - sum);
+    }
+}
+```
+
+本题采用了数学求合法解决
+
+**公式推导**：计算 $0$ 到 $n$ 的总和（即 $\frac{n(n+1)}{2}$），减去数组元素的总和，差值即为缺失数字。
+
+* **时间复杂度**：$O(n)$
+* **空间复杂度**：$O(1)$
+
+其核心来源于**高斯在童年时期发现的等差数列求和公式**:
+
+**具体公式**：
+
+$$\sum\limits_{k=1}^{n} k = \frac{n(n+1)}{2} \quad \text{（高斯求和公式）}$$
+
+#### 核心规律
+
+无论n是奇数还是偶数，都存在：
+
+$$\text{总对数} = \frac{n}{2} \quad \text{每对和} = n+1$$
+
+因此：
+
+$$总和 = \frac{n}{2} × (n+1) = \frac{n(n+1)}{2}$$
