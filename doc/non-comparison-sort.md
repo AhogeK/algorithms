@@ -32,6 +32,16 @@
       * [1. 理论基础：鸽巢原理](#1-理论基础鸽巢原理)
       * [2. 算法核心思想](#2-算法核心思想)
       * [复杂度分析](#复杂度分析-1)
+    * [完成「力扣」第 268 题：缺失数字](#完成力扣第-268-题缺失数字)
+      * [核心规律](#核心规律)
+    * [完成「力扣」第 287 题：寻找重复数](#完成力扣第-287-题寻找重复数)
+      * [算法步骤](#算法步骤)
+      * [举例](#举例)
+    * [完成「力扣」第 442 题：数组中重复的数据](#完成力扣第-442-题数组中重复的数据)
+      * [核心思路](#核心思路)
+      * [算法步骤](#算法步骤-1)
+      * [细节与注意事项](#细节与注意事项)
+      * [复杂度分析](#复杂度分析-2)
 <!-- TOC -->
 
 # 非比较排序算法
@@ -45,7 +55,6 @@
 * **统计频率**：统计每个数值出现的次数
 * **累计定位**：计算每个数值的最终位置
 * **反向填充**：逆向遍历原数组保持稳定性
-
 
 ### 适用条件
 
@@ -191,7 +200,7 @@ $$\text{时间复杂度：} O(n + k) \\\ \text{空间复杂度：} O(n + k)$$
 * ${n}$：待排序元素个数
 * ${k}$：元素的取值范围（最大值与最小值之差 + 1）
 
-1. **时间复杂度分析** 
+1. **时间复杂度分析**
 
     * **统计阶段**：遍历 ${n}$ 个元素，耗时 ${O(n)}$
     * **累加阶段**：遍历 ${k}$ 个计数单元，耗时 ${O(k)}$
@@ -241,13 +250,13 @@ $$\text{时间复杂度：} O(n + k) \\\ \text{空间复杂度：} O(n + k)$$
 ```java
 void msdSort(int[] arr, int left, int right, int digit) {
     if (digit < 0 || left >= right) return;
-    
+
     // 按当前digit位的值分组
     int[] boundaries = partitionByDigit(arr, left, right, digit);
-    
+
     // 递归处理每个分组（digit-1位）
     for (int i = 0; i < boundaries.length - 1; i++) {
-        msdSort(arr, boundaries[i], boundaries[i+1]-1, digit-1);
+        msdSort(arr, boundaries[i], boundaries[i + 1] - 1, digit - 1);
     }
 }
 ```
@@ -532,7 +541,6 @@ $$O(n + k)$$
 * $n$：存储元素的额外空间
 * $k$：桶指针数组空间
 
-
 |      | 最坏时间复杂度       | 平均时间复杂度                            | 最好时间复杂度       | 额外空间复杂度     | 稳定性 | 是否原地排序 |
 |------|---------------|------------------------------------|---------------|-------------|-----|--------|
 | 选择排序 | $O(N^2)$      | $O(N^2)$                           | $O(N^2)$      | $O(1)$      | 不稳定 | 原地排序   |
@@ -658,20 +666,20 @@ public class Solution {
         // 初始化快慢指针
         int slow = nums[0];
         int fast = nums[0];
-        
+
         // 第一阶段：检测环的存在
         do {
             slow = nums[slow];          // 慢指针步长1
             fast = nums[nums[fast]];    // 快指针步长2
         } while (slow != fast);
-        
+
         // 第二阶段：寻找环入口
         fast = nums[0]; // 重置快指针到起点
         while (slow != fast) {
             slow = nums[slow];
             fast = nums[fast];
         }
-        
+
         return slow;    // 环入口即重复数
     }
 }
@@ -684,11 +692,11 @@ public class Solution {
 1. **检测环的存在**：
     * 快指针（每次两步）和慢指针（每次一步）从起点出发
     * 当两指针相遇时，确认存在环
-    $$\begin{aligned} slow &= nums[slow] \quad \text{(步长1)} \\\ fast &= nums[nums[fast]] \quad \text{(步长2)} \end{aligned}$$
+      $$\begin{aligned} slow &= nums[slow] \quad \text{(步长1)} \\\ fast &= nums[nums[fast]] \quad \text{(步长2)} \end{aligned}$$
 2. **寻找环入口**：
     * 将快指针重置到起点
     * 两指针以相同步长移动，再次相遇点即为环入口
-    $$\begin{cases} fast &= nums[0] \\\ slow &= \text{相遇点位置} \end{cases}$$
+      $$\begin{cases} fast &= nums[0] \\\ slow &= \text{相遇点位置} \end{cases}$$
 
 本身这是一个链表的思路，不过可以利用数组下标与值的对应关系来形成隐式链表:
 
@@ -753,3 +761,51 @@ fast = nums[nums[4]] → nums[2] → 4  # 4→2→4（第二次跳仍在4）
         ↓
 0 → 1 → 3 → 2 → 4 → 2...
 ```
+
+### 完成「力扣」第 442 题：[数组中重复的数据](https://leetcode.cn/problems/find-all-duplicates-in-an-array)
+
+[../src/sort/leetcode/FindAllDuplicatesInAnArray.java](../src/sort/leetcode/FindAllDuplicatesInAnArray.java)
+
+```java
+public class FindAllDuplicatesInAnArray {
+
+    public List<Integer> findDuplicates(int[] nums) {
+        List<Integer> result = new ArrayList<>();
+        for (int i = 0; i < nums.length; i++) {
+            int num = Math.abs(nums[i]);   // 取绝对值确保索引正确
+            int index = num - 1;           // 计算实际索引
+            if (nums[index] < 0) {
+                result.add(num);           // 重复时加入结果
+            } else {
+                nums[index] = -nums[index];// 标记为已访问
+            }
+        }
+        return result;
+    }
+}
+```
+
+#### 核心思路
+
+利用数组本身的正负性标记元素是否重复。遍历数组时，将元素对应的索引位置取反作为标记。
+如果第二次遇到同一元素时发现对应索引位置已为负数，则说明该元素重复。
+
+#### 算法步骤
+
+1. **遍历数组**：逐个处理元素，用绝对值获取原始值。
+2. **索引计算**：元素值 $num$ 对应的索引为 $index = \text{abs}(num) - 1$ 。
+3. **标记与检测**：
+    * 若`nums[index]`为正数，将其取反（标记为已出现）。
+    * 若`nums[index]`为负数，说明该元素已出现过一次，将 $\text{abs}(num)$ 加入结果。
+
+#### 细节与注意事项
+
+1. **绝对值的必要性**：元素可能在遍历中被修改为负数，因此必须用`Math.abs()`获取原始值。
+2. **索引范围**：元素值范围是 $[1, n]$ ，转换为索引 $[0, n-1]$ 不会越界。
+3. **空间复杂度**：结果列表不占用额外空间复杂度，算法满足 $O(1)$ 要求。
+4. **重复判断**：仅当第二次遇到元素时才会加入结果，确保每个重复元素只记录一次。
+
+#### 复杂度分析
+
+* **时间复杂度**： $O(n)$ ，仅需一次遍历。
+* **空间复杂度**： $O(1)$ ，除结果列表外无额外存储。
