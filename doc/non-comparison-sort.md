@@ -647,3 +647,109 @@ $$\text{总对数} = \frac{n}{2} \quad \text{每对和} = n+1$$
 因此：
 
 $$总和 = \frac{n}{2} × (n+1) = \frac{n(n+1)}{2}$$
+
+### 完成「力扣」第 287 题：[寻找重复数](https://leetcode.cn/problems/find-the-duplicate-number/)
+
+[../src/sort/leetcode/FindTheDuplicateNumber.java](../src/sort/leetcode/FindTheDuplicateNumber.java)
+
+```java
+public class Solution {
+    public int findDuplicate(int[] nums) {
+        // 初始化快慢指针
+        int slow = nums[0];
+        int fast = nums[0];
+        
+        // 第一阶段：检测环的存在
+        do {
+            slow = nums[slow];          // 慢指针步长1
+            fast = nums[nums[fast]];    // 快指针步长2
+        } while (slow != fast);
+        
+        // 第二阶段：寻找环入口
+        fast = nums[0]; // 重置快指针到起点
+        while (slow != fast) {
+            slow = nums[slow];
+            fast = nums[fast];
+        }
+        
+        return slow;    // 环入口即重复数
+    }
+}
+```
+
+这道题利用快慢指针的方式实现，一开始理解这里的快慢指针思路可能会有点混乱
+
+#### 算法步骤
+
+1. **检测环的存在**：
+    * 快指针（每次两步）和慢指针（每次一步）从起点出发
+    * 当两指针相遇时，确认存在环
+    $$\begin{aligned} slow &= nums[slow] \quad \text{(步长1)} \\\ fast &= nums[nums[fast]] \quad \text{(步长2)} \end{aligned}$$
+2. **寻找环入口**：
+    * 将快指针重置到起点
+    * 两指针以相同步长移动，再次相遇点即为环入口
+    $$\begin{cases} fast &= nums[0] \\\ slow &= \text{相遇点位置} \end{cases}$$
+
+本身这是一个链表的思路，不过可以利用数组下标与值的对应关系来形成隐式链表:
+
+* **节点定义**：下标 $i$ 表示节点，值 $nums[i]$ 表示指向的下一个节点
+* **重复数效应**：至少两个不同节点指向同一后继节点，形成环
+
+#### 举例
+
+数组 ``[1,3,4,2,2]``
+
+```text
+初始位置：
+slow = 0  # 起点
+fast = 0  # 起点
+
+第1轮循环：
+slow = nums[0] → 1  # 慢指针跳到索引1
+fast = nums[nums[0]] → nums[1] → 3  # 快指针跳两次：0→1→3
+位置：slow在1（值3），fast在3（值2）
+
+第2轮循环：
+slow = nums[1] → 3  # 1→3
+fast = nums[nums[3]] → nums[2] → 4  # 3→2→4
+位置：slow在3（值2），fast在4（值2）
+
+第3轮循环：
+slow = nums[3] → 2  # 3→2
+fast = nums[nums[4]] → nums[2] → 4  # 4→2→4
+位置：slow在2（值4），fast在4（值2）
+
+第4轮循环：
+slow = nums[2] → 4  # 2→4
+fast = nums[nums[4]] → nums[2] → 4  # 4→2→4（第二次跳仍在4）
+位置：slow和fast都在4 → 相遇了！即检测到了环
+```
+
+* **快指针像兔子跑得快**：
+    * 每次比慢指针多跑1步（相对速度）
+    * 遇到环时，兔子会不断绕圈，最终被乌龟追上
+* **为什么能检测环**：
+    * 如果没有环 → 兔子会跑到终点（但在本题不可能）
+    * 如果有环 → 兔子会绕圈，乌龟最终会进入环被追上
+
+随后就是第二阶段，环的存在还不能证明重复
+
+```text
+阶段二操作：
+让两个指针：
+1. 一个从起点0出发
+2. 一个从相遇点4出发
+都走L=3步（示例中L=3）：
+   - 起点指针：0→1→3→2（到达入口）
+   - 相遇点指针：4→2→4→2（绕环1圈后也到入口）
+```
+
+算法中我们需要让一个指针重新走一次"起点到入口"的路径，才能计算出准确距离。所以算法需要重制快指针而不是让快指针留在相遇点。
+
+因为重复数是环的唯一入口，这个方法必然会在入口相遇。因此算法不会漏掉重复数。
+
+```text
+        环入口（重复数）
+        ↓
+0 → 1 → 3 → 2 → 4 → 2...
+```
