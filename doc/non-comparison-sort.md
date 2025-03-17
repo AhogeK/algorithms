@@ -695,13 +695,13 @@ public class Solution {
     * 快指针（每次两步）和慢指针（每次一步）从起点出发
     * 当两指针相遇时，确认存在环
      
-      $$\begin{aligned} slow &= nums[slow] \quad \text{(步长1)} \\\ fast &= nums[nums[fast]] \quad \text{(步长2)} \end{aligned}$$
+$$\begin{aligned} slow &= nums[slow] \quad \text{(步长1)} \\\ fast &= nums[nums[fast]] \quad \text{(步长2)} \end{aligned}$$
      
 2. **寻找环入口**：
     * 将快指针重置到起点
     * 两指针以相同步长移动，再次相遇点即为环入口
      
-      $$\begin{cases} fast &= nums[0] \\\ slow &= \text{相遇点位置} \end{cases}$$
+$$\begin{cases} fast &= nums[0] \\\ slow &= \text{相遇点位置} \end{cases}$$
 
 本身这是一个链表的思路，不过可以利用数组下标与值的对应关系来形成隐式链表:
 
