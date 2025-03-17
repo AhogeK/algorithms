@@ -809,3 +809,37 @@ public class FindAllDuplicatesInAnArray {
 
 * **时间复杂度**： $O(n)$ ，仅需一次遍历。
 * **空间复杂度**： $O(1)$ ，除结果列表外无额外存储。
+
+### 完成「力扣」第 448 题：[找到所有数组中消失的数字](https://leetcode.cn/problems/find-all-numbers-disappeared-in-an-array)
+
+[../src/sort/leetcode/FindAllNumbersDisappearedInAnArray.java](../src/sort/leetcode/FindAllNumbersDisappearedInAnArray.java)
+
+```java
+public List<Integer> findDisappearedNumbers(int[] nums) {
+    List<Integer> result = new ArrayList<>();
+    // 第一次遍历：标记已出现数字的索引位置
+    for (int num : nums) {
+        int index = Math.abs(num) - 1;    // 取绝对值避免索引越界
+        if (nums[index] > 0) {            // 避免重复取反
+            nums[index] = -nums[index];   // 标记为负数
+        }
+    }
+    // 第二次遍历：收集未标记的索引
+    for (int i = 0; i < nums.length; i++) {
+        if (nums[i] > 0) {
+            result.add(i + 1);            // 索引i对应数字i+1未出现
+        }
+    }
+    return result;
+}
+```
+
+该题的核心思路依旧是通过**数组正负性标记法**
+
+1. **标记出现过的数字**：遍历数组时，将每个元素 $num$ 对应的索引位置（ $index = |num| - 1$ ）的值取反。若该位置已为负数，说明 $num$ 已出现过。
+2. **收集未标记的索引**：再次遍历数组，所有正数位置的索引 $i$ 对应的数字 $i+1$ 即为缺失的数字。
+
+#### 复杂度分析
+
+* **时间复杂度**： $O(n)$ ，两次独立遍历。
+* **空间复杂度**： $O(1)$ （结果列表不计入空间复杂度）。
