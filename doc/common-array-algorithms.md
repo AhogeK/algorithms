@@ -124,3 +124,98 @@ class Solution {
 * **时间复杂度**： $O(n)$ ，每个字符被访问两次（左右指针各一次）。
 * **空间复杂度**： $O(|\Sigma|)$ ， $\Sigma$ 为字符集大小（ASCII字符最多128个）。
 
+## 滑动窗口经典问题
+
+### 例题：「力扣」第 76 题：[最小覆盖子串](https://leetcode.cn/problems/minimum-window-substring/)
+
+```java
+public class MinimumWindowSubstring {
+
+    public String minWindow(String s, String t) {
+        // 初始化阶段
+        int[] need = new int[128]; // 记录t中每个字符的需求量
+        int[] window = new int[128]; // 记录当前窗口中字符的统计量
+        int count = 0; // t中不同字符的种类数
+
+        // 初始化need数组并统计字符种类
+        for (char c : t.toCharArray()) {
+            if (need[c] == 0) count++; // 首次出现时增加种类计数
+            need[c]++; // 更新需求量
+        }
+
+        // 滑动窗口主循环
+        int left = 0, right = 0; // 窗口的左右指针
+        int fit = 0; // 满足需求的字符种类数
+        int start = 0, minLen = Integer.MAX_VALUE;
+        final int n = s.length();
+        while (right < n) {
+            char cur = s.charAt(right);
+
+            // 仅处理目标字符 （need[c] > 0）
+            if (need[cur] > 0) {
+                window[cur]++;
+                if (window[cur] == need[cur]) {
+                    fit++; //当数量精确匹配时增加fit
+                }
+            }
+            right++; //右指针始终右移
+
+            // 当所有字符满足需求时收缩窗口
+            while (fit == count) {
+                // 更新最小窗口
+                if (right - left < minLen) {
+                    minLen = right - left;
+                    start = left;
+                    if (minLen == t.length()) break; // 提前终止优化
+                }
+
+                // 处理左指针移动
+                char leftChar = s.charAt(left);
+                if (need[leftChar] > 0) {
+                    if (window[leftChar] == need[leftChar]) {
+                        fit--; // 移出前数量正好满足需求，移出后不满足
+                    }
+                    window[leftChar]--;
+                }
+                left++;
+            }
+
+            if (minLen == t.length()) break; // 外层提前终止
+        }
+        return minLen == Integer.MAX_VALUE ? "" : s.substring(start, start + minLen);
+    }
+}
+```
+
+该题核心思路使用**滑动窗口** + 数组计数在字符串 $s$ 中寻找包含 $t$ 所有字符的最短子串，通过两个指针 $left$ 和 $right$ 动态维护窗口，时间复杂度为 $O(n)$ 。
+
+#### 1. 算法框架
+
+* **滑动窗口**：维护窗口 `[left, right]`，动态扩展和收缩
+
+* **数组计数**：用两个长度为128的数组（ASCII字符集）：
+
+  * `need`：记录 `t` 中每个字符的需求量
+  * `window`：记录当前窗口中字符的统计量
+
+* **验证条件**：`fit` 表示窗口中满足需求的字符种类数
+
+#### 关键逻辑解析
+
+1. **满足条件判断**：
+
+   * `fit == count`表示窗口中每个字符的数量都**至少达到**$t$中的需求
+   * 例如：t="AABC"（count=3），当A、B、C在窗口中分别出现至少2、1、1次时满足条件
+
+2. **窗口更新策略**：
+
+   ```text
+   未满足条件 → 右扩窗口
+   满足条件 → 左缩窗口直到不满足
+   ```
+
+3. **复杂度分析**：
+
+   * 每个字符最多被左右指针各访问一次 → $O(n)$
+
+*这个解法通过精妙的双指针配合计数统计，高效地解决了最小覆盖子串问题。理解这个模板后，可以应对许多滑动窗口类题目。*
