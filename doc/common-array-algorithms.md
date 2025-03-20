@@ -219,3 +219,60 @@ public class MinimumWindowSubstring {
    * 每个字符最多被左右指针各访问一次 → $O(n)$
 
 *这个解法通过精妙的双指针配合计数统计，高效地解决了最小覆盖子串问题。理解这个模板后，可以应对许多滑动窗口类题目。*
+
+### 完成「力扣」第 209 题：[长度最小的子数组](https://leetcode.cn/problems/minimum-size-subarray-sum)
+
+```java
+public class MinimumSizeSubarraySum {
+    
+    public int minSubArrayLen(int target, int[] nums) {
+        int left = 0;
+        int sum = 0;
+        int minLen = Integer.MAX_VALUE;
+        
+        for (int right = 0; right < nums.length; right++) {
+            sum += nums[right];
+            while (sum >= target) {
+                int currentLen = right - left + 1;
+                if (currentLen < minLen) {
+                    minLen = currentLen;
+                }
+                sum -= nums[left];
+                left++;
+            }
+        }
+        
+        return minLen == Integer.MAX_VALUE ? 0 : minLen;
+    }
+}
+```
+
+#### **算法思路：滑动窗口**
+
+1. **核心思想**：\
+   利用双指针维护一个滑动窗口，通过动态调整窗口大小来寻找满足条件的最小窗口长度。
+
+2. **操作步骤**：
+
+   * **初始化**左右指针 `left = 0` 和 `right = 0`，窗口和 `sum = 0`，最小长度 `minLen = Integer.MAX_VALUE`。
+   * **扩展右边界**：移动 `right` 指针累加元素，直到窗口和 ≥ `target`。
+   * **收缩左边界**：当窗口和满足条件时，尝试移动 `left` 指针缩小窗口，同时更新最小长度。
+   * **终止条件**：`right` 遍历完数组后停止。
+
+#### **关键细节点**
+
+1. **数组元素均为正整数**：\
+   这一特性保证了当 `sum` 增加时窗口只能通过移动左边界来减少，使得算法时间复杂度为 $O(n)$ 。
+
+2. **窗口长度计算**：\
+   `right - left + 1` 是因为数组下标从 `0` 开始。例如，当 `left = 0` 且 `right = 0` 时，窗口长度为 `1`。
+
+3. **更新最小长度的时机**：\
+   必须在每次窗口满足条件时立即更新，因为后续收缩左边界可能导致窗口不再满足条件。
+
+#### **复杂度分析**
+
+* **时间复杂度**： $O(n)$ \
+  每个元素最多被访问两次（被 `right` 和 `left` 各访问一次）。
+* **空间复杂度**： $O(1)$ \
+  仅使用常数级别的额外空间。
