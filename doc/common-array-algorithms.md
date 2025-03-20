@@ -20,6 +20,12 @@
       * [**算法思路：固定窗口滑动**](#算法思路固定窗口滑动)
       * [**关键细节点**](#关键细节点-1)
       * [**复杂度分析**](#复杂度分析-2)
+    * [完成「力扣」第 567 题：字符串的排列](#完成力扣第-567-题字符串的排列)
+      * [算法思路](#算法思路)
+        * [滑动窗口 + 哈希表计数](#滑动窗口--哈希表计数)
+        * [关键变量](#关键变量)
+      * [细节点剖析](#细节点剖析)
+      * [复杂度分析](#复杂度分析-3)
 <!-- TOC -->
 
 # 数组里常见的两类算法
@@ -376,3 +382,84 @@ public class FindAllAnagramsInAString {
   * `n` 为 `s` 的长度，每个字符最多被左右指针各访问一次。
 * **空间复杂度**： $O(1)$
   * 固定长度的数组 `pCount` 和 `currentCount`（长度26）。
+
+### 完成「力扣」第 567 题：[字符串的排列](https://leetcode.cn/leetbook/read/learning-algorithms-with-leetcode)
+
+[../src/array/PermutationInString.java](../src/array/PermutationInString.java)
+
+```java
+public class PermutationInString {
+
+    public boolean checkInclusion(String s1, String s2) {
+        int len1 = s1.length(), len2 = s2.length();
+        if (len1 > len2) return false;
+
+        int[] hash = new int[26];
+        // 统计s1字符频率
+        for (char c : s1.toCharArray()) {
+            hash[c - 'a']++;
+        }
+
+        // 初始化剩余需要匹配的字符数
+        int requiredChars = len1;
+
+        // 处理初始窗口（s2的前len1个字符）
+        for (int i = 0; i < len1; i++) {
+            int idx = s2.charAt(i) - 'a';
+            // 若该字符是s1需要的，减少需匹配数
+            if (hash[idx]-- > 0) {
+                requiredChars--;
+            }
+        }
+        if (requiredChars == 0) return true;
+
+        // 滑动窗口：每次移动一位
+        for (int right = len1; right < len2; right++) {
+            int leftChar = s2.charAt(right - len1) - 'a'; // 是要移出的，所以长度还是2
+            int rightChar = s2.charAt(right) - 'a';
+
+            // 处理左边界字符移出
+            if (hash[leftChar]++ >= 0) { // 若该字符原属于s1，需恢复匹配需求
+                requiredChars++;
+            }
+
+            if (hash[rightChar]-- > 0) { // 若该字符是s1需要的，减少需匹配数
+                requiredChars--;
+            }
+
+            if (requiredChars == 0) return true;
+        }
+        return false;
+    }
+}
+```
+
+#### 算法思路
+
+##### 滑动窗口 + 哈希表计数
+
+1. **边界处理**：若`s1`长度 > `s2`长度，直接返回`false`。
+2. **哈希表初始化**：统计`s1`的字符频率。
+3. **初始窗口处理**：检查`s2`的前`len(s1)`个字符是否匹配。
+4. **滑动窗口**：每次移动窗口右边界，动态维护字符频率计数和匹配状态。
+
+##### 关键变量
+
+* `hash[26]`：记录每个字符的剩余需要匹配的次数（负数表示冗余）。
+* `requiredChars`：剩余需要匹配的字符总数（初始为`s1`的长度）。
+
+#### 细节点剖析
+
+1. **窗口长度固定**：始终为`len(s1)`，通过`right`从`len(s1)`开始，每次移动一位。
+
+2. **哈希表动态更新**：
+
+   * **移出左边界字符**：若该字符原本属于`s1`（`hash[leftChar] >= 0`），则移出后需增加`requiredChars`。
+   * **新增右边界字符**：若该字符在`s1`中有剩余需求（`hash[rightChar] > 0`），则减少`requiredChars`。
+
+3. **提前终止条件**：一旦`requiredChars == 0`，立即返回`true`。
+
+#### 复杂度分析
+
+1. **时间复杂度**： $O(n)$ ，其中$n$是`s2`的长度。每个字符最多进入和离开窗口各一次。
+2. **空间复杂度**： $O(1)$ ，固定长度的哈希表（26个字符）。
