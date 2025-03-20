@@ -8,6 +8,18 @@
       * [核心思路：滑动窗口 + 哈希表](#核心思路滑动窗口--哈希表)
       * [代码详解](#代码详解)
       * [复杂度分析](#复杂度分析)
+  * [滑动窗口经典问题](#滑动窗口经典问题)
+    * [例题：「力扣」第 76 题：最小覆盖子串](#例题力扣第-76-题最小覆盖子串)
+      * [1. 算法框架](#1-算法框架)
+      * [关键逻辑解析](#关键逻辑解析)
+    * [完成「力扣」第 209 题：长度最小的子数组](#完成力扣第-209-题长度最小的子数组)
+      * [**算法思路：滑动窗口**](#算法思路滑动窗口)
+      * [**关键细节点**](#关键细节点)
+      * [**复杂度分析**](#复杂度分析-1)
+    * [完成「力扣」第 438 题：找到字符串中所有字母异位词](#完成力扣第-438-题找到字符串中所有字母异位词)
+      * [**算法思路：固定窗口滑动**](#算法思路固定窗口滑动)
+      * [**关键细节点**](#关键细节点-1)
+      * [**复杂度分析**](#复杂度分析-2)
 <!-- TOC -->
 
 # 数组里常见的两类算法
@@ -222,6 +234,8 @@ public class MinimumWindowSubstring {
 
 ### 完成「力扣」第 209 题：[长度最小的子数组](https://leetcode.cn/problems/minimum-size-subarray-sum)
 
+[../src/array/MinimumSizeSubarraySum.java](../src/array/MinimumSizeSubarraySum.java)
+
 ```java
 public class MinimumSizeSubarraySum {
     
@@ -276,3 +290,89 @@ public class MinimumSizeSubarraySum {
   每个元素最多被访问两次（被 `right` 和 `left` 各访问一次）。
 * **空间复杂度**： $O(1)$ \
   仅使用常数级别的额外空间。
+
+### 完成「力扣」第 438 题：[找到字符串中所有字母异位词](https://leetcode.cn/problems/find-all-anagrams-in-a-string/)
+
+[../src/array/FindAllAnagramsInAString.java](../src/array/FindAllAnagramsInAString.java)
+
+```java
+public class FindAllAnagramsInAString {
+
+    public List<Integer> findAnagrams(String s, String p) {
+        List<Integer> result = new ArrayList<>();
+
+        if (s.length() < p.length()) return result;
+
+        int[] pCount = new int[26];
+        int[] currentCount = new int[26];
+        int valid = 0; // 记录满足频率要求的字符种类数
+        int uniqueChars = 0; // p中不同字符的数量
+
+        // 统计p的字符频率
+        for (char c : p.toCharArray()) {
+            if (pCount[c - 'a'] == 0) uniqueChars++;
+            pCount[c - 'a']++;
+        }
+
+        int left = 0;
+        for (int right = 0; right < s.length(); right++) {
+            char c = s.charAt(right);
+            currentCount[c - 'a']++;
+
+            // 当新增字符的频率与p中该字符的频率一致时，valid增加
+            if (currentCount[c - 'a'] == pCount[c - 'a']) {
+                valid++;
+            }
+
+            // 窗口大小超过p长度时，左指针右移
+            if (right - left + 1 > p.length()) {
+                char leftChar = s.charAt(left);
+                if (currentCount[leftChar - 'a'] == pCount[leftChar - 'a']) {
+                    valid--;
+                }
+                currentCount[leftChar - 'a']--;
+                left++;
+            }
+
+            // 当窗口大小等于p长度且valid匹配时，记录索引
+            if (right - left + 1 == p.length() && valid == uniqueChars) {
+                result.add(left);
+            }
+        }
+
+        return result;
+    }
+}
+```
+
+#### **算法思路：固定窗口滑动**
+
+1. **核心思想**：\
+   维护一个长度固定为 `p.length()` 的滑动窗口，统计窗口内字符频率是否与 `p` 的字符频率一致。
+
+2. **操作步骤**：
+
+   * 统计 `p` 的字符频率，存入数组 `pCount`。
+   * 初始化窗口的左右指针 `left=0` 和 `right=0`，统计窗口内字符频率的数组 `currentCount`。
+   * 维护计数器 `valid` 表示当前窗口内满足 `p` 字符频率的字符种类数。
+   * 当窗口大小等于 `p` 的长度时，若 `valid` 等于 `p` 的字符种类数，则记录起始索引。
+
+#### **关键细节点**
+
+1. **固定窗口大小**：\
+   窗口大小必须严格等于 `p` 的长度，因此当 `right - left + 1 > p.length()` 时必须收缩左边界。
+
+2. **字符频率的精确匹配**：\
+   仅当某个字符在窗口内的频率 **等于** `p` 中该字符的频率时，才会计入 `valid`。例如，若 `p` 中 `a` 出现2次，窗口内 `a` 出现2次才会触发 `valid++`。
+
+3. **计数器的维护**：
+
+   * 右指针扩展时，若字符频率从 `pCount[c]-1` 增加到 `pCount[c]`，则 `valid++`。
+   * 左指针收缩时，若字符频率从 `pCount[c]` 减少到 `pCount[c]-1`，则 `valid--`。
+
+#### **复杂度分析**
+
+* **时间复杂度**： $O(n)$
+  * `n` 为 `s` 的长度，每个字符最多被左右指针各访问一次。
+* **空间复杂度**： $O(1)$
+  * 固定长度的数组 `pCount` 和 `currentCount`（长度26）。
