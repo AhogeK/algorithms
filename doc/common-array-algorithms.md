@@ -26,6 +26,10 @@
         * [关键变量](#关键变量)
       * [细节点剖析](#细节点剖析)
       * [复杂度分析](#复杂度分析-3)
+    * [完成「力扣」第 424 题：替换后的最长重复字符](#完成力扣第-424-题替换后的最长重复字符)
+      * [**算法思路：滑动窗口**](#算法思路滑动窗口-1)
+      * [**关键细节点**](#关键细节点-2)
+      * [**复杂度分析**](#复杂度分析-4)
 <!-- TOC -->
 
 # 数组里常见的两类算法
@@ -463,3 +467,64 @@ public class PermutationInString {
 
 1. **时间复杂度**： $O(n)$ ，其中$n$是`s2`的长度。每个字符最多进入和离开窗口各一次。
 2. **空间复杂度**： $O(1)$ ，固定长度的哈希表（26个字符）。
+
+### 完成「力扣」第 424 题：[替换后的最长重复字符](https://leetcode.cn/problems/longest-repeating-character-replacement/)
+
+[../src/array/LongestRepeatingCharacterReplacement.java](../src/array/LongestRepeatingCharacterReplacement.java)
+
+```java
+public class LongestRepeatingCharacterReplacement {
+
+    public int characterReplacement(String s, int k) {
+        int[] count = new int[26];
+        int left = 0, maxCount = 0, result = 0;
+        for (int right = 0; right < s.length(); right++) {
+            char c = s.charAt(right);
+            count[c - 'A']++;
+            maxCount = Math.max(maxCount, count[c - 'A']); // 更新当前窗口的最大出现次数
+
+            // 若窗口不满足条件，收缩左边界
+            while (right - left + 1 - maxCount > k) {
+                count[s.charAt(left) - 'A']--; // 移除左边界字符
+                left++;
+            }
+
+            result = Math.max(result, right - left + 1);
+        }
+
+        return result;
+    }
+}
+```
+
+#### **算法思路：滑动窗口**
+
+1. **核心思想**：\
+   维护一个滑动窗口，统计窗口内字符出现的最大次数 `maxCount`。若窗口大小满足 `窗口大小 - maxCount ≤ k`，则可以通过替换 `k` 次字符使窗口内字符全部相同。
+
+2. **操作步骤**：
+
+   * **初始化**：字符计数数组 `count`，左指针 `left = 0`，最大出现次数 `maxCount = 0`，结果 `result = 0`。
+   * **扩展窗口**：右指针 `right` 遍历字符串，更新当前字符的计数和 `maxCount`。
+   * **收缩窗口**：若窗口大小 `right - left + 1 - maxCount > k`，则移动左指针并减少对应字符的计数。
+   * **更新结果**：每次扩展后，记录窗口大小的最大值。
+
+#### **关键细节点**
+
+1. **字符计数数组**：\
+   使用长度为 `26` 的数组统计每个字符的出现次数（仅限大写字母）。
+
+2. **`maxCount` 的动态维护**：
+
+   * 右指针移动时，更新当前字符的计数，并比较是否超过 `maxCount`。
+   * **无需在左指针移动时更新 `maxCount`**：即使 `maxCount` 被高估，窗口收缩后仍能正确判断有效性。
+
+3. **窗口有效性条件**：\
+   窗口大小 `right - left + 1` 必须满足 `窗口大小 ≤ maxCount + k`，否则需收缩左边界。
+
+#### **复杂度分析**
+
+| 指标        | 值      | 说明                 |
+|-----------|--------|--------------------|
+| **时间复杂度** | $O(n)$ | 每个字符被左右指针各访问一次     |
+| **空间复杂度** | $O(1)$ | 固定长度的字符计数数组（26个元素） |
