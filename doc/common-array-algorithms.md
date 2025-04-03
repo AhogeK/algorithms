@@ -51,6 +51,9 @@
     * [完成「力扣」第 16 题：最接近的三数之和](#完成力扣第-16-题最接近的三数之和)
       * [算法思路](#算法思路-1)
       * [复杂度分析](#复杂度分析-6)
+    * [完成「力扣」第 167 题：两数之和 II - 输入有序数组](#完成力扣第-167-题两数之和-ii---输入有序数组)
+      * [算法思路](#算法思路-2)
+      * [复杂度分析](#复杂度分析-7)
 <!-- TOC -->
 
 # 数组里常见的两类算法
@@ -797,6 +800,76 @@ public class ThreeSumClosest {
     * 对于大多数语言内置的排序实现，空间复杂度通常是 $O(\log n)$
 
 这种"排序 + 双指针"的方法是解决此类问题的最优解，它将时间复杂度从暴力枚举的 $O(n^3)$ 降低到了 $O(n^2)$ 。
+
+### 完成「力扣」第 167 题：[两数之和 II - 输入有序数组](https://leetcode.cn/problems/two-sum-ii-input-array-is-sorted)
+
+[../src/array/TwoSumIIInputArrayIsSorted.java](../src/array/TwoSumIIInputArrayIsSorted.java)
+
+```java
+public class ThreeSumClosest {
+
+    public int threeSumClosest(int[] nums, int target) {
+        // 首先对数组进行排序
+        Arrays.sort(nums);
+
+        // 初始化最接近的和为前三个元素的和
+        int closestSum = nums[0] + nums[1] + nums[2];
+
+        // 遍历数组，固定第一个元素
+        for (int i = 0; i < nums.length - 2; i++) {
+            // 跳过重复元素
+            if (i > 0 && nums[i] == nums[i - 1]) continue;
+
+            // 使用双指针查找另外两个数
+            int left = i + 1;
+            int right = nums.length - 1;
+
+            while (left < right) {
+                int currentSum = nums[i] + nums[left] + nums[right];
+
+                // 如果找到完全匹配的和直接返回
+                if (currentSum == target) {
+                    return target;
+                }
+
+                // 更新最接近的和
+                if (Math.abs(currentSum - target) < Math.abs(closestSum - target)) {
+                    closestSum = currentSum;
+                }
+
+                // 根据当前和与目标值的关系调整指针
+                if (currentSum < target) {
+                    left++;
+                } else {
+                    right--;
+                }
+            }
+        }
+        return closestSum;
+    }
+}
+```
+
+#### 算法思路
+
+最优解法是使用**双指针技术**：
+
+1. 使用两个指针：一个指向数组开头（`left`），一个指向数组末尾（`right`）
+
+2. 计算两个指针所指元素的和，与目标值比较：
+
+    * 如果和等于目标值，找到答案
+    * 如果和小于目标值，增大 `left` 指针（向右移动）
+    * 如果和大于目标值，减小 `right` 指针（向左移动）
+
+3. 重复以上步骤直到找到答案
+
+这种方法利用了数组已排序的特性，通过有针对性地移动指针来快速找到目标值。
+
+#### 复杂度分析
+
+* **时间复杂度**： $O(n)$ ，其中 $n$ 是数组的长度。在最坏情况下，我们需要遍历整个数组一次。
+* **空间复杂度**： $O(1)$ ，只使用了常量级的额外空间（两个指针变量）。
 
 ---
 
