@@ -19,6 +19,7 @@ public class TrappingRainWater {
             leftMax = Math.max(leftMax, height[left]);
             rightMax = Math.max(rightMax, height[right]);
 
+            //  指针动后左边小于右边，此时如果左边最大值（可能是之前的）大于当前左指针的值，则当前位置可以储水
             if (leftMax < rightMax) {
                 waterTrapped += leftMax - height[left];
                 left++;

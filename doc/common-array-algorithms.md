@@ -62,6 +62,9 @@
       * [细节及注意事项](#细节及注意事项)
       * [复杂度分析](#复杂度分析-8)
       * [为什么双指针法是最优解？](#为什么双指针法是最优解)
+    * [完成「力扣」第 11 题：盛最多水的容器](#完成力扣第-11-题盛最多水的容器)
+      * [算法思路 - 双指针法](#算法思路---双指针法)
+      * [复杂度分析](#复杂度分析-9)
 <!-- TOC -->
 
 # 数组里常见的两类算法
@@ -983,6 +986,56 @@ public class TrappingRainWater {
 其他方法如动态规划和单调栈虽然时间复杂度也是 $O(n)$ ，但空间复杂度为 $O(n)$
 ，需要额外的数组或栈来存储中间状态。在这个问题上，双指针法在保持相同时间复杂度的前提下，优化了空间复杂度，因此是最优解。
 
+### 完成「力扣」第 11 题：[盛最多水的容器](https://leetcode.cn/problems/container-with-most-water)
+
+[../src/array/ContainerWithMostWater.java](../src/array/ContainerWithMostWater.java)
+
+```java
+public class ContainerWithMostWater {
+
+    public int maxArea(int[] height) {
+        int maxArea = 0;
+        int left = 0;
+        int right = height.length - 1;
+
+        while (left < right) {
+            int width = right - left;
+            int minHeight = Math.min(height[left], height[right]);
+            int currentArea = width * minHeight;
+
+            maxArea = Math.max(maxArea, currentArea);
+
+            if (height[left] < height[right]) {
+                left++;
+            } else {
+                right--;
+            }
+        }
+
+        return maxArea;
+    }
+}
+```
+
+#### 算法思路 - 双指针法
+
+虽然可以使用暴力法（时间复杂度 $O(n^2)$ ）枚举所有可能的双线组合，但最优解是使用**双指针法**：
+
+1. 使用两个指针 `left` 和 `right`，初始分别指向数组的两端
+2. 计算当前两指针所形成的容器的容量
+3. 移动两个指针中指向较短垂直线的那个指针（这是关键策略）
+4. 重复步骤2和3，直到两指针相遇
+
+**为什么要移动较短的那个指针？**
+
+* 容器的容量受限于较短的线
+* 如果移动较长的线，容器宽度减小，而高度不变或变小，容量一定减小
+* 只有移动较短的线，才有可能找到更高的线，从而增加容量
+
+#### 复杂度分析
+
+* **时间复杂度**： $O(n)$ ，其中 $n$ 是数组 `height` 的长度。我们只需要遍历数组一次。
+* **空间复杂度**： $O(1)$ ，只使用了常量级的额外空间（几个变量）。
 
 ---
 
