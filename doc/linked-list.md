@@ -10,6 +10,10 @@
     * [例题：「力扣」第 206 题：反转链表](#例题力扣第-206-题反转链表)
       * [算法思路](#算法思路)
       * [复杂度剖析](#复杂度剖析)
+    * [完成「力扣」第 92 题：反转链表 II](#完成力扣第-92-题反转链表-ii)
+      * [算法思路](#算法思路-1)
+      * [细节点分析](#细节点分析)
+      * [复杂度分析](#复杂度分析)
 <!-- TOC -->
 
 # 链表
@@ -118,5 +122,87 @@ public class ReverseLinkedList {
 掌握这种简单的迭代反转方法对于解决其他链表问题非常有帮助。
 关键是要理解指针操作的顺序，并通过保存临时引用防止链表断裂。
 
+### 完成「力扣」第 92 题：[反转链表 II](https://leetcode.cn/problems/reverse-linked-list-ii/)
+
+[../src/linked/ReverseLinkedListII.java](../src/linked/ReverseLinkedListII.java)
+
+```java
+public class ReverseLinkedListII {
+    public ListNode reverseBetween(ListNode head, int left, int right) {
+        // 处理特殊情况
+        if (head == null || left == right) {
+            return head;
+        }
+
+        // 创建虚拟头节点
+        ListNode dummy = new ListNode(0);
+        dummy.next = head;
+
+        // 找到反转部分的前一个节点
+        ListNode pre = dummy;
+        for (int i = 1; i < left; i++) {
+            pre = pre.next;
+        }
+
+        // 当前节点初始化为left位置
+        ListNode curr = pre.next;
+        ListNode next;
+
+        // 执行（right - left）次反转操作
+        for (int i = 0; i < right - left; i++) {
+            next = curr.next;
+            curr.next = next.next;
+            next.next = pre.next;
+            pre.next = next;
+        }
+
+        return dummy.next;
+    }
+}
+```
+
+#### 算法思路
+
+我们将使用"**头插法**"来反转指定区间的链表。头插法的核心思想是：将需要反转部分的节点一个个地插入到反转区间的头部，从而实现反转效果。
+
+具体步骤如下：
+
+1. 处理特殊情况：如果链表为空或只需反转一个节点（`left == right`），直接返回原链表
+2. 创建虚拟头节点，简化操作（特别是当`left=1`时的边界情况）
+3. 定位到反转区间的前一个节点（`pre`）
+4. 将`curr`指针设置为反转区间的第一个节点（`left`位置）
+5. 执行`right-left`次头插操作，每次：
+   * 取出`curr`的下一个节点
+   * 将这个节点插入到反转部分的头部
+   * 更新链接关系
+6. 返回反转后的链表
+
+#### 细节点分析
+
+1. **虚拟头节点**：
+    * 使用虚拟头节点`dummy`可以统一处理`left=1`的特殊情况
+    * 如果不使用虚拟头节点，当`left=1`时需要特殊处理头节点的变化
+2. **指针不变性**：
+    * 整个过程中，`curr`指针始终指向原始链表中`left`位置的节点（示例中的节点2）
+    * 反转完成后，`curr`成为反转部分的尾节点
+    * `pre`始终指向反转部分的前一个节点（示例中的节点1）
+3. **指针操作顺序**：
+    * 操作顺序至关重要，必须按照代码中的顺序执行
+    * 任何顺序的改变都可能导致链表断裂或循环引用
+4. **头插法原理**：
+    * 每次循环都将`curr.next`节点移到反转部分的头部
+    * 通过`right-left`次操作，完成区间内所有节点的反转
+
+#### 复杂度分析
+
+* **时间复杂度**： $O(n)$ ，其中 $n$ 是链表的长度
+  * 定位到`left`位置需要 $O(left)$ 时间
+  * 反转区间内的节点需要 $O(right-left)$ 时间
+  * 总体时间复杂度为 $O(right)$ ，最坏情况下为 $O(n)$
+* **空间复杂度**： $O(1)$
+  * 只使用了几个指针变量，不随输入规模变化
+  * 没有使用额外的数据结构
+
 ---
+
 [返回](../README.md)
