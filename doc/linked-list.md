@@ -314,6 +314,98 @@ public class SwapNodesInPairs {
     * 只使用了几个指针变量，额外空间使用不随输入规模变化
     * 没有使用递归，不需要占用调用栈空间
 
+### 完成「力扣」第 25 题：[K 个一组翻转链表](https://leetcode.cn/problems/reverse-nodes-in-k-group)
+
+[../src/linked/ReverseNodesInKGroup.java](../src/linked/ReverseNodesInKGroup.java)
+
+```java
+public class ReverseNodesInKGroup {
+
+    public ListNode reverseKGroup(ListNode head, int k) {
+        if (head == null || k == 1) {
+            return head;
+        }
+
+        // 创建虚拟头节点
+        ListNode dummy = new ListNode(0);
+        dummy.next = head;
+
+        // 初始化指针
+        ListNode prev = dummy;
+
+        while (true) {
+            // 检查是否有 k 个节点
+            ListNode kth = getKth(prev, k);
+            if (kth == null) break;
+
+            // 当前组的第一个节点和下一组的起始节点
+            ListNode first = prev.next;
+            ListNode nextStart = kth.next;
+
+            // 断开当前组与后续节点的连接
+            kth.next = null;
+
+            // 反转当前组，并连接到前一个节点
+            prev.next = reverseList(first);
+
+            // 连接当前组的尾节点（翻转后的 first）到下一组的起始节点
+            first.next = nextStart;
+
+            prev = first;
+        }
+
+        return dummy.next;
+    }
+
+    private ListNode getKth(ListNode node, int k) {
+        for (int i = 0; i < k; i++) {
+            node = node.next;
+            if (node == null) {
+                return null;
+            }
+        }
+        return node;
+    }
+
+    private ListNode reverseList(ListNode head) {
+        ListNode prev = null;
+        ListNode curr = head;
+
+        while (curr != null) {
+            ListNode next = curr.next;
+            curr.next = prev;
+            prev = curr;
+            curr = next;
+        }
+
+        return prev;
+    }
+}
+```
+
+#### 算法思路
+
+解决这个问题的最优方法是使用**迭代法**，主要步骤如下：
+
+1. 创建虚拟头节点（dummy node）简化边界情况处理
+2. 循环处理每一组 `k` 个节点：
+    * 检查当前位置是否有足够的 `k` 个节点
+    * 如果不足 `k` 个节点，保持原有顺序并结束
+    * 如果有 `k` 个节点，进行翻转操作
+    * 重新连接翻转后的组到主链表
+    * 继续处理下一组节点
+
+#### 复杂度分析
+
+* **时间复杂度**: $O(n)$ ，其中 $n$ 是链表的长度
+    * 每个节点最多被访问两次：一次是在 `getKth` 函数中检查是否有 `k` 个节点，一次是在反转过程中
+    * 对每个节点的操作都是常数时间的
+
+* **空间复杂度**: $O(1)$
+    * 只使用了几个指针变量，不随输入规模增长
+    * 不使用额外的数据结构
+    * 满足题目进阶要求的 $O(1)$ 额外内存空间
+
 
 ---
 
