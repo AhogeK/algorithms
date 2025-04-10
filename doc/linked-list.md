@@ -203,6 +203,60 @@ public class ReverseLinkedListII {
   * 只使用了几个指针变量，不随输入规模变化
   * 没有使用额外的数据结构
 
+### 完成「力扣」第 203 题：[移除链表元素](https://leetcode.cn/problems/remove-linked-list-elements)
+
+[../src/linked/RemoveLinkedListElements.java](../src/linked/RemoveLinkedListElements.java)
+
+```java
+public class RemoveLinkedListElements {
+    
+    public ListNode removeElements(ListNode head, int val) {
+        // 创建虚拟头节点
+        ListNode dummy = new ListNode(0);
+        dummy.next = head;
+        
+        // 当前遍历节点指针
+        ListNode curr = dummy;
+        
+        // 遍历链表
+        while (curr.next != null) {
+            // 如果下一个节点的值等于要删除的值
+            if (curr.next.val == val) {
+                // 删除下一个节点
+                curr.next = curr.next.next;
+            } else {
+                // 否则移动到下一个节点
+                curr = curr.next;
+            }
+        }
+        
+        // 返回新的头节点
+        return dummy.next;
+    }
+}
+```
+
+#### 算法思路
+
+解决这类链表删除问题有一个非常经典的技巧：**使用虚拟头节点（dummy node）**。
+
+基本思路如下：
+
+1. 创建一个虚拟头节点，将其 next 指向原链表的头节点
+2. 遍历链表，检查每个节点的下一个节点
+3. 如果下一个节点的值等于 `val`，则删除该节点（通过修改指针）
+4. 如果不等于 `val`，则移动当前指针到下一个节点
+5. 最后返回虚拟头节点的 next 作为新的头节点
+
+#### 复杂度分析
+
+* **时间复杂度**： $O(n)$ ，其中 $n$ 是链表的长度
+    * 我们需要遍历整个链表一次，对每个节点进行常数次操作
+
+* **空间复杂度**： $O(1)$
+    * 只使用了几个额外的指针变量，不随输入规模变化
+    * 不需要额外的数据结构存储中间结果
+
 ---
 
 [返回](../README.md)
