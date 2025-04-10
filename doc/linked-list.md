@@ -257,6 +257,64 @@ public class RemoveLinkedListElements {
     * 只使用了几个额外的指针变量，不随输入规模变化
     * 不需要额外的数据结构存储中间结果
 
+### 完成「力扣」第 24 题：[两两交换链表中的节点](https://leetcode.cn/problems/swap-nodes-in-pairs)
+
+[../src/linked/SwapNodesInPairs.java](../src/linked/SwapNodesInPairs.java)
+
+```java
+public class SwapNodesInPairs {
+
+    public ListNode swapPairs(ListNode head) {
+        // 创建虚拟头节点
+        ListNode dummy = new ListNode(0);
+        dummy.next = head;
+        
+        // prev指针，指向待交换两个节点的前一个节点
+        ListNode prev = dummy;
+        
+        // 当链表表还有至少两个节点可以交换时
+        while (head != null && head.next != null) {
+            // 定位待交换的两个节点
+            ListNode first = head;
+            ListNode second = head.next;
+            
+            // 进行交换
+            first.next = second.next;
+            second.next = first;
+            prev.next = second;
+            
+            // 更换指针，为下一次交换作准备
+            prev = first;
+            head = first.next;
+        }
+        
+        return dummy.next;
+    }
+}
+```
+
+#### 算法思路
+
+本题的最优解法是**迭代法**，通过维护指针关系来实现节点交换。具体思路如下：
+
+1. 创建一个虚拟头节点（dummy node），简化对原始头节点的处理
+2. 使用三个关键指针：
+    * `prev`: 指向待交换的两个节点的前一个节点
+    * `first`: 指向待交换的第一个节点
+    * `second`: 指向待交换的第二个节点
+3. 对于每一对需要交换的节点，调整它们的指针关系
+4. 更新指针位置，继续处理后面的节点对
+
+#### 复杂度分析
+
+* **时间复杂度**： $O(n)$，其中 $n$ 是链表的长度
+    * 我们需要遍历整个链表，对每一对节点进行常数次操作
+    * 每个节点最多被访问和操作一次
+* **空间复杂度**： $O(1)$
+    * 只使用了几个指针变量，额外空间使用不随输入规模变化
+    * 没有使用递归，不需要占用调用栈空间
+
+
 ---
 
 [返回](../README.md)
