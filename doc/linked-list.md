@@ -26,6 +26,9 @@
     * [完成「力扣」第 143 题：重排链表](#完成力扣第-143-题重排链表)
       * [算法思路](#算法思路-5)
       * [复杂度分析](#复杂度分析-4)
+    * [完成「力扣」第 328 题：奇偶链表](#完成力扣第-328-题奇偶链表)
+      * [算法思路](#算法思路-6)
+      * [复杂度剖析](#复杂度剖析-1)
 <!-- TOC -->
 
 # 链表
@@ -494,6 +497,45 @@ public class ReorderList {
 * **空间复杂度**： $O(1)$
     * 只使用了常数个额外指针变量
     * 没有使用额外的数据结构存储节点
+
+### 完成「力扣」第 328 题：[奇偶链表](https://leetcode.cn/problems/odd-even-linked-list/)
+
+[../src/linked/OddEvenLinkedList.java](../src/linked/OddEvenLinkedList.java)
+
+```java
+public class OddEvenLinkedList {
+    public ListNode oddEvenList(ListNode head) {
+        if (head == null || head.next == null) return head;
+
+        // 初始化奇数节点指针和偶数节点指针
+        ListNode odd = head;
+        ListNode even = head.next;
+        ListNode evenHead = even;
+
+        // 遍历链表，将奇数节点和偶数节点分别连接起来
+        while (even != null && even.next != null) {
+            odd.next = odd.next.next;
+            even.next = even.next.next;
+            odd = odd.next;
+            even = even.next;
+        }
+
+        odd.next = evenHead;
+        return head;
+    }
+}
+```
+
+#### 算法思路
+
+1. **分离奇偶节点**：使用两个指针 `odd` 和 `even` 分别指向奇数位置和偶数位置的节点。
+2. **连接奇偶链表**：遍历链表，将奇数节点和偶数节点分别连接起来。
+3. **合并链表**：最后将奇数链表的末尾连接到偶数链表的头部。
+
+#### 复杂度剖析
+
+* **时间复杂度**： $O(n)$ ，我们只遍历了一次链表。
+* **空间复杂度**： $O(1)$ ，只使用了常数级别的额外空间。
 
 ---
 
