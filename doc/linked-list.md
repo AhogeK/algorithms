@@ -14,6 +14,18 @@
       * [算法思路](#算法思路-1)
       * [细节点分析](#细节点分析)
       * [复杂度分析](#复杂度分析)
+    * [完成「力扣」第 203 题：移除链表元素](#完成力扣第-203-题移除链表元素)
+      * [算法思路](#算法思路-2)
+      * [复杂度分析](#复杂度分析-1)
+    * [完成「力扣」第 24 题：两两交换链表中的节点](#完成力扣第-24-题两两交换链表中的节点)
+      * [算法思路](#算法思路-3)
+      * [复杂度分析](#复杂度分析-2)
+    * [完成「力扣」第 25 题：K 个一组翻转链表](#完成力扣第-25-题k-个一组翻转链表)
+      * [算法思路](#算法思路-4)
+      * [复杂度分析](#复杂度分析-3)
+    * [完成「力扣」第 143 题：重排链表](#完成力扣第-143-题重排链表)
+      * [算法思路](#算法思路-5)
+      * [复杂度分析](#复杂度分析-4)
 <!-- TOC -->
 
 # 链表
@@ -406,6 +418,82 @@ public class ReverseNodesInKGroup {
     * 不使用额外的数据结构
     * 满足题目进阶要求的 $O(1)$ 额外内存空间
 
+### 完成「力扣」第 143 题：[重排链表](https://leetcode.cn/problems/reorder-list)
+
+[../src/linked/ReorderList.java](../src/linked/ReorderList.java)
+
+```java
+public class ReorderList {
+
+    public void reorderList(ListNode head) {
+        if (head == null || head.next == null) {
+            return;
+        }
+
+        // 使用快慢指针找到链表的中点
+        ListNode slow = head;
+        ListNode fast = head;
+        while (fast.next != null && fast.next.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+
+        // 反转链表的后半部分
+        ListNode secondHalf = slow.next;
+        slow.next = null;
+        secondHalf = reverseList(secondHalf);
+
+        // 合并两个链表
+        mergeLists(head, secondHalf);
+    }
+
+    private ListNode reverseList(ListNode head) {
+        ListNode prev = null;
+        ListNode curr = head;
+
+        while (curr != null) {
+            ListNode next = curr.next;
+            curr.next = prev;
+            prev = curr;
+            curr = next;
+        }
+
+        return prev;
+    }
+
+    private void mergeLists(ListNode l1, ListNode l2) {
+        while (l1 != null && l2 != null) {
+            ListNode l1Next = l1.next;
+            ListNode l2Next = l2.next;
+
+            l1.next = l2;
+            l2.next = l1Next;
+
+            l1 = l1Next;
+            l2 = l2Next;
+        }
+    }
+}
+```
+
+#### 算法思路
+
+我们可以将这个问题分解为三个步骤：
+
+1. **找到链表的中点**：使用快慢指针法
+2. **反转后半部分链表**：从中点之后的节点开始反转
+3. **合并两个链表**：将前半部分与反转后的后半部分交替合并
+
+#### 复杂度分析
+
+* **时间复杂度**： $O(n)$
+    * 查找中点： $O(n)$
+    * 反转链表： $O(n/2)$ ≈ $O(n)$
+    * 合并链表： $O(n/2)$ ≈ $O(n)$
+    * 总体： $O(n)$
+* **空间复杂度**： $O(1)$
+    * 只使用了常数个额外指针变量
+    * 没有使用额外的数据结构存储节点
 
 ---
 
