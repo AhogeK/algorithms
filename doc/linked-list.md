@@ -29,6 +29,9 @@
     * [完成「力扣」第 328 题：奇偶链表](#完成力扣第-328-题奇偶链表)
       * [算法思路](#算法思路-6)
       * [复杂度剖析](#复杂度剖析-1)
+    * [完成「力扣」第 61 题：旋转链表](#完成力扣第-61-题旋转链表)
+      * [算法思路](#算法思路-7)
+      * [复杂度剖析](#复杂度剖析-2)
 <!-- TOC -->
 
 # 链表
@@ -536,6 +539,54 @@ public class OddEvenLinkedList {
 
 * **时间复杂度**： $O(n)$ ，我们只遍历了一次链表。
 * **空间复杂度**： $O(1)$ ，只使用了常数级别的额外空间。
+
+### 完成「力扣」第 61 题：[旋转链表](https://leetcode.cn/problems/rotate-list)
+
+```java
+public class RotateList {
+
+    public ListNode rotateRight(ListNode head, int k) {
+        if (head == null || head.next == null || k == 0) return head;
+
+        // 计算链表长度
+        ListNode tail = head;
+        int n = 1;
+        while (tail.next != null) {
+            tail = tail.next;
+            n++;
+        }
+
+        // 计算实际旋转次数
+        k %= n;
+        if (k == 0) return head;
+
+        // 找到新的头结点的前一个节点
+        ListNode newTail = head;
+        for (int i = 0; i < n - k - 1; i++) newTail = newTail.next;
+
+        // 调整指针
+        ListNode newHead = newTail.next;
+        newTail.next = null;
+        tail.next = head;
+
+        return newHead;
+    }
+}
+```
+
+#### 算法思路
+
+1. **计算链表长度**：首先遍历链表，计算其长度 `n`。
+2. **处理 `k` 的有效性**：如果 `k ≥ n`，则实际旋转次数为 `k % n`（因为旋转 `n` 次后链表恢复原状）。
+3. **找到新头节点**：旋转后的新头节点是原链表的第 `n - k` 个节点。
+4. **调整指针**：
+    * 将原链表的尾节点指向原头节点（形成环）。
+    * 将新头节点的前一个节点的 `next` 置为 `null`（断开环）。
+
+#### 复杂度剖析
+
+* **时间复杂度**： $O(n)$ ，其中 `n` 是链表长度。需要遍历链表两次（计算长度和找到新头节点）。
+* **空间复杂度**： $O(1)$ ，仅使用常数额外空间。
 
 ---
 
