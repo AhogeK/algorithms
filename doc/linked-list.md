@@ -32,6 +32,10 @@
     * [完成「力扣」第 61 题：旋转链表](#完成力扣第-61-题旋转链表)
       * [算法思路](#算法思路-7)
       * [复杂度剖析](#复杂度剖析-2)
+    * [完成「力扣」第 234 题：回文链表](#完成力扣第-234-题回文链表)
+      * [算法思路](#算法思路-8)
+      * [算法技巧](#算法技巧)
+      * [复杂度剖析](#复杂度剖析-3)
 <!-- TOC -->
 
 # 链表
@@ -587,6 +591,73 @@ public class RotateList {
 
 * **时间复杂度**： $O(n)$ ，其中 `n` 是链表长度。需要遍历链表两次（计算长度和找到新头节点）。
 * **空间复杂度**： $O(1)$ ，仅使用常数额外空间。
+
+### 完成「力扣」第 234 题：[回文链表](https://leetcode.cn/problems/palindrome-linked-list)
+
+[../src/linked/PalindromeLinkedList.java](../src/linked/PalindromeLinkedList.java)
+
+```java
+public class PalindromeLinkedList {
+    public boolean isPalindrome(ListNode head) {
+        if (head == null || head.next == null) return true;
+
+        // 找到链表中点
+        ListNode slow = head, fast = head;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        
+        // 反转后半部分链表
+        ListNode secondHalf = reverseList(slow);
+        ListNode firstHalf = head;
+        
+        // 比较前后两部分
+        while (secondHalf != null) {
+            if (firstHalf.val != secondHalf.val) return false;
+            firstHalf = firstHalf.next;
+            secondHalf = secondHalf.next;
+        }
+        
+        return true;
+    }
+
+    private ListNode reverseList(ListNode head) {
+        ListNode prev = null;
+        ListNode curr = head;
+        while (curr != null) {
+            ListNode nextTemp = curr.next;
+            curr.next = prev;
+            prev = curr;
+            curr = nextTemp;
+        }
+        return prev;
+    }
+}
+```
+
+#### 算法思路
+
+时间复杂度最优的解法是 $O(n)$ 时间复杂度和 $O(1)$ 空间复杂度的解法，步骤如下：
+
+1. **找到链表的中点**：使用快慢指针法，快指针每次走两步，慢指针每次走一步，当快指针到达末尾时，慢指针正好在中点。
+2. **反转后半部分链表**：从中点开始反转后半部分链表。
+3. **比较前后两部分**：将前半部分和反转后的后半部分逐一比较节点值。
+4. **恢复链表（可选）**：如果需要保持原链表结构，可以再次反转后半部分恢复原状。
+
+#### 算法技巧
+
+* **快慢指针法**：用于高效找到链表的中点
+* **链表反转**：原地反转链表是链表操作的基本功
+* **双指针比较**：前后指针同时遍历比较
+
+#### 复杂度剖析
+
+* **时间复杂度**： $O(n)$
+    * 找中点： $O(n/2)$
+    * 反转后半部分： $O(n/2)$
+    * 比较前后部分： $O(n/2)$
+* **空间复杂度**： $O(1)$ ，只使用了固定数量的指针变量。
 
 ---
 
