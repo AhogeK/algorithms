@@ -36,6 +36,12 @@
       * [算法思路](#算法思路-8)
       * [算法技巧](#算法技巧)
       * [复杂度剖析](#复杂度剖析-3)
+    * [完成「力扣」第 147 题：对链表进行插入排序](#完成力扣第-147-题对链表进行插入排序)
+      * [算法思路](#算法思路-9)
+      * [知识点](#知识点)
+      * [复杂度分析](#复杂度分析-5)
+        * [时间复杂度](#时间复杂度)
+        * [空间复杂度](#空间复杂度)
 <!-- TOC -->
 
 # 链表
@@ -194,9 +200,9 @@ public class ReverseLinkedListII {
 3. 定位到反转区间的前一个节点（`pre`）
 4. 将`curr`指针设置为反转区间的第一个节点（`left`位置）
 5. 执行`right-left`次头插操作，每次：
-   * 取出`curr`的下一个节点
-   * 将这个节点插入到反转部分的头部
-   * 更新链接关系
+    * 取出`curr`的下一个节点
+    * 将这个节点插入到反转部分的头部
+    * 更新链接关系
 6. 返回反转后的链表
 
 #### 细节点分析
@@ -218,12 +224,12 @@ public class ReverseLinkedListII {
 #### 复杂度分析
 
 * **时间复杂度**： $O(n)$ ，其中 $n$ 是链表的长度
-  * 定位到`left`位置需要 $O(left)$ 时间
-  * 反转区间内的节点需要 $O(right-left)$ 时间
-  * 总体时间复杂度为 $O(right)$ ，最坏情况下为 $O(n)$
+    * 定位到`left`位置需要 $O(left)$ 时间
+    * 反转区间内的节点需要 $O(right-left)$ 时间
+    * 总体时间复杂度为 $O(right)$ ，最坏情况下为 $O(n)$
 * **空间复杂度**： $O(1)$
-  * 只使用了几个指针变量，不随输入规模变化
-  * 没有使用额外的数据结构
+    * 只使用了几个指针变量，不随输入规模变化
+    * 没有使用额外的数据结构
 
 ### 完成「力扣」第 203 题：[移除链表元素](https://leetcode.cn/problems/remove-linked-list-elements)
 
@@ -231,15 +237,15 @@ public class ReverseLinkedListII {
 
 ```java
 public class RemoveLinkedListElements {
-    
+
     public ListNode removeElements(ListNode head, int val) {
         // 创建虚拟头节点
         ListNode dummy = new ListNode(0);
         dummy.next = head;
-        
+
         // 当前遍历节点指针
         ListNode curr = dummy;
-        
+
         // 遍历链表
         while (curr.next != null) {
             // 如果下一个节点的值等于要删除的值
@@ -251,7 +257,7 @@ public class RemoveLinkedListElements {
                 curr = curr.next;
             }
         }
-        
+
         // 返回新的头节点
         return dummy.next;
     }
@@ -290,26 +296,26 @@ public class SwapNodesInPairs {
         // 创建虚拟头节点
         ListNode dummy = new ListNode(0);
         dummy.next = head;
-        
+
         // prev指针，指向待交换两个节点的前一个节点
         ListNode prev = dummy;
-        
+
         // 当链表表还有至少两个节点可以交换时
         while (head != null && head.next != null) {
             // 定位待交换的两个节点
             ListNode first = head;
             ListNode second = head.next;
-            
+
             // 进行交换
             first.next = second.next;
             second.next = first;
             prev.next = second;
-            
+
             // 更换指针，为下一次交换作准备
             prev = first;
             head = first.next;
         }
-        
+
         return dummy.next;
     }
 }
@@ -607,18 +613,18 @@ public class PalindromeLinkedList {
             slow = slow.next;
             fast = fast.next.next;
         }
-        
+
         // 反转后半部分链表
         ListNode secondHalf = reverseList(slow);
         ListNode firstHalf = head;
-        
+
         // 比较前后两部分
         while (secondHalf != null) {
             if (firstHalf.val != secondHalf.val) return false;
             firstHalf = firstHalf.next;
             secondHalf = secondHalf.next;
         }
-        
+
         return true;
     }
 
@@ -658,6 +664,77 @@ public class PalindromeLinkedList {
     * 反转后半部分： $O(n/2)$
     * 比较前后部分： $O(n/2)$
 * **空间复杂度**： $O(1)$ ，只使用了固定数量的指针变量。
+
+### 完成「力扣」第 147 题：[对链表进行插入排序](https://leetcode.cn/problems/insertion-sort-list/)
+
+```java
+public class InsertionSortList {
+
+    public ListNode insertionSortList(ListNode head) {
+        if (head == null || head.next == null) return head;
+
+        ListNode dummy = new ListNode(0, head);
+        ListNode lastSorted = head; // 已排序部分的最后一个节点
+        ListNode curr = head.next; // 当前待排序节点
+
+        while (curr != null) {
+            if (lastSorted.val <= curr.val) {
+                // 当前节点大于已排序部分最后一个节点，直接扩展
+                lastSorted = lastSorted.next;
+            } else {
+                // 需要插入，从头开始寻找插入位置
+                ListNode prev = dummy;
+                while (prev.next.val <= curr.val) prev = prev.next;
+                // 执行插入操作（此时prev.val <= curr.val但prev.next.val > curr.val）
+                lastSorted.next = curr.next; // lastSorted去连接当前的下一个待排元素(临时将curr从链表中摘除)
+                curr.next = prev.next; // curr被摘除，curr.next从原先的null变为大于curr的值也就是上面说的prev.next
+                prev.next = curr; // prev.val <= curr.val的，所以最后重新连上即可
+            }
+            // 移动到下一个待排序节点
+            curr = lastSorted.next;
+        }
+
+        return dummy.next;
+    }
+}
+```
+
+#### 算法思路
+
+该算法实现了链表的插入排序，通过维护已排序部分的尾指针`lastSorted`来优化性能。核心思想是将链表分为已排序和未排序两部分，
+逐步将未排序部分的节点插入到已排序部分的正确位置。
+
+#### 知识点
+
+1. **哑节点(dummy node)应用**：
+    * 统一处理在头部插入的特殊情况
+    * 代码示例：`ListNode dummy = new ListNode(0, head)`
+2. **双指针协同**：
+    * `lastSorted`跟踪已排序部分的边界
+    * `prev`在需要插入时用于查找位置
+3. **链表操作四步法**：
+   ```
+   lastSorted.next = curr.next; // 1.摘除当前节点
+   curr.next = prev.next;       // 2.连接后续节点
+   prev.next = curr;            // 3.插入到正确位置
+   ```
+
+#### 复杂度分析
+
+##### 时间复杂度
+* **最佳情况**（已排序链表）： $O(n)$
+    * 每次比较都满足`lastSorted.val <= curr.val`
+    * 只需一次遍历，无需内部循环
+* **最坏情况**（完全逆序）： $O(n^2)$
+    * 每次都需要遍历整个已排序部分
+    * 比较次数为 $1 + 2 + ... + (n-1) = n(n-1)/2$
+* **平均情况**： $O(n^2)$
+
+##### 空间复杂度
+
+* $O(1)$
+    * 只使用了固定数量的指针变量
+    * 排序是原地进行的
 
 ---
 
