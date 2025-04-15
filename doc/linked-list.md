@@ -736,6 +736,69 @@ public class InsertionSortList {
     * 只使用了固定数量的指针变量
     * 排序是原地进行的
 
+## 虚拟头节点
+
+> 在链表算法中，虚拟头节点（Dummy Node）是一种常用的编程技巧，主要用于简化边界条件的处理。
+
+1. **基本概念**
+    * **定义**：一个不存储实际数据的辅助节点，其`next`指针指向真正的链表头节点。
+    * **数学表示**：若原链表为 $L = [a_1, a_2, ..., a_n]$ ，则带虚拟头节点的链表为 
+     $L' = [dummy \rightarrow a_1 \rightarrow a_2 \rightarrow ... \rightarrow a_n]$ 。
+2. **核心作用**
+   * **统一操作逻辑**：所有节点（包括原头节点）都变成"中间节点"，避免对头节点的特殊处理。
+   * **典型应用场景**：
+       * 链表插入/删除（尤其是头节点可能被修改时）
+       * 链表反转
+       * 合并两个有序链表
+
+### 例题：「力扣」第 19 题：[删除链表的倒数第 N 个节点](https://leetcode.cn/problems/remove-nth-node-from-end-of-list/)
+
+[../src/linked/RemoveNthNodeFromEndOfList.java](../src/linked/RemoveNthNodeFromEndOfList.java)
+
+```java
+public class RemoveNthNodeFromEndOfList {
+    public ListNode removeNthFromEnd(ListNode head, int n) {
+        // 创建虚拟头节点
+        ListNode dummy = new ListNode(0, head);
+        ListNode fast = dummy, slow = dummy;
+
+        // 快指针先走n+1步（此时与慢指针的间隔就是n+1，因为要删除的目标在倒数第 n+1 个节点）
+        for (int i = 0; i < n + 1; i++) fast = fast.next;
+
+        // 同步前进
+        while (fast != null) {
+            fast = fast.next;
+            slow = slow.next;
+        }
+
+        // 删除操作
+        slow.next = slow.next.next;
+
+        return dummy.next;
+    }
+}
+```
+
+#### 算法思路
+
+使用**双指针技巧**中的快慢指针法：
+
+1. **快指针**先走n步
+2. **快慢指针**同时前进，直到快指针到达末尾
+3. 此时慢指针指向的就是倒数第n个节点的前驱节点
+4. 执行删除操作
+
+#### 算法技巧
+
+* **哑节点(dummy node)**：简化头节点删除的特殊处理
+* **快慢指针**：高效定位倒数第n个节点
+* **链表删除操作**：标准的前驱节点处理方式
+
+#### 复杂度分析
+
+* **时间复杂度**： $O(L)$ ，其中L是链表长度，只需一次遍历
+* **空间复杂度**： $O(1)$ ，只使用了固定数量的指针变量
+
 ---
 
 [返回](../README.md)
