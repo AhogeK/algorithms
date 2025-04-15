@@ -42,6 +42,15 @@
       * [复杂度分析](#复杂度分析-5)
         * [时间复杂度](#时间复杂度)
         * [空间复杂度](#空间复杂度)
+  * [虚拟头节点](#虚拟头节点)
+    * [例题：「力扣」第 19 题：删除链表的倒数第 N 个节点](#例题力扣第-19-题删除链表的倒数第-n-个节点)
+      * [算法思路](#算法思路-10)
+      * [算法技巧](#算法技巧-1)
+      * [复杂度分析](#复杂度分析-6)
+    * [完成「力扣」第 2 题：两数相加](#完成力扣第-2-题两数相加)
+      * [算法思路](#算法思路-11)
+      * [算法技巧](#算法技巧-2)
+      * [复杂度分析](#复杂度分析-7)
 <!-- TOC -->
 
 # 链表
@@ -798,6 +807,61 @@ public class RemoveNthNodeFromEndOfList {
 
 * **时间复杂度**： $O(L)$ ，其中L是链表长度，只需一次遍历
 * **空间复杂度**： $O(1)$ ，只使用了固定数量的指针变量
+
+### 完成「力扣」第 2 题：[两数相加](https://leetcode.cn/problems/add-two-numbers/)
+
+[../src/linked/AddTwoNumbers.java](../src/linked/AddTwoNumbers.java)
+
+```java
+public class AddTwoNumbers {
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        ListNode dummy = new ListNode(0);
+        ListNode curr = dummy;
+        int carry = 0;
+
+        while (l1 != null || l2 != null) {
+            int x = (l1 != null) ? l1.val : 0;
+            int y = (l2 != null) ? l2.val : 0;
+            int sum = x + y + carry;
+            carry = sum / 10;
+            curr.next = new ListNode(sum % 10);
+            curr = curr.next;
+
+            if (l1 != null) l1 = l1.next;
+            if (l2 != null) l2 = l2.next;
+        }
+
+        if (carry > 0) {
+            curr.next = new ListNode(carry);
+        }
+
+        return dummy.next;
+    }
+}
+```
+
+#### 算法思路
+
+我们可以模拟手工加法的过程：
+
+1. 从两个链表的头部开始相加（即从数字的个位开始）
+2. 维护一个进位值 `carry`
+3. 每次计算当前位的和：`sum = l1.val + l2.val + carry`
+4. 当前位的值为 `sum % 10`，新的进位为 `sum / 10`
+5. 移动到下一个节点继续计算
+6. 如果链表长度不等，较短的链表视为0
+7. 最后如果还有进位，需要额外创建一个节点
+
+#### 算法技巧
+
+* **链表遍历**：同时遍历两个链表
+* **虚拟头节点**：简化链表操作，避免处理头节点特殊情况
+* **进位处理**：正确处理进位是本题关键
+
+#### 复杂度分析
+
+* **时间复杂度**： $O(\max(m, n))$ ，其中 $m$ 和 $n$ 分别是两个链表的长度。我们需要遍历两个链表的全部节点。
+* **空间复杂度**： $O(\max(m, n))$ ，结果链表的长度最多为 $\max(m, n) + 1$（因为有进位）。
 
 ---
 
