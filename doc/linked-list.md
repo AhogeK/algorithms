@@ -1119,6 +1119,53 @@ public class RemoveDuplicatesFromSortedList {
 * **时间复杂度**： $O(n)$ ，只需遍历链表一次
 * **空间复杂度**： $O(1)$ ，只使用了常数个额外指针
 
+### 完成「力扣」第 86 题：[分隔链表](https://leetcode.cn/problems/partition-list/)
+
+[../src/linked/PartitionList.java](../src/linked/PartitionList.java)
+
+```java
+public class PartitionList {
+    public ListNode partition(ListNode head, int x) {
+        // 创建两个虚拟头节点
+        ListNode smallerDummy = new ListNode(0);
+        ListNode largerDummy = new ListNode(0);
+
+        // 两个链表的当前节点指针
+        ListNode smaller = smallerDummy;
+        ListNode larger = largerDummy;
+
+        while (head != null) {
+            if (head.val < x) {
+                smaller.next = head;
+                smaller = smaller.next;
+            } else {
+                larger.next = head;
+                larger = larger.next;
+            }
+            head = head.next;
+        }
+
+        // 连接两个链表
+        larger.next = null;
+        smaller.next = largerDummy.next;
+        
+        return smallerDummy.next;
+    }
+}
+```
+
+#### 算法思路
+
+使用**双链表**方法可以高效解决这个问题：
+
+1. 创建两个虚拟头节点：一个用于存储小于 `x` 的节点（小链表），一个用于存储大于等于 `x` 的节点（大链表）
+2. 遍历原始链表，将每个节点分配到对应的链表中
+3. 最后将小链表的尾部连接到大链表的头部
+
+#### 复杂度分析
+
+* **时间复杂度**： $O(n)$ ，只需遍历链表一次
+* **空间复杂度**： $O(1)$ ，只使用了常数个额外指针
 
 ---
 
