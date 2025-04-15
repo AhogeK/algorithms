@@ -924,6 +924,52 @@ public class AddTwoNumbersII {
 * **时间复杂度**： $O(\max(m, n))$ ，其中 $m$ 和 $n$ 分别是两个链表的长度
 * **空间复杂度**： $O(1)$（不考虑结果链表占用的空间）
 
+### 完成「力扣」第 21 题：[合并两个有序链表](https://leetcode.cn/problems/merge-two-sorted-lists/)
+
+[../src/linked/MergeTwoSortedLists.java](../src/linked/MergeTwoSortedLists.java)
+
+```java
+public class MergeTwoSortedLists {
+    public ListNode mergeTwoLists(ListNode list1, ListNode list2) {
+        ListNode dummy = new ListNode(-1);
+        ListNode current = dummy;
+
+        // 同时遍历两个链表
+        while (list1 != null && list2 != null) {
+            if (list1.val <= list2.val) {
+                current.next = list1;
+                list1 = list1.next;
+            } else {
+                current.next = list2;
+                list2 = list2.next;
+            }
+            current = current.next;
+        }
+
+        // 连接剩余的链表
+        current.next = list1 != null ? list1 : list2;
+
+        return dummy.next;
+    }
+}
+```
+
+#### 算法思路
+
+我们可以使用**迭代法**来合并两个有序链表：
+
+1. 创建一个虚拟头节点(dummy)作为新链表的起点
+2. 使用一个指针(current)来跟踪新链表的当前位置
+3. 比较两个链表当前节点的值，将较小的节点连接到新链表
+4. 移动被选中链表的指针到下一个节点
+5. 重复上述过程直到其中一个链表遍历完毕
+6. 将剩余的非空链表直接连接到新链表的末尾
+
+#### 复杂度分析
+
+* **时间复杂度**：$O(n + m)$，其中 $n$ 和 $m$ 分别是两个链表的长度。我们需要遍历两个链表的所有节点。
+* **空间复杂度**：$O(1)$，我们只需要常数空间存储几个指针，没有使用额外的数据结构。
+
 ---
 
 [返回](../README.md)
