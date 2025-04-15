@@ -51,6 +51,9 @@
       * [算法思路](#算法思路-11)
       * [算法技巧](#算法技巧-2)
       * [复杂度分析](#复杂度分析-7)
+    * [完成「力扣」第 445 题：两数相加 II](#完成力扣第-445-题两数相加-ii)
+      * [算法思路](#算法思路-12)
+      * [复杂度分析](#复杂度分析-8)
 <!-- TOC -->
 
 # 链表
@@ -862,6 +865,64 @@ public class AddTwoNumbers {
 
 * **时间复杂度**： $O(\max(m, n))$ ，其中 $m$ 和 $n$ 分别是两个链表的长度。我们需要遍历两个链表的全部节点。
 * **空间复杂度**： $O(\max(m, n))$ ，结果链表的长度最多为 $\max(m, n) + 1$（因为有进位）。
+
+### 完成「力扣」第 445 题：[两数相加 II](https://leetcode.cn/problems/add-two-numbers-ii)
+
+[../src/linked/AddTwoNumbersII.java](../src/linked/AddTwoNumbersII.java)
+
+```java
+public class AddTwoNumbersII {
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        // 反转两个链表
+        l1 = reverseList(l1);
+        l2 = reverseList(l2);
+
+        // 执行相加操作
+        ListNode dummy = new ListNode(0);
+        ListNode curr = dummy;
+        int carry = 0;
+
+        while (l1 != null || l2 != null) {
+            int x = (l1 != null) ? l1.val : 0;
+            int y = (l2 != null) ? l2.val : 0;
+            int sum = x + y + carry;
+            carry = sum / 10;
+            curr.next = new ListNode(sum % 10);
+            curr = curr.next;
+
+            if (l1 != null) l1 = l1.next;
+            if (l2 != null) l2 = l2.next;
+        }
+
+        // 反转结果
+        return reverseList(dummy.next);
+    }
+
+    private ListNode reverseList(ListNode head) {
+        ListNode prev = null;
+        while (head != null) {
+            ListNode next = head.next;
+            head.next = prev;
+            prev = head;
+            head = next;
+        }
+        return prev;
+    }
+}
+```
+
+#### 算法思路
+
+由于数字是正序存储的，我们可以采用以下方法：
+
+1. **反转链表**：先将两个链表反转，变成逆序存储
+2. **相加操作**：使用与前一题相同的方法进行相加
+3. **再次反转**：将结果链表反转回来，恢复正序存储
+
+#### 复杂度分析
+
+* **时间复杂度**： $O(\max(m, n))$ ，其中 $m$ 和 $n$ 分别是两个链表的长度
+* **空间复杂度**： $O(1)$（不考虑结果链表占用的空间）
 
 ---
 
