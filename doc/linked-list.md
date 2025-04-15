@@ -970,6 +970,70 @@ public class MergeTwoSortedLists {
 * **时间复杂度**：$O(n + m)$，其中 $n$ 和 $m$ 分别是两个链表的长度。我们需要遍历两个链表的所有节点。
 * **空间复杂度**：$O(1)$，我们只需要常数空间存储几个指针，没有使用额外的数据结构。
 
+### 完成「力扣」第 23 题：[合并 K 个排序链表](https://leetcode.cn/problems/merge-k-sorted-lists)
+
+[../src/linked/MergeKSortedLists.java](../src/linked/MergeKSortedLists.java)
+
+```java
+public class MergeKSortedLists {
+    public ListNode mergeKLists(ListNode[] lists) {
+        if (lists == null || lists.length == 0) return null;
+        return mergeLists(lists, 0, lists.length - 1);
+    }
+
+    // 分治合并
+    private ListNode mergeLists(ListNode[] lists, int left, int right) {
+        // 只有一个链表的情况
+        if (left == right) return lists[left];
+
+        // 将链表数组分成两部分
+        int mid = left + (right - left) / 2;
+        ListNode leftList = mergeLists(lists, left, mid);
+        ListNode rightList = mergeLists(lists, mid + 1, right);
+
+        // 合并两个有序链表
+        return mergeTwoLists(leftList, rightList);
+    }
+
+    private ListNode mergeTwoLists(ListNode l1, ListNode l2) {
+        ListNode dummy = new ListNode(-1);
+        ListNode current = dummy;
+
+        while (l1 != null && l2 != null) {
+            if (l1.val <= l2.val) {
+                current.next = l1;
+                l1 = l1.next;
+            } else {
+                current.next = l2;
+                l2 = l2.next;
+            }
+            current = current.next;
+        }
+
+        current.next = (l1 != null) ? l1 : l2;
+
+        return dummy.next;
+    }
+}
+```
+
+#### 算法思路
+
+采用分治法，将大问题分解为小问题，逐个击破：
+
+1. **分解阶段**：将K个链表分成两部分，递归处理每一部分
+2. **解决阶段**：当分解到只剩一个链表时直接返回（基准情况）
+3. **合并阶段**：将两个已排序的链表合并为一个有序链表
+
+#### 复杂度分析
+
+* **时间复杂度**： $O(N \log K)$
+    * 分治树的高度为 $\log K$
+    * 每层需要合并所有 $N$ 个节点
+* **空间复杂度**： $O(\log K)$
+    * 递归调用栈的深度
+    * 比堆方法的 $O(K)$ 更优
+
 ---
 
 [返回](../README.md)
