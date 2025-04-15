@@ -1084,6 +1084,42 @@ public class RemoveDuplicatesFromSortedListII {
 * **时间复杂度**： $O(n)$ ，只需遍历链表一次
 * **空间复杂度**： $O(1)$ ，只使用了常数个额外指针
 
+### 完成「力扣」第 83 题：[删除排序链表中的重复元素](https://leetcode.cn/problems/remove-duplicates-from-sorted-list/)
+
+[../src/linked/RemoveDuplicatesFromSortedList.java](../src/linked/RemoveDuplicatesFromSortedList.java)
+
+```java
+public class RemoveDuplicatesFromSortedList {
+    public ListNode deleteDuplicates(ListNode head) {
+        ListNode cur = head;
+        
+        while (cur != null && cur.next != null) {
+            if (cur.val == cur.next.val) {
+                cur.next = cur.next.next;
+            } else {
+                cur = cur.next;
+            }
+        }
+        
+        return head;
+    }
+}
+```
+
+#### 算法思路
+
+可以使用**单指针**方法高效解决这个问题：
+
+1. **当前指针(cur)**：用于遍历链表
+2. **重复检测**：比较当前节点与下一个节点的值
+3. **删除操作**：当发现重复时，跳过重复节点
+
+#### 复杂度分析
+
+* **时间复杂度**： $O(n)$ ，只需遍历链表一次
+* **空间复杂度**： $O(1)$ ，只使用了常数个额外指针
+
+
 ---
 
 [返回](../README.md)
