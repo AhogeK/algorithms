@@ -7,6 +7,7 @@ import common.ListNode;
  * @since 2025-04-16 05:32:35
  */
 public class PartitionList {
+
     public ListNode partition(ListNode head, int x) {
         // 创建两个虚拟头节点
         ListNode smallerDummy = new ListNode(0);
