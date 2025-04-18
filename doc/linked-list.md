@@ -87,6 +87,9 @@
       * [关键原理](#关键原理)
         * [1. 变量设定](#1-变量设定)
         * [2. 推理（关键公式）](#2-推理关键公式)
+    * [例 1：「力扣」第 142 题：环形链表 II](#例-1力扣第-142-题环形链表-ii)
+      * [算法思路](#算法思路-19)
+      * [复杂度分析](#复杂度分析-15)
 <!-- TOC -->
 
 # 链表
@@ -1336,6 +1339,53 @@ $$\begin{aligned} s\_{fast} &= 2 \times s\_{slow} \\\ a + b + n \times r &= 2 (a
 
 **形象理解：**\
 当一个指针从头走，另一个从相遇点走，他们速度相等（都走一步），那么两者必然在入口相遇！
+
+### 例 1：「力扣」第 142 题：[环形链表 II](https://leetcode.cn/problems/linked-list-cycle-ii)
+
+[../src/linked/LinkedListCycleII.java](../src/linked/LinkedListCycleII.java)
+
+```java
+public class LinkedListCycleII {
+    public ListNode detectCycle(ListNode head) {
+        if (head == null || head.next == null) return null;
+
+        ListNode slow = head;
+        ListNode fast = head;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+            if (slow == fast) {
+                // 说明有环
+                slow = head;
+                while (slow != fast) {
+                    slow = slow.next;
+                    fast = fast.next;
+                }
+                // 找到环入口
+                return slow;
+            }
+        }
+
+        return null;
+    }
+}
+```
+
+#### 算法思路
+
+采用**快慢指针法（Floyd 判圈算法）**：
+
+1. **判环阶段：**
+    * 用两个指针，`fast` 每次走两步，`slow` 每次走一步，如果这两个指针能相遇，则链表有环，否则无环。
+2. **确定环入口：**
+    * 首先，让 `slow`、`fast` 在环中第一次相遇。
+    * 然后，将 `slow` 指回头结点，`fast` 保持在相遇点，二者都每次走一步。
+    * 它们第二次相遇的节点，就是环的入口节点。
+
+#### 复杂度分析
+
+* **时间复杂度：** $O(n)$ 遍历两遍；
+* **空间复杂度：** $O(1)$ ，未用任何辅助空间。
 
 ---
 
