@@ -90,6 +90,9 @@
     * [例 1：「力扣」第 142 题：环形链表 II](#例-1力扣第-142-题环形链表-ii)
       * [算法思路](#算法思路-19)
       * [复杂度分析](#复杂度分析-15)
+    * [例 2：「力扣」第 141 题：环形链表 II](#例-2力扣第-141-题环形链表-ii)
+      * [算法思路](#算法思路-20)
+      * [复杂度分析](#复杂度分析-16)
 <!-- TOC -->
 
 # 链表
@@ -1386,6 +1389,44 @@ public class LinkedListCycleII {
 
 * **时间复杂度：** $O(n)$ 遍历两遍；
 * **空间复杂度：** $O(1)$ ，未用任何辅助空间。
+
+### 例 2：「力扣」第 141 题：[环形链表 II](https://leetcode.cn/problems/linked-list-cycle)
+
+[../src/linked/LinkedListCycle.java](../src/linked/LinkedListCycle.java)
+
+```java
+public class LinkedListCycle {
+    public boolean hasCycle(ListNode head) {
+        if (head == null || head.next == null)
+            return false;
+        ListNode slow = head;
+        ListNode fast = head;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+            if (slow == fast)
+                return true;
+        }
+        return false;
+    }
+}
+```
+
+#### 算法思路
+
+本题最好、最快的算法为“双指针法”——分别用快、慢两个指针遍历链表：
+
+1. **指针初始化**：都指向头节点；
+2. 快指针每次前进两步 `fast = fast.next.next`，慢指针每次前进一步 `slow = slow.next`；
+3. 如果存在环，两者最终一定会在环中相遇（进入环后，快指针总体“套圈追上”慢指针）；
+4. 如果不存在环，快指针会先到达链表末尾，即出现 `fast == null || fast.next == null`。
+
+#### 复杂度分析
+
+* **时间复杂度**：$O(n)$
+    * 每个节点最多被快、慢指针遍历一次，所以线性复杂度；
+* **空间复杂度**：$O(1)$
+    * 没有用额外的数据结构（哈希表等）。
 
 ---
 
