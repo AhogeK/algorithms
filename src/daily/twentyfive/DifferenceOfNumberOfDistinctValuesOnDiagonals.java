@@ -1,4 +1,4 @@
-package daily;
+package daily.twentyfive;
 
 /**
  * <a href="https://leetcode.cn/problems/difference-of-number-of-distinct-values-on-diagonals">2711. 对角线上不同值的数量差</a>

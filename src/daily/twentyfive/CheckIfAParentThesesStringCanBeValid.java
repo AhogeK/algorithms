@@ -1,4 +1,4 @@
-package daily;
+package daily.twentyfive;
 
 /**
  * 2025-03-23 每日一题

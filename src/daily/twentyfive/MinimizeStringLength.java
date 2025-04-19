@@ -1,4 +1,4 @@
-package daily;
+package daily.twentyfive;
 
 /**
  * 2025-3-28

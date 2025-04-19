@@ -1,4 +1,4 @@
-package daily;
+package daily.twentyfive;
 
 /**
  * @author AhogeK
