@@ -1,10 +1,13 @@
 package tree;
 
 /**
+ * AVL树（AVL Tree）学习类
+ *
  * @author AhogeK
  * @since 2025-04-17 13:39:08
  */
 public class AVLTree {
+
     private Node root;
 
     public static void main(String[] args) {
@@ -100,7 +103,7 @@ public class AVLTree {
      *
      * @param key 待插入的节点值
      */
-    private void insert(int key) {
+    public void insert(int key) {
         root = insert(root, key);
     }
 
@@ -144,11 +147,43 @@ public class AVLTree {
         return node;
     }
 
+    /**
+     * 查找节点
+     *
+     * @param key 查找的节点值
+     * @return 节点是否存在
+     */
+    public boolean contains(int key) {
+        return contains(root, key);
+    }
+
+    /**
+     * 查找节点
+     *
+     * @param node 当前节点
+     * @param key  查找的节点值
+     * @return 节点是否存在
+     */
+    private boolean contains(Node node, int key) {
+        if (node == null) return false;
+        if (key == node.key) return true;
+        if (key < node.key) return contains(node.left, key);
+        return contains(node.right, key);
+    }
+
+    /**
+     * 中序遍历输出
+     */
     public void printInOrder() {
         inOrder(root);
         System.out.println();
     }
 
+    /**
+     * 中序遍历输出
+     *
+     * @param node 当前节点
+     */
     private void inOrder(Node node) {
         if (node != null) {
             inOrder(node.left);
@@ -157,7 +192,10 @@ public class AVLTree {
         }
     }
 
-    class Node {
+    /**
+     * 节点定义
+     */
+    static class Node {
         int key;
         int height;
         Node left;
@@ -165,6 +203,7 @@ public class AVLTree {
 
         Node(int key) {
             this.key = key;
+            // 新节点高度默认为1
             this.height = 1;
         }
     }
