@@ -102,6 +102,9 @@
     * [例：「力扣」第 160 题：相交链表](#例力扣第-160-题相交链表)
       * [算法思路](#算法思路-21)
       * [复杂度分析](#复杂度分析-17)
+    * [完成「力扣」第 355 题：设计推特](#完成力扣第-355-题设计推特)
+      * [算法思路](#算法思路-22)
+      * [复杂度分析](#复杂度分析-18)
 <!-- TOC -->
 
 # 链表
@@ -1522,6 +1525,87 @@ public class IntersectionOfTwoLinkedLists {
 
 * 时间复杂度： $O(m+n)$ ，每个指针最多走 $m+n$ 步。
 * 空间复杂度： $O(1)$ ，只用了指针变量。
+
+### 完成「力扣」第 355 题：[设计推特](https://leetcode.cn/problems/design-twitter)
+
+[../src/linked/Twitter.java](../src/linked/Twitter.java)
+
+```java
+public class Twitter {
+    // 用户关注关系，最大501用户，静态预分配
+    Set<Integer>[] followees = new HashSet[501];
+    // 每个用户的最新推文（postLasts下标，-1为无推文）
+    int[] userLasts = new int[501];
+    // 全部推文链：每条推文[id, 上一条同用户推文下标]
+    List<int[]> postLasts = new ArrayList<>();
+
+    public Twitter() {
+        Arrays.fill(userLasts, -1);
+        // followees 在 follow 时延迟分配，节省空间
+    }
+
+    public void postTweet(int userId, int tweetId) {
+        // 头插法建立单向链表
+        postLasts.add(new int[]{tweetId, userLasts[userId]});
+        userLasts[userId] = postLasts.size() - 1;
+    }
+
+    public List<Integer> getNewsFeed(int userId) {
+        Queue<Integer> pq = new PriorityQueue<>((a, b) -> b - a);
+        add(userId, pq); // 包含自己
+        if (followees[userId] != null)
+            for (int id : followees[userId])
+                add(id, pq);
+        List<Integer> ans = new ArrayList<>();
+        while (!pq.isEmpty() && ans.size() < 10) {
+            int idx = pq.poll();
+            int[] post = postLasts.get(idx);
+            ans.add(post[0]);
+            if (post[1] >= 0)
+                // 加入该作者的下一个旧推文
+                pq.add(post[1]);
+        }
+        return ans;
+    }
+
+    private void add(int userId, Queue<Integer> pq) {
+        if (userLasts[userId] >= 0) pq.add(userLasts[userId]);
+    }
+
+    public void follow(int followerId, int followeeId) {
+        // 不能关注自己
+        if (followerId == followeeId) return;
+        if (followees[followeeId] == null) followees[followeeId] = new HashSet<>();
+        followees[followeeId].add(followeeId);
+    }
+
+    public void unfollow(int followerId, int followeeId) {
+        if (followees[followerId] != null) {
+            followees[followerId].remove(followeeId);
+        }
+    }
+}
+```
+
+#### 算法思路
+
+1. **推文倒排链表**
+    * 用 `postLasts` 列表存所有推文内容，每个元素为 `[tweetId, 上一个同用户推文在 postLasts 的下标]`。
+    * `userLasts[userId]` 直接保存该用户最近一条推文在 `postLasts` 的下标，查最新推文 $O(1)$ 。
+2. **关注列表**
+    * 用`followees[userId]`存该用户所有关注用户集合，静态容量 $501$ ，初始化节省时间。
+3. **取最新流合并**
+    * 最大堆（优先队列）保存**当前可见“最靠后的”等候行（即所有参与用户的`userLasts`下标）**。
+    * 弹出堆顶（即全局最新推文），如果该推文后续还有同作者前一条，则继续入堆，实现**K路链式有序流合并**。
+    * 只需弹出 $10$ 次，效率极高。
+
+#### 复杂度分析
+
+* `postTweet`/`follow`/`unfollow`：全部 $O(1)$
+* `getNewsFeed`：
+    * 最坏堆初始化 $O(k\log k)$ ，其中 $k$ =用户关注人数（极限500）。
+    * 实际上每一弹出/加入最多 $10$ 次，**内循环最多处理 $O(10\log k)$ 次**。
+    * 代码逻辑不涉及链表节点对象，仅用下标，常数超优，内存局部性极好。
 
 ---
 
