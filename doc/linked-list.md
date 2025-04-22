@@ -99,6 +99,9 @@
     * [典型解法及技巧](#典型解法及技巧)
       * [解法一：哈希表法（适用于所有链表问题）](#解法一哈希表法适用于所有链表问题)
       * [解法二：双指针法（最优解，推荐）](#解法二双指针法最优解推荐)
+    * [例：「力扣」第 160 题：相交链表](#例力扣第-160-题相交链表)
+      * [算法思路](#算法思路-21)
+      * [复杂度分析](#复杂度分析-17)
 <!-- TOC -->
 
 # 链表
@@ -1447,7 +1450,7 @@ public class LinkedListCycle {
 
 ### 常见考法
 
-* **判断是否相交**：返回 Boolean。
+* **判断是否相交**：返回 ``Boolean``。
 * **返回第一个相交节点**：即第一个公共节点的地址。
 
 ### 典型解法及技巧
@@ -1482,6 +1485,43 @@ public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
 
 * **时间复杂度**： $O(m+n)$
 * **空间复杂度**： $O(1)$
+
+### 例：「力扣」第 160 题：[相交链表](https://leetcode.cn/problems/intersection-of-two-linked-lists)
+
+[../src/linked/IntersectionOfTwoLinkedLists.java](../src/linked/IntersectionOfTwoLinkedLists.java)
+
+```java
+public class IntersectionOfTwoLinkedLists {
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        ListNode pA = headA;
+        ListNode pB = headB;
+        while (pA != pB) {
+            pA = pA != null ? pA.next : headB;
+            pB = pB != null ? pB.next : headA;
+        }
+        return pA;
+    }
+}
+```
+
+#### 算法思路
+
+**相交链表的“指针追及”原理**
+
+* 假如链表A长度为 $m$ ，链表B长度为 $n$ ，相交部分长度为 $k$ ，则A的前缀为 $a$ ，B的前缀为 $b$ ，$a + k = m$ ，$b + k = n$ 。
+* 不妨假设链表A为 $[a_1,a_2,...,a_a,c_1,c_2,...,c_k]$ ，链表B为 $[b_1,b_2,...,b_b,c_1,c_2,...,c_k]$ ，其中 $[c_1,c_2,...,c_k]$ 为公共相交段。
+* 让两个指针分别从两条链表头出发，当走到尾部时，分别切换到对方的头，然后继续走。
+* 这样他们要么在第一个相交节点处相遇，要么都走完所有节点后落在`null`。
+
+*关键点*
+
+* 让两个指针走的总路径都为 $m+n$ ，保证不会错过重合节点；
+* 在相遇前始终同步前进，第一次相遇即为重合节点。
+
+#### 复杂度分析
+
+* 时间复杂度： $O(m+n)$ ，每个指针最多走 $m+n$ 步。
+* 空间复杂度： $O(1)$ ，只用了指针变量。
 
 ---
 
