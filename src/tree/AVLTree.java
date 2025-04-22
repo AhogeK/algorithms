@@ -21,6 +21,9 @@ public class AVLTree {
 
         // 中序遍历输出（验证平衡性）
         tree.printInOrder(); // 输出：10 20 25 30 40 50
+
+        // 测试查找
+        System.out.println(tree.contains(25)); // 输出：true
     }
 
     /**
