@@ -105,6 +105,9 @@
     * [完成「力扣」第 355 题：设计推特](#完成力扣第-355-题设计推特)
       * [算法思路](#算法思路-22)
       * [复杂度分析](#复杂度分析-18)
+    * [完成「力扣」第 146 题：LRU 缓存机制](#完成力扣第-146-题lru-缓存机制)
+      * [算法思路](#算法思路-23)
+      * [复杂度分析](#复杂度分析-19)
 <!-- TOC -->
 
 # 链表
@@ -1511,7 +1514,7 @@ public class IntersectionOfTwoLinkedLists {
 
 **相交链表的“指针追及”原理**
 
-* 假如链表A长度为 $m$ ，链表B长度为 $n$ ，相交部分长度为 $k$ ，则A的前缀为 $a$ ，B的前缀为 $b$ ，$a + k = m$ ，$b + k = n$ 。
+* 假如链表A长度为 $m$ ，链表B长度为 $n$ ，相交部分长度为 $k$ ，则A的前缀为 $a$ ，B的前缀为 $b$ ， $a + k = m$ ， $b + k = n$ 。
 * 不妨假设链表A为 $[a_1,a_2,...,a_a,c_1,c_2,...,c_k]$ ，链表B为 $[b_1,b_2,...,b_b,c_1,c_2,...,c_k]$ ，其中 $[c_1,c_2,...,c_k]$ 为公共相交段。
 * 让两个指针分别从两条链表头出发，当走到尾部时，分别切换到对方的头，然后继续走。
 * 这样他们要么在第一个相交节点处相遇，要么都走完所有节点后落在`null`。
@@ -1606,6 +1609,116 @@ public class Twitter {
     * 最坏堆初始化 $O(k\log k)$ ，其中 $k$ =用户关注人数（极限500）。
     * 实际上每一弹出/加入最多 $10$ 次，**内循环最多处理 $O(10\log k)$ 次**。
     * 代码逻辑不涉及链表节点对象，仅用下标，常数超优，内存局部性极好。
+
+### 完成「力扣」第 146 题：LRU [缓存机制](https://leetcode.cn/problems/lru-cache)
+
+[../src/linked/LRUCache.java](../src/linked/LRUCache.java)
+
+```java
+public class LRUCache {
+
+    private final int capacity;
+    private final HashMap<Integer, Node> map;
+    // 虚拟头尾节点
+    private final Node head, tail;
+
+    public LRUCache(int capacity) {
+        this.capacity = capacity;
+        map = new HashMap<>();
+        head = new Node(0, 0);
+        tail = new Node(0, 0);
+        head.next = tail;
+        tail.prev = head;
+    }
+
+    /**
+     * 删除节点
+     *
+     * @param node 待删除的节点
+     */
+    private void remove(Node node) {
+        node.prev.next = node.next;
+        node.next.prev = node.prev;
+    }
+
+    /**
+     * 插入节点到头部
+     *
+     * @param node 待插入的节点
+     */
+    private void insertToHead(Node node) {
+        node.next = head.next;
+        head.next.prev = node;
+        head.next = node;
+        node.prev = head;
+    }
+
+    public int get(int key) {
+        if (!map.containsKey(key)) return -1;
+        Node node = map.get(key);
+        // 只有不在头部才做操作
+        if (head.next != node) {
+            // 先移除旧位置
+            remove(node);
+            // 再插到头部
+            insertToHead(node);
+        }
+        return node.value;
+    }
+
+    public void put(int key, int value) {
+        if (map.containsKey(key)) {
+            Node node = map.get(key);
+            // 更新值
+            node.value = value;
+            if (head.next != node) {
+                remove(node);
+                insertToHead(node);
+            }
+        } else {
+            if (map.size() == capacity) {
+                // 淘汰尾部节点
+                Node lru = tail.prev;
+                remove(lru);
+                map.remove(lru.key);
+            }
+            Node node = new Node(key, value);
+            map.put(key, node);
+            insertToHead(node);
+        }
+    }
+
+    /**
+     * 双向链表节点
+     */
+    static class Node {
+        int key, value;
+        Node prev, next;
+
+        Node(int k, int v) {
+            key = k;
+            value = v;
+        }
+    }
+}
+```
+
+#### 算法思路
+
+**核心的数据结构选择:**
+* 常见解法是**哈希表 + 双向链表**：
+    * **哈希表** (`key` $\to$ 节点指针) 用于 $\mathcal{O}(1)$ 查找。
+    * **双向链表** 用于将最近使用的节点移到头部，不常使用的节点移到尾部，方便 $\mathcal{O}(1)$ 删除最久未使用的节点。
+
+**设计要点**
+1. 每个链表节点存储 `key` 和 `value`，以便淘汰节点时可以在哈希表中同步删除 `key`。
+2. `get`/`put` 操作都**需要将访问/新插入的节点移到链表头部**。
+3. 当缓存满了，`put` 新元素时，需淘汰链表尾部节点，并移除哈希表对应项。
+
+#### 复杂度分析
+
+* 单次 `get`、`put` 时间复杂度： $\mathcal{O}(1)$ （哈希表查找和链表操作都是常数级时间）；
+* 空间复杂度： $\mathcal{O}(\text{capacity})$ （节点和哈希表）。
 
 ---
 
