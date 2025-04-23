@@ -196,6 +196,27 @@ public class AVLTree {
     }
 
     /**
+     * 删除节点
+     *
+     * @param key 待删除的节点值
+     */
+    public void delete(int key) {
+        root = delete(root, key);
+    }
+
+    /**
+     * 删除节点
+     *
+     * @param node 当前节点
+     * @param key  待删除的节点值
+     * @return 删除后的树根节点
+     */
+    private Node delete(Node node, int key) {
+        if (node == null) return null;
+        return node;
+    }
+
+    /**
      * 节点定义
      */
     static class Node {
