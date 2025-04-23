@@ -108,6 +108,9 @@
     * [完成「力扣」第 146 题：LRU 缓存机制](#完成力扣第-146-题lru-缓存机制)
       * [算法思路](#算法思路-23)
       * [复杂度分析](#复杂度分析-19)
+    * [完成「力扣」第 460 题：LFU 缓存](#完成力扣第-460-题lfu-缓存)
+      * [算法思路](#算法思路-24)
+      * [复杂度分析](#复杂度分析-20)
 <!-- TOC -->
 
 # 链表
@@ -1610,7 +1613,7 @@ public class Twitter {
     * 实际上每一弹出/加入最多 $10$ 次，**内循环最多处理 $O(10\log k)$ 次**。
     * 代码逻辑不涉及链表节点对象，仅用下标，常数超优，内存局部性极好。
 
-### 完成「力扣」第 146 题：LRU [缓存机制](https://leetcode.cn/problems/lru-cache)
+### 完成「力扣」第 146 题：[LRU 缓存机制](https://leetcode.cn/problems/lru-cache)
 
 [../src/linked/LRUCache.java](../src/linked/LRUCache.java)
 
@@ -1719,6 +1722,132 @@ public class LRUCache {
 
 * 单次 `get`、`put` 时间复杂度： $\mathcal{O}(1)$ （哈希表查找和链表操作都是常数级时间）；
 * 空间复杂度： $\mathcal{O}(\text{capacity})$ （节点和哈希表）。
+
+### 完成「力扣」第 460 题：[LFU 缓存](https://leetcode.cn/problems/lfu-cache)
+
+[../src/linked/LFUCache.java](../src/linked/LFUCache.java)
+
+```java
+public class LFUCache {
+    int minFreq, capacity;
+    Map<Integer, Node> keyTable;
+    Map<Integer, DoublyLinkedList> freqTable;
+
+    public LFUCache(int capacity) {
+        this.minFreq = 0;
+        this.capacity = capacity;
+        keyTable = new HashMap<>();
+        freqTable = new HashMap<>();
+    }
+
+    public int get(int key) {
+        if (capacity == 0 || !keyTable.containsKey(key)) return -1;
+
+        Node node = keyTable.get(key);
+        int val = node.val;
+        int freq = node.freq;
+        freqTable.get(freq).remove(node);
+        // 如果当前频率的链表为空，则需要删除该频率的链表
+        if (freqTable.get(freq).size == 0) {
+            freqTable.remove(freq);
+            // 如果当前频率是最小频率，则需要更新最小频率
+            if (minFreq == freq) minFreq++;
+        }
+        node.freq++;
+        freqTable.computeIfAbsent(node.freq, k -> new DoublyLinkedList()).addFirst(node);
+        return val;
+    }
+
+    public void put(int key, int value) {
+        if (capacity == 0) return;
+
+        if (keyTable.containsKey(key)) {
+            Node node = keyTable.get(key);
+            node.val = value;
+            // 直接利用 get 方法，更新频率，并更新节点的值
+            get(key);
+        } else {
+            if (keyTable.size() == capacity) {
+                Node node = freqTable.get(minFreq).getTail();
+                keyTable.remove(node.key);
+                freqTable.get(minFreq).remove(node);
+                if (freqTable.get(minFreq).size == 0)
+                    freqTable.remove(minFreq);
+            }
+            Node node = new Node(key, value, 1);
+            freqTable.computeIfAbsent(1, k -> new DoublyLinkedList()).addFirst(node);
+            keyTable.put(key, node);
+            minFreq = 1;
+        }
+    }
+}
+
+class Node {
+    int key, val, freq;
+    Node prev, next;
+
+    Node() {
+        this(-1, -1, 0);
+    }
+
+    Node(int key, int val, int freq) {
+        this.key = key;
+        this.val = val;
+        this.freq = freq;
+    }
+}
+
+class DoublyLinkedList {
+    Node dummyHead, dummyTail;
+    int size;
+
+    DoublyLinkedList() {
+        dummyHead = new Node();
+        dummyTail = new Node();
+        dummyHead.next = dummyTail;
+        dummyTail.prev = dummyHead;
+        size = 0;
+    }
+
+    public void addFirst(Node node) {
+        Node next = dummyHead.next;
+        node.prev = dummyHead;
+        node.next = next;
+        next.prev = node;
+        dummyHead.next = node;
+        size++;
+    }
+
+    public void remove(Node node) {
+        node.prev.next = node.next;
+        node.next.prev = node.prev;
+        size--;
+    }
+
+    public Node getTail() {
+        return dummyTail.prev;
+    }
+}
+```
+
+#### 算法思路
+
+**数据结构方案**要实现**按频率淘汰 + 并列时按 LRU**
+
+* 用**两个哈希表**和**多个双向链表**协作实现：
+    1. **keyTable**（`Map<Integer, Node>`）：对于每个 key，映射到唯一 Node 节点（该节点维护 key、value、频率freq，以及链表指针）。
+    2. **freqTable**（`Map<Integer, DoublyLinkedList>`）：对于每个频率 freq，维护所有该频率下的节点链表，链表元素按先后顺序排列，表头为最新访问，表尾为最早访问。
+
+* **minFreq 变量意义**
+  * 实时记录缓存中「当前最小使用频率」，以便淘汰时能 $O(1)$ 定位到最优淘汰点（直接去 ``freqTable[minfreq]`` 链表尾部淘汰）。
+
+#### 复杂度分析
+
+* **时间复杂度**：
+    * `get`/`put` 操作，所有 ``map`` 查找、链表插入/删除操作都是 $O(1)$ ，满足竞速要求。
+* **空间复杂度**：
+    * 当 cache 满载时，空间占用 $O(\text{capacity})$ ，分布于 ``keyTable``、所有 ``freqTable`` 链表及 ``Node`` 对象。
+
 
 ---
 
