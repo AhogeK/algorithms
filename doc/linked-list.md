@@ -111,6 +111,7 @@
     * [完成「力扣」第 460 题：LFU 缓存](#完成力扣第-460-题lfu-缓存)
       * [算法思路](#算法思路-24)
       * [复杂度分析](#复杂度分析-20)
+    * [完成「力扣」第 1206 题：设计跳表](#完成力扣第-1206-题设计跳表)
 <!-- TOC -->
 
 # 链表
@@ -1147,7 +1148,7 @@ public class RemoveDuplicatesFromSortedListII {
 public class RemoveDuplicatesFromSortedList {
     public ListNode deleteDuplicates(ListNode head) {
         ListNode cur = head;
-        
+
         while (cur != null && cur.next != null) {
             if (cur.val == cur.next.val) {
                 cur.next = cur.next.next;
@@ -1155,7 +1156,7 @@ public class RemoveDuplicatesFromSortedList {
                 cur = cur.next;
             }
         }
-        
+
         return head;
     }
 }
@@ -1203,7 +1204,7 @@ public class PartitionList {
         // 连接两个链表
         larger.next = null;
         smaller.next = largerDummy.next;
-        
+
         return smallerDummy.next;
     }
 }
@@ -1839,7 +1840,7 @@ class DoublyLinkedList {
     2. **freqTable**（`Map<Integer, DoublyLinkedList>`）：对于每个频率 freq，维护所有该频率下的节点链表，链表元素按先后顺序排列，表头为最新访问，表尾为最早访问。
 
 * **minFreq 变量意义**
-  * 实时记录缓存中「当前最小使用频率」，以便淘汰时能 $O(1)$ 定位到最优淘汰点（直接去 ``freqTable[minfreq]`` 链表尾部淘汰）。
+    * 实时记录缓存中「当前最小使用频率」，以便淘汰时能 $O(1)$ 定位到最优淘汰点（直接去 ``freqTable[minfreq]`` 链表尾部淘汰）。
 
 #### 复杂度分析
 
@@ -1848,6 +1849,154 @@ class DoublyLinkedList {
 * **空间复杂度**：
     * 当 cache 满载时，空间占用 $O(\text{capacity})$ ，分布于 ``keyTable``、所有 ``freqTable`` 链表及 ``Node`` 对象。
 
+### 完成「力扣」第 1206 题：[设计跳表](https://leetcode.cn/problems/design-skiplist)
+
+[../src/linked/Skiplist.java](../src/linked/Skiplist.java)
+
+```java
+public class Skiplist {
+    // 全局复用避免重复实例
+    private static final Random rand = new Random();
+    private static final int S = 0xFFFF;
+    // 层提升概率
+    private static final double P = 0.5;
+    private static final int PS = (int) (S * P);
+    private static final int MAX_LEVEL = 16;
+    // 哨兵头节点
+    private Node head = new Node(-1, MAX_LEVEL);
+    // 当前跳表最大使用层数
+    private int level = 1;
+
+    /**
+     * 随机生成层数
+     *
+     * @return 层数
+     */
+    private int randomLevel() {
+        // 初始层
+        int lv = 1;
+        while ((rand.nextInt() & S) < PS) {
+            lv++;
+            if (lv >= MAX_LEVEL) break;
+        }
+        return lv;
+    }
+
+    /**
+     * 查找元素
+     *
+     * @param target 目标元素
+     * @return 是否存在
+     */
+    public boolean search(int target) {
+        Node curr = head;
+        // 从高层到低层查找
+        for (int i = level - 1; i >= 0; i--) {
+            while (curr.next[i] != null && curr.next[i].val < target)
+                curr = curr.next[i];
+        }
+        curr = curr.next[0];
+        return curr != null && curr.val == target;
+    }
+
+    /**
+     * 添加元素
+     *
+     * @param num 待添加的元素
+     */
+    public void add(int num) {
+        // 路径存储
+        Node[] update = new Node[MAX_LEVEL];
+        Node curr = head;
+        // 路径查找，每一层找到最后小于 num 的节点
+        for (int i = level - 1; i >= 0; i--) {
+            // 找前驱节点
+            while (curr.next[i] != null && curr.next[i].val < num)
+                curr = curr.next[i];
+            // 记录需要变更指针的节点
+            update[i] = curr;
+        }
+        int lv = randomLevel();
+        if (lv > level) {
+            for (int i = level; i < lv; i++)
+                update[i] = head;
+            level = lv;
+        }
+        Node node = new Node(num, lv);
+        for (int i = 0; i < lv; i++) {
+            // 节点的下一个节点就是前驱节点的下一个节点
+            node.next[i] = update[i].next[i];
+            // 前驱节点的下一个节点就是当前节点
+            update[i].next[i] = node;
+        }
+    }
+
+    public boolean erase(int num) {
+        Node[] update = new Node[MAX_LEVEL];
+        Node curr = head;
+        for (int i = level - 1; i >= 0; i--) {
+            // 找待断连的节点的前驱节点
+            while (curr.next[i] != null && curr.next[i].val < num)
+                curr = curr.next[i];
+            update[i] = curr;
+        }
+        // 此时在第一层，第一层包含所有数字，所以可以先判断要删除的数字是否存在
+        curr = curr.next[0];
+        if (curr == null || curr.val != num) return false;
+        // 多层断链
+        for (int i = 0; i < level; i++) {
+            // 边界，跳表可能不存在该节点
+            if (update[i].next[i] != curr) break;
+            // 断链，将前驱节点的下一个节点指向断链节点的下一个节点
+            update[i].next[i] = curr.next[i];
+        }
+        // 动态降低跳表的高度（因为可能会存在最高层且只有一个要删的元素）
+        while (level > 1 && head.next[level - 1] == null)
+            level--;
+        return true;
+    }
+
+    static class Node {
+        int val;
+        Node[] next;
+
+        Node(int val, int level) {
+            this.val = val;
+            next = new Node[level];
+        }
+    }
+}
+```
+
+#### 算法思路
+
+**1. 跳表结构核心**
+
+* 跳表是一种**多层带索引的链表结构**。
+* 每个节点有多个指针，level $i$ 指针表示本节点在第 $i$ 层的“下一个”节点。
+* 层数越高，跨越的节点越多，查找越快。最低一层就是常规有序链表。
+
+**本题技巧**：节点值可能重复，只要每个插入独立节点即可，无需合并计数。
+
+**2. 跳表操作基础**
+
+* **查找**：从最高层自左向右遍历，遇见大于等于目标值即下移到下一层，层层递归，终在最底层确定是否命中。
+* **插入**：首先查找插入位置，记录每一层的前置节点（路径），再在对应层更新指针，并通过随机函数决定新节点的最大高度（层数）。
+* **删除**：先查找所有路径（每层的前置节点），如找到则每层断链。允许有重复值，删第一个足矣。
+
+**3. 跳表算法要点与竞速实现**
+
+* **节点结构**用数组保存多级“后继”指针，空间局部性好，减少虚引用。
+* **随机层数**决定均匀分布索引，防止最坏复杂度退化，用伪随机生成器实现 $P=0.5$ 逐级提升概率。
+* **哨兵头节点**便于边界操作，无需特判空链。
+* **最大层数**通常 $16$ 或 $32$ 即满足 $n\leq 5*10^4$ 。
+* **线程安全**、**健壮性**、**边界判断**等本题不考虑，仅关注单线程高效实现。
+* **空间换时间**：多开指针空间保持查找 $O(\log n)$ 。
+
+#### 复杂度分析
+
+* **期望时间复杂度**： 查找、插入、删除均为 $O(\log n)$
+* **期望空间复杂度**： $O(n)$ ，每节点 $O(\log n)$ 级空间，但常数小
 
 ---
 
