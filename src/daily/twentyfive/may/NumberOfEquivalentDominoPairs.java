@@ -13,7 +13,7 @@ public class NumberOfEquivalentDominoPairs {
         for (int[] d : dominoes) {
             int a = d[0];
             int b = d[1];
-            // 想当于 min(a, b) * 10 + max(a, b)
+            // 相当于 min(a, b) * 10 + max(a, b)
             int code = a < b ? a * 10 + b : b * 10 + a;
             ans += cnt[code];
             cnt[code]++;
