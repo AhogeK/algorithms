@@ -14,18 +14,13 @@ public class DominoAndTrominoTiling {
         if (n <= 2) return n;
 
         long[] dp = new long[n + 1];
-        long[] gap = new long[n + 1];
 
         dp[0] = 1;
         dp[1] = 1;
         dp[2] = 2;
-        gap[0] = 0;
-        gap[1] = 0;
-        gap[2] = 1;
 
         for (int i = 3; i <= n; i++) {
-            dp[i] = (dp[i - 1] + dp[i - 2] + 2 * gap[i - 1]) % MOD;
-            gap[i] = (dp[i - 2] + gap[i - 1]) % MOD;
+            dp[i] = (2 * dp[i - 1] + dp[i - 3]) % MOD;
         }
 
         return (int) dp[n];
