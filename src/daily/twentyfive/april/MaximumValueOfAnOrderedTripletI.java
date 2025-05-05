@@ -1,4 +1,4 @@
-package daily.twentyfive;
+package daily.twentyfive.april;
 
 /**
  * <a href="https://leetcode.cn/problems/maximum-value-of-an-ordered-triplet-i>2873. 有序三元组中的最大值 I</a>

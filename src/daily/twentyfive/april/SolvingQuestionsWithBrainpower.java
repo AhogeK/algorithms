@@ -1,4 +1,4 @@
-package daily.twentyfive;
+package daily.twentyfive.april;
 
 /**
  * <a href="https://leetcode.cn/problems/solving-questions-with-brainpower">2140. 解决智力问题</a>

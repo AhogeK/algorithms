@@ -1,4 +1,4 @@
-package daily.twentyfive;
+package daily.twentyfive.april;
 
 /**
  * <a href="https://leetcode.cn/problems/longest-cycle-in-a-graph">2360. 图中的最长环</a>

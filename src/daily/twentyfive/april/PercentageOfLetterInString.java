@@ -1,4 +1,4 @@
-package daily.twentyfive;
+package daily.twentyfive.april;
 
 /**
  * <a href="https://leetcode.cn/problems/percentage-of-letter-in-string">2278. 字母在字符串中的百分比</a>

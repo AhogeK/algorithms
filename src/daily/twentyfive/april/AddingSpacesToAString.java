@@ -1,4 +1,4 @@
-package daily.twentyfive;
+package daily.twentyfive.april;
 
 /**
  * <a href="https://leetcode.cn/problems/adding-spaces-to-a-string">2109. 向字符串添加空格<a>
