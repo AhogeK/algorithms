@@ -160,3 +160,4 @@ $T(n) = aT\left(\frac{n}{b}\right) + f(n)$
 - [非比较排序算法](doc/non-comparison-sort.md)
 - [数组里常见的两类算法](doc/common-array-algorithms.md)
 - [链表](doc/linked-list.md)
+- [栈与队列](doc/stack-and-queue.md)
