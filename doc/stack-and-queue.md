@@ -23,6 +23,10 @@
       * [算法知识点与技巧](#算法知识点与技巧)
       * [代码实现](#代码实现)
       * [复杂度分析](#复杂度分析)
+    * [完成「力扣」第 20 题：有效的括号](#完成力扣第-20-题有效的括号)
+      * [算法思路](#算法思路-1)
+      * [代码实现](#代码实现-1)
+      * [复杂度分析](#复杂度分析-1)
 <!-- TOC -->
 
 # 栈与队列
@@ -331,4 +335,38 @@ public class SimplifyPath {
 
 * **时间复杂度**： $O(n)$， $n$ 为路径字符串长度，每个字符至多被访问两次（遍历和依次处理）。
 * **空间复杂度**： $O(n)$，最坏情况下每一层路径都要入栈。
+
+### 完成「力扣」第 20 题：[有效的括号](https://leetcode.cn/problems/valid-parentheses)
+
+#### 算法思路
+
+**核心思路：**\
+**用栈存左括号，遇到右括号时判断栈顶是否与其配对，配对成功则出栈，否则无效**
+
+#### 代码实现
+
+* *[../src/stackqueue/ValidParentheses.java](../src/stackqueue/ValidParentheses.java)*
+
+```java
+    public boolean isValid(String s) {
+    char[] stack = new char[s.length()];
+    int top = -1;
+    for (int i = 0; i < s.length(); i++) {
+        char c = s.charAt(i);
+        if (c == '(' || c == '[' || c == '{') {
+            stack[++top] = c;
+        } else {
+            if (top < 0) return false;
+            char left = stack[top--];
+            if (c == ')' && left != '(' || c == ']' && left != '[' || c == '}' && left != '{') return false;
+        }
+    }
+    return top == -1;
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**：$O(n)$（每字符最多只进/出栈一次）
+* **空间复杂度**：$O(n)$（全部为左括号时栈空间最大化）
 
