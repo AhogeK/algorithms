@@ -348,20 +348,35 @@ public class SimplifyPath {
 * *[../src/stackqueue/ValidParentheses.java](../src/stackqueue/ValidParentheses.java)*
 
 ```java
-    public boolean isValid(String s) {
-    char[] stack = new char[s.length()];
-    int top = -1;
-    for (int i = 0; i < s.length(); i++) {
-        char c = s.charAt(i);
-        if (c == '(' || c == '[' || c == '{') {
-            stack[++top] = c;
-        } else {
-            if (top < 0) return false;
-            char left = stack[top--];
-            if (c == ')' && left != '(' || c == ']' && left != '[' || c == '}' && left != '{') return false;
+public class SimplifyPath {
+    public String simplifyPath(String path) {
+        int len = path.length();
+        Deque<String> stack = new ArrayDeque<>();
+        int idx = 0;
+        while (idx < len) {
+            while (idx < len && path.charAt(idx) == '/')
+                idx++;
+            if (idx == len) break;
+            int end = idx;
+            while (end < len && path.charAt(end) != '/')
+                end++;
+            String segment = path.substring(idx, end);
+            if (segment.equals("..")) {
+                if (!stack.isEmpty()) {
+                    stack.pollLast();
+                }
+            } else if (!segment.equals(".")) {
+                stack.offerLast(segment);
+            }
+            idx = end;
         }
+        if (stack.isEmpty()) return "/";
+        StringBuilder res = new StringBuilder();
+        for (String dir : stack) {
+            res.append("/").append(dir);
+        }
+        return res.toString();
     }
-    return top == -1;
 }
 ```
 

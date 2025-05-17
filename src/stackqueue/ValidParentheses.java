@@ -7,7 +7,6 @@ package stackqueue;
  * @since 2025-05-17 22:32:24
  */
 public class ValidParentheses {
-
     public boolean isValid(String s) {
         char[] stack = new char[s.length()];
         int top = -1;

@@ -10,7 +10,6 @@ import java.util.Deque;
  * @since 2025-05-17 17:57:44
  */
 public class SimplifyPath {
-
     public String simplifyPath(String path) {
         int len = path.length();
         Deque<String> stack = new ArrayDeque<>();
