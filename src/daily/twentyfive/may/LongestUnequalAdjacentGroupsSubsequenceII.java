@@ -37,7 +37,7 @@ public class LongestUnequalAdjacentGroupsSubsequenceII {
             for (int j = 0; j < cs.length; j++) {
                 char orig = cs[j];
                 cs[j] = '.';
-                dict.computeIfAbsent(new String(cs), s -> new ArrayList<>()).add(i);
+                dict.computeIfAbsent(new String(cs), _ -> new ArrayList<>()).add(i);
                 cs[j] = orig;
             }
             if (res == null || dp[i].size() > res.size()) res = dp[i];
