@@ -14,6 +14,15 @@
       * [主要特点](#主要特点)
       * [常见举例](#常见举例)
     * [栈的抽象数据类型](#栈的抽象数据类型)
+    * [关于Java栈推荐用`ArrayDeque`实现栈，而不用`Stack`](#关于java栈推荐用arraydeque实现栈而不用stack)
+      * [历史上的 `Stack` 类设计问题](#历史上的-stack-类设计问题)
+      * [优选 `ArrayDeque` 的理由](#优选-arraydeque-的理由)
+  * [典型问题 1: 简化路径](#典型问题-1-简化路径)
+    * [例：「力扣」 第 71 题： 简化路径](#例力扣-第-71-题-简化路径)
+      * [算法思路](#算法思路)
+      * [算法知识点与技巧](#算法知识点与技巧)
+      * [代码实现](#代码实现)
+      * [复杂度分析](#复杂度分析)
 <!-- TOC -->
 
 # 栈与队列
@@ -223,3 +232,103 @@ $$\begin{aligned} &\text{入栈：} O(1) \\\ &\text{出栈：} O(1) \\\ &\text{�
 | `void`    | `push(int x)`      | 添加元素 `x`                         |
 | `Integer` | `pop()`            | 删除栈顶元素（前提：栈非空）                   |
 | `Integer` | `peek()`           | 查看栈顶元素而不取出（前提：栈非空） peek 有「偷瞄」的意思 |
+
+### 关于Java栈推荐用`ArrayDeque`实现栈，而不用`Stack`
+
+#### 历史上的 `Stack` 类设计问题
+
+* $\texttt{Stack}$ 继承自 $\texttt{Vector}$，本身是**同步的（线程安全）**，
+  但由于继承而不是组合，暴露了许多并非栈本应具备的方法（如
+  $\texttt{insertElementAt}$、 $\texttt{removeElementAt}$ 等），**破坏了“仅允许栈顶插删”的封装性**。
+* 设计得不够精简，造成了**接口污染**，违背了栈的抽象数据类型原则。
+
+#### 优选 `ArrayDeque` 的理由
+
+* $\texttt{ArrayDeque}$ 实现了 $\texttt{Deque}$ 接口，**可以高效地作为栈（或队列）使用**。
+* 支持 $O(1)$ 复杂度的 $\texttt{push}$、 $\texttt{pop}$、 $\texttt{peek}$ 操作，
+  且**性能比 `Stack` 更好、不带额外同步开销**。
+* 不暴露非栈操作，更符合“后进先出（LIFO）”的纯粹语义。
+* 语法简洁、功能齐全，是现代 Java 算法和数据结构代码的推荐选择。
+
+  示例用法：
+
+  ```java
+  Deque<Integer> stack = new ArrayDeque<>();
+  stack.push(1);
+  stack.push(2);
+  int top = stack.pop(); // 弹出2
+  ```
+
+## 典型问题 1: 简化路径
+
+### 例：「力扣」 第 71 题： [简化路径](https://leetcode.cn/problems/simplify-path)
+
+#### 算法思路
+
+**核心思路是用栈模拟路径的层级变化**：
+
+1. 按 `/` 拆分路径每一部分（分段）。
+2. 顺序遍历：
+    * 忽略 `.`（表示本目录）。
+    * 对于 `..`，如果栈不为空则弹出栈顶（回到上一级）。
+    * 对于其他目录名（包括 `...`），推入栈。
+3. 遍历结束，将栈内元素用 `/` 连接，保证以 `/` 开头，不以 `/` 结尾（除了根目录 `/`）。
+
+#### 算法知识点与技巧
+
+* **栈的应用**：栈后进先出适合处理“返回上一级”的场景。
+* **边界与特殊符号处理**：本题需要细致判断 `"."`、`".."` 及普通目录名的区别，注意 `"..."` 之类不能混淆。
+* **字符串遍历与切分**：本题高效做法不是直接 `split("/")`, 而是用双指针逐段分析（更省空间、处理细节更灵活）。
+* **构造输出**：拼接标准路径时避免多余 `/` 和空路径。
+
+#### 代码实现
+
+* *[../src/stackqueue/SimplifyPath.java](../src/stackqueue/SimplifyPath.java)*
+
+```java
+public class SimplifyPath {
+
+    public String simplifyPath(String path) {
+        int len = path.length();
+        Deque<String> stack = new ArrayDeque<>();
+        int idx = 0;
+        while (idx < len) {
+            while (idx < len && path.charAt(idx) == '/')
+                idx++;
+            if (idx == len) break;
+            int end = idx;
+            while (end < len && path.charAt(end) != '/')
+                end++;
+            String segment = path.substring(idx, end);
+            if (segment.equals("..")) {
+                if (!stack.isEmpty()) {
+                    stack.pollLast();
+                }
+            } else if (!segment.equals(".")) {
+                stack.offerLast(segment);
+            }
+            idx = end;
+        }
+        if (stack.isEmpty()) return "/";
+        StringBuilder res = new StringBuilder();
+        for (String dir : stack) {
+            res.append("/").append(dir);
+        }
+        return res.toString();
+    }
+}
+```
+
+**代码关键点**:
+
+* `Deque<String>` 实现栈，用于存放每一级目录。
+* 双指针 `idx, end` 遍历路径字符串，避免直接 split 后的空字符串问题（更严谨且效率高）。
+* `.equals("..")` 判断上一级，栈非空才弹出（已经是根目录就忽略）。
+* 常规目录名用 `offerLast` 入栈，`"."` 和空字符串（多余斜杠产生的）被忽略。
+* 构造输出时，`StringBuilder` 拼接，每级前加 `/`，避免多余 `/`。
+
+#### 复杂度分析
+
+* **时间复杂度**： $O(n)$， $n$ 为路径字符串长度，每个字符至多被访问两次（遍历和依次处理）。
+* **空间复杂度**： $O(n)$，最坏情况下每一层路径都要入栈。
+
