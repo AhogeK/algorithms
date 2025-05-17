@@ -27,6 +27,10 @@
       * [算法思路](#算法思路-1)
       * [代码实现](#代码实现-1)
       * [复杂度分析](#复杂度分析-1)
+    * [完成「力扣」第 150 题：逆波兰表达式求值](#完成力扣第-150-题逆波兰表达式求值)
+      * [算法思路](#算法思路-2)
+      * [算法技巧知识点](#算法技巧知识点)
+      * [复杂度分析](#复杂度分析-2)
 <!-- TOC -->
 
 # 栈与队列
@@ -385,3 +389,52 @@ public class SimplifyPath {
 * **时间复杂度**： $O(n)$（每字符最多只进/出栈一次）
 * **空间复杂度**： $O(n)$（全部为左括号时栈空间最大化）
 
+### 完成「力扣」第 150 题：[逆波兰表达式求值](https://leetcode.cn/leetbook/read/learning-algorithms-with-leetcode)
+
+#### 算法思路
+
+**核心步骤：**
+1. 遍历 `tokens`
+    * 若遇到整数，入栈
+    * 若遇到运算符，从栈弹出 **栈顶两个数**，按“左操作数 `op` 右操作数”顺序计算，结果压回栈顶
+2. 遍历完成，栈顶即为最终答案
+**注意顺序：**
+* 一次运算时，先`pop`出来的是“右操作数”，第二次`pop`得到“左操作数”。
+
+#### 算法技巧知识点
+
+* 用`int`数组模拟栈，避免`Java`集合类带来函数开销，提高运行速度。
+* 利用运算符字符串的等值判断（`equals()`），也可用`switch-case`替代链式判断，提升效率。
+* 字符串转整数推荐 `Integer.parseInt`，对特殊用例直接转型。
+
+```java
+public class EvaluateReversePolishNotation {
+    public int evalRPN(String[] tokens) {
+        int[] stack = new int[tokens.length];
+        int top = -1;
+        for (String token : tokens) {
+            char c = token.charAt(0);
+            if (token.length() == 1 && (c == '+' || c == '-' || c == '*' || c == '/')) {
+                int b = stack[top--];
+                int a = stack[top--];
+                int res = switch (c) {
+                    case '+' -> a + b;
+                    case '-' -> a - b;
+                    case '*' -> a * b;
+                    case '/' -> a / b;
+                    default -> 0;
+                };
+                stack[++top] = res;
+            } else {
+                stack[++top] = Integer.parseInt(token);
+            }
+        }
+        return stack[top];
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度：** $O(n)$，每个 `token` 仅入栈/出栈/算一次。
+* **空间复杂度：** $O(n)$，辅助栈空间。
