@@ -31,6 +31,12 @@
       * [算法思路](#算法思路-2)
       * [算法技巧知识点](#算法技巧知识点)
       * [复杂度分析](#复杂度分析-2)
+  * [典型问题 2：去除重复字母](#典型问题-2去除重复字母)
+    * [例 1：「力扣」第 316 题：去除重复字母](#例-1力扣第-316-题去除重复字母)
+      * [算法思路](#算法思路-3)
+      * [代码实现](#代码实现-2)
+      * [算法知识点技巧](#算法知识点技巧)
+      * [复杂度分析](#复杂度分析-3)
 <!-- TOC -->
 
 # 栈与队列
@@ -394,11 +400,14 @@ public class SimplifyPath {
 #### 算法思路
 
 **核心步骤：**
+
 1. 遍历 `tokens`
     * 若遇到整数，入栈
     * 若遇到运算符，从栈弹出 **栈顶两个数**，按“左操作数 `op` 右操作数”顺序计算，结果压回栈顶
 2. 遍历完成，栈顶即为最终答案
+ 
 **注意顺序：**
+
 * 一次运算时，先`pop`出来的是“右操作数”，第二次`pop`得到“左操作数”。
 
 #### 算法技巧知识点
@@ -438,3 +447,66 @@ public class EvaluateReversePolishNotation {
 
 * **时间复杂度：** $O(n)$，每个 `token` 仅入栈/出栈/算一次。
 * **空间复杂度：** $O(n)$，辅助栈空间。
+
+## 典型问题 2：去除重复字母
+
+### 例 1：「力扣」第 316 题：[去除重复字母](https://leetcode.cn/problems/remove-duplicate-letters)
+
+#### 算法思路
+
+要同时**去重**和**保证字典序最小**，我们可以用**单调栈**+**贪心**解决。
+
+1. **去重与字母唯一性**
+    * 保证每个字母只出现一次，需要辅助结构（如`boolean[] inAns`）标记**当前字母是否已经在答案里**。
+2. **字典序最小的贪心考虑**
+    * 遍历每个字符时，如果当前栈（即构造中的字符串）的末尾字符**比当前字符大**，而且**末尾字符后续还会出现**，那么：
+        * 可以把栈顶字符弹出，因为未来该字符还会出现，且把当前“小”的字符放前面可以让结果更小。
+    * 重复上述操作直到不能再弹出，最后把当前字符入栈。
+3. **技巧要点**
+    * **记录每个字母剩余出现次数**：用`int[] left`遍历字符串统计。
+    * **标记字母是否已入栈**：用`boolean[] inAns`。
+    * **答案用`StringBuilder`充当栈**：`ans`。
+
+#### 代码实现
+
+* *[../src/stackqueue/RemoveDuplicateLetters.java](../src/stackqueue/RemoveDuplicateLetters.java)*
+
+```java
+public class RemoveDuplicateLetters {
+    public String removeDuplicateLetters(String s) {
+        char[] array = s.toCharArray();
+        int[] left = new int[26];
+        for (char c : array)
+            left[c - 'a']++;
+        StringBuilder ans = new StringBuilder();
+        boolean[] inAns = new boolean[26];
+        for (char c : array) {
+            left[c - 'a']--;
+            if (inAns[c - 'a'])
+                continue;
+            while (!ans.isEmpty() &&
+                    c < ans.charAt(ans.length() - 1) &&
+                    left[ans.charAt(ans.length() - 1) - 'a'] > 0) {
+               inAns[ans.charAt(ans.length() - 1) - 'a'] = false;
+               ans.deleteCharAt(ans.length() - 1);
+            }
+            ans.append(c);
+            inAns[c - 'a'] = true;
+        }
+        return ans.toString();
+    }
+}
+```
+
+#### 算法知识点技巧
+
+* **单调栈思想**："栈顶比当前字母大，且后面还会再出现，则弹栈"实现最小字典序
+* **贪心策略**：让尽可能小的字母“靠前”
+* **字母是否已选**和**字母剩余个数**，配合控制去重和弹栈逻辑
+* **ASCII 转下标**：`c - 'a'`在 $[0,25]$ 范围运算
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}(n)$，每个字母最多入栈、弹出、遍历各一次。
+* **空间复杂度**： $\mathcal{O}(k)$， $k=26$为小写字母个数，用于`left`、`inAns`等辅助数组，栈最多存 $k$ 个字母。
+
