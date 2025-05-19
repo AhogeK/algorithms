@@ -405,7 +405,7 @@ public class SimplifyPath {
     * 若遇到整数，入栈
     * 若遇到运算符，从栈弹出 **栈顶两个数**，按“左操作数 `op` 右操作数”顺序计算，结果压回栈顶
 2. 遍历完成，栈顶即为最终答案
- 
+
 **注意顺序：**
 
 * 一次运算时，先`pop`出来的是“右操作数”，第二次`pop`得到“左操作数”。
@@ -487,8 +487,8 @@ public class RemoveDuplicateLetters {
             while (!ans.isEmpty() &&
                     c < ans.charAt(ans.length() - 1) &&
                     left[ans.charAt(ans.length() - 1) - 'a'] > 0) {
-               inAns[ans.charAt(ans.length() - 1) - 'a'] = false;
-               ans.deleteCharAt(ans.length() - 1);
+                inAns[ans.charAt(ans.length() - 1) - 'a'] = false;
+                ans.deleteCharAt(ans.length() - 1);
             }
             ans.append(c);
             inAns[c - 'a'] = true;
@@ -509,4 +509,3 @@ public class RemoveDuplicateLetters {
 
 * **时间复杂度**： $\mathcal{O}(n)$，每个字母最多入栈、弹出、遍历各一次。
 * **空间复杂度**： $\mathcal{O}(k)$， $k=26$为小写字母个数，用于`left`、`inAns`等辅助数组，栈最多存 $k$ 个字母。
-
