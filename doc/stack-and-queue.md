@@ -37,6 +37,13 @@
       * [代码实现](#代码实现-2)
       * [算法知识点技巧](#算法知识点技巧)
       * [复杂度分析](#复杂度分析-3)
+  * [典型问题3: 单调栈](#典型问题3-单调栈)
+    * [工作原理](#工作原理)
+    * [算法复杂度分析](#算法复杂度分析)
+    * [例：「力扣」第 42 题：接雨水](#例力扣第-42-题接雨水)
+      * [核心思想](#核心思想)
+      * [代码实现](#代码实现-3)
+    * [复杂度分析](#复杂度分析-4)
 <!-- TOC -->
 
 # 栈与队列
@@ -509,3 +516,82 @@ public class RemoveDuplicateLetters {
 
 * **时间复杂度**： $\mathcal{O}(n)$，每个字母最多入栈、弹出、遍历各一次。
 * **空间复杂度**： $\mathcal{O}(k)$， $k=26$为小写字母个数，用于`left`、`inAns`等辅助数组，栈最多存 $k$ 个字母。
+
+## 典型问题3: 单调栈
+
+> 单调栈指的是栈内元素始终保持“单调性”（递增或递减），在不断地进栈、出栈过程中始终满足该单调关系。
+> 单调递增栈：栈顶到栈底的元素依次递增。单调递减栈：栈顶到栈底的元素依次递减。常见场景包括：
+> 寻找数组中每个元素左/右边第一个比它大/小的位置；处理区间最大/最小值问题等。
+
+### 工作原理
+
+以**单调递增栈**为例（用于查找最近的更小元素）：
+
+* 从左到右遍历数组，对于每个元素：
+    * 如果当前元素小于等于栈顶元素，则弹出栈顶，直到栈为空或栈顶小于当前元素。
+    * 当前元素进栈。
+* 栈顶存储的是还没被“打破单调性”的元素。
+
+### 算法复杂度分析
+
+* 每个元素最多进栈、出栈各一次
+* 时间复杂度 $\mathcal{O}(n)$
+
+### 例：「力扣」第 42 题：[接雨水](https://leetcode.cn/problems/trapping-rain-water)
+
+***注：该题使用双指针+前后缀分治会比单调栈更快一点点，这里使用单调栈用于学习使用单调栈解决该题***
+
+#### 核心思想
+
+**区间两侧最高值分析法**
+
+每个点 $i$ 能接的水量为：
+
+$$water_i = \max(0,\, \min(\max\limits_{[0, i]} height,\, \max\limits_{[i, n-1]} height) - height_i)$$
+
+但直接求 $\max$ 会 $\mathcal{O}(n^2)$，空间换时间两边预处理前缀/后缀最大即可 $\mathcal{O}(n)$，但这是常规做法。
+
+对每个可能形成“水坑底”的位置，找到左、右围墙的位置和高度，决定此处能积多少水。用单调递减栈维护递减柱子，
+每遇到高墙弹出构成水槽，**每一个被弹出的元素位置就是“水坑底”**。
+
+*步骤说明*:
+
+1. 初始化一个栈用于存放下标，初始为空。
+2. 从左到右遍历 $height$ 数组：
+    * `while` 当前 $height[i] > height[stack.top()]$，说明遇到右侧更高墙，弹出`stack.top()`作为“水坑底” $bot$。
+    * 若栈空，跳出，否则 $left = stack.top()$ 为左侧墙。
+    * $width = i - left - 1$
+    * $h = \min(height[left], height[i]) - height[bot]$
+    * 若 $h > 0$，累计 $width \times h$ 到结果。
+3. 继续入栈 $i$。
+
+#### 代码实现
+
+* *[../src/stackqueue/TrappingRainWater.java](../src/stackqueue/TrappingRainWater.java)*
+
+```java
+public class TrappingRainWater {
+    public int trap(int[] height) {
+        int n = height.length, res = 0;
+        int[] stack = new int[n];
+        int top = -1;
+        for (int i = 0; i < n; i++) {
+            while (top != -1 && height[i] > height[stack[top]]) {
+                int bot = stack[top--];
+                if (top == -1) break;
+                int left = stack[top];
+                int width = i - left - 1;
+                int h = Math.min(height[left], height[i]) - height[bot];
+                if (h > 0) res += width * h;
+            }
+            stack[++top] = i;
+        }
+        return res;
+    }
+}
+```
+
+### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}(n)$，每个元素最多进栈、出栈各一次。
+* **空间复杂度**： $\mathcal{O}(n)$，极限为所有递减进栈。
