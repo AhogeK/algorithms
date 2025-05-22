@@ -44,6 +44,10 @@
       * [核心思想](#核心思想)
       * [代码实现](#代码实现-3)
     * [复杂度分析](#复杂度分析-4)
+    * [完成「力扣」第 739 题：每日温度](#完成力扣第-739-题每日温度)
+      * [算法思路](#算法思路-4)
+      * [代码实现](#代码实现-4)
+      * [复杂度分析](#复杂度分析-5)
 <!-- TOC -->
 
 # 栈与队列
@@ -65,8 +69,7 @@
 2. **下标访问**\
    与普通数组一样，动态数组通过下标可以在 $\mathcal{O}(1)$ 时间内随机访问任意元素。
 
-3. **插入与删除**
-
+3. **插入与删除**\
     * 末尾插入新元素的摊还时间复杂度为 $\mathcal{O}(1)$（由于偶尔会有扩容导致 $\mathcal{O}(n)$，
       但全部操作平均下来是常数级别）。
     * 中间插入或删除元素的时间复杂度为 $\mathcal{O}(n)$，因为需要移动元素。
@@ -595,3 +598,48 @@ public class TrappingRainWater {
 
 * **时间复杂度**： $\mathcal{O}(n)$，每个元素最多进栈、出栈各一次。
 * **空间复杂度**： $\mathcal{O}(n)$，极限为所有递减进栈。
+
+### 完成「力扣」第 739 题：[每日温度](https://leetcode.cn/problems/daily-temperatures)
+
+#### 算法思路
+
+> 本题本质为「下一个更大元素」问题变种。若直接双重循环暴力枚举，每个元素往右遍历一次，
+> 复杂度为 $\mathcal{n^2}$，难以通过所有测试点。
+
+**核心技巧：单调栈**
+
+* 使用单调递减栈，维护索引栈 $stack$，保证
+  $temperatures[stack[0]] < temperatures[stack[1]] < \cdots < temperatures[stack[top]]$。
+* 从左到右遍历 $temperatures$，对于每个新温度 $t_i$，只要 $stack$ 顶部 $temperatures[stack[top]] < t_i$，
+  则找到了 $stack[top]$ 的下一个更高温度为 $i$。
+* 将对应 $\text{answer}[stack[top]]$ 赋值为 $i - stack[top]$，然后弹出栈顶。
+* 最后，将 $i$ 入栈，表示当前位置还没有找到下一个更高温度。
+
+#### 代码实现
+
+* *[../src/stackqueue/DailyTemperatures.java](../src/stackqueue/DailyTemperatures.java)*
+
+```java
+public class DailyTemperatures {
+    public int[] dailyTemperatures(int[] temperatures) {
+        int n = temperatures.length;
+        int[] answer = new int[n];
+        int[] stack = new int[n];
+        int top = -1;
+
+        for (int i = 0; i < n; ++i) {
+            while (top >= 0 &&  temperatures[i] > temperatures[stack[top]]) {
+                int idx = stack[top--];
+                answer[idx] = i - idx;
+            }
+            stack[++top] = i;
+        }
+        return answer;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度： $\mathcal{O}(n)$，每个元素最多进栈、出栈各一次。
+* 空间复杂度： $\mathcal{O}(n)$，最坏情况下栈存所有元素。
