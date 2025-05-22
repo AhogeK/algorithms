@@ -48,6 +48,11 @@
       * [算法思路](#算法思路-4)
       * [代码实现](#代码实现-4)
       * [复杂度分析](#复杂度分析-5)
+    * [完成「力扣」第 496 题：下一个更大元素 I](#完成力扣第-496-题下一个更大元素-i)
+      * [算法思路](#算法思路-5)
+      * [算法技巧](#算法技巧)
+      * [代码实现](#代码实现-5)
+      * [复杂度分析](#复杂度分析-6)
 <!-- TOC -->
 
 # 栈与队列
@@ -643,3 +648,48 @@ public class DailyTemperatures {
 
 * 时间复杂度： $\mathcal{O}(n)$，每个元素最多进栈、出栈各一次。
 * 空间复杂度： $\mathcal{O}(n)$，最坏情况下栈存所有元素。
+
+### 完成「力扣」第 496 题：[下一个更大元素 I](https://leetcode.cn/leetbook/read/learning-algorithms-with-leetcode/)
+
+#### 算法思路
+
+* **步骤1（预处理）**：对 $nums2$ 用单调栈从左到右预先计算每个元素的“下一个更大元素”，并保存到映射结构（哈希表或定长数组）。
+* **步骤2（查询）**：用哈希表或数组（如 $nextGreater[x]$）快速查询 $nums1$ 中每一个元素结果。
+
+#### 算法技巧
+
+* **单调栈找每个元素右侧第一个更大值**：核心同“每日温度/下一个更大元素 II”。
+* **用哈希表或桶数组保存单调栈结果**：由于 $nums2[i]\in[0,10^4]$，可以直接 `nextGreater = new int[10001]`，常数优化。
+* **不出现的元素或没有更大值的初始化为 $-1$**。
+
+#### 代码实现
+
+* *[../src/stackqueue/NextGreaterElementI.java](../src/stackqueue/NextGreaterElementI.java)*
+ 
+```java
+public class NextGreaterElementI {
+    public int[] nextGreaterElement(int[] nums1, int[] nums2) {
+        int[] next = new int[1001];
+        for (int i = 0; i < nums2.length; i++)
+            next[i] = -1;
+        int[] stack = new int[nums2.length];
+        int top = -1;
+        for (int i = 0; i < nums2.length; i++) {
+            while (top >= 0 && nums2[i] > nums2[stack[top]]) {
+                int idx = stack[top--];
+                next[nums2[idx]] = nums2[i];
+            }
+            stack[++top] = i;
+        }
+        int[] ans = new int[nums1.length];
+        for (int i = 0; i < nums1.length; i++)
+            ans[i] = next[nums1[i]];
+        return ans;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度： $\mathcal{O}(n+k)$， $n=|nums2|$, $k=|nums1|$。单调栈 $O(n)$，结果查询 $O(k)$。
+* 空间复杂度： $\mathcal{O}(n+V)$，栈 $O(n)$，桶 $O(V=10^4)$，不考虑 $V$ 也近似 $O(n)$。
