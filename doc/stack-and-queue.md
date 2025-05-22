@@ -649,7 +649,7 @@ public class DailyTemperatures {
 * 时间复杂度： $\mathcal{O}(n)$，每个元素最多进栈、出栈各一次。
 * 空间复杂度： $\mathcal{O}(n)$，最坏情况下栈存所有元素。
 
-### 完成「力扣」第 496 题：[下一个更大元素 I](https://leetcode.cn/leetbook/read/learning-algorithms-with-leetcode/)
+### 完成「力扣」第 496 题：[下一个更大元素 I](https://leetcode.cn/problems/next-greater-element-i)
 
 #### 算法思路
 
@@ -693,3 +693,43 @@ public class NextGreaterElementI {
 
 * 时间复杂度： $\mathcal{O}(n+k)$， $n=|nums2|$, $k=|nums1|$。单调栈 $O(n)$，结果查询 $O(k)$。
 * 空间复杂度： $\mathcal{O}(n+V)$，栈 $O(n)$，桶 $O(V=10^4)$，不考虑 $V$ 也近似 $O(n)$。
+
+### 完成「力扣」第 503 题：[下一个更大元素 II](https://leetcode.cn/problems/next-greater-element-ii)
+
+#### 算法思路
+
+* 使用**单调栈**模板，从 $i = 0$ 到 $2n-1$（即遍历数组两遍），下标每次取 $i \bmod n$，借此模拟**循环特性**。
+* 栈存放的是原数组下标，当发现当前元素比栈顶元素大时，弹出栈顶并更新结果。
+* 遍历 $2n-1$ 使得每个元素都能在循环意义下完成一轮查找。
+* 只在 $i < n$ 时将下标入栈，第二轮仅用于找前面未出栈元素的循环“后缀”解，不再反复入栈。
+
+#### 代码实现
+
+* *[../src/stackqueue/NextGreaterElementII.java](../src/stackqueue/NextGreaterElementII.java)*
+
+```java
+public class NextGreaterElementII {
+    public int[] nextGreaterElements(int[] nums) {
+        int n = nums.length;
+        int[] ans = new int[n];
+        int[] stack = new int[n];
+        int top = -1;
+        for (int i = 0; i < n; i++)
+            ans[i] = -1;
+        for (int i = 0; i < n * 2; i++) {
+            int j = i % n;
+            while (top >= 0 && nums[j] > nums[stack[top]]) {
+                int idx = stack[top--];
+                ans[idx] = nums[j];
+            }
+            if (i < n) stack[++top] = j;
+        }
+        return ans;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度： $\mathcal{O}(n)$。每个下标只会入栈、出栈各一次， $2n$ 遍历不会导致 $\mathcal{O}(n^2)$。
+* 空间复杂度： $\mathcal{O}(n)$。答案数组与栈空间。
