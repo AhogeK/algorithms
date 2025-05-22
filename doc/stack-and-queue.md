@@ -53,6 +53,14 @@
       * [算法技巧](#算法技巧)
       * [代码实现](#代码实现-5)
       * [复杂度分析](#复杂度分析-6)
+    * [完成「力扣」第 503 题：下一个更大元素 II](#完成力扣第-503-题下一个更大元素-ii)
+      * [算法思路](#算法思路-6)
+      * [代码实现](#代码实现-6)
+      * [复杂度分析](#复杂度分析-7)
+    * [完成「力扣」第 84 题：柱状图中最大的矩形](#完成力扣第-84-题柱状图中最大的矩形)
+      * [算法思路](#算法思路-7)
+      * [代码实现](#代码实现-7)
+      * [复杂度分析](#复杂度分析-8)
 <!-- TOC -->
 
 # 栈与队列
@@ -633,7 +641,7 @@ public class DailyTemperatures {
         int top = -1;
 
         for (int i = 0; i < n; ++i) {
-            while (top >= 0 &&  temperatures[i] > temperatures[stack[top]]) {
+            while (top >= 0 && temperatures[i] > temperatures[stack[top]]) {
                 int idx = stack[top--];
                 answer[idx] = i - idx;
             }
@@ -665,7 +673,7 @@ public class DailyTemperatures {
 #### 代码实现
 
 * *[../src/stackqueue/NextGreaterElementI.java](../src/stackqueue/NextGreaterElementI.java)*
- 
+
 ```java
 public class NextGreaterElementI {
     public int[] nextGreaterElement(int[] nums1, int[] nums2) {
@@ -733,3 +741,50 @@ public class NextGreaterElementII {
 
 * 时间复杂度： $\mathcal{O}(n)$。每个下标只会入栈、出栈各一次， $2n$ 遍历不会导致 $\mathcal{O}(n^2)$。
 * 空间复杂度： $\mathcal{O}(n)$。答案数组与栈空间。
+
+### 完成「力扣」第 84 题：[柱状图中最大的矩形](https://leetcode.cn/problems/largest-rectangle-in-histogram/)
+
+#### 算法思路
+
+> 经典“单调栈”应用。用单调递增栈，找到每个柱子最大可以扩展到的左右边界。矩形面积为每根柱高 $\times$ 能覆盖的宽。
+
+* **向 `heights` 末尾补 $0$**，便于收敛、弹出栈顶所有元素。
+* **遍历所有 $i$。用栈维护**：当前下标 $i$ 前后比 $h_i$ 小的柱子的下标。
+    * 当 $h_i \lt$ 栈顶，则弹出栈顶，计算以 $h_{stack[top]}$ 为高的最大面积
+    * 宽度 $w = i-1-(stack[top-1])+1 = i-stack[top-1]-1$， $\text{其中}\\~stack[top-1]\ \text{是新栈顶}$
+    * 每次更新最大面积
+* **入栈**： $i$ 入栈，保持从栈底到栈顶递增。
+
+#### 代码实现
+
+* *[../src/stackqueue/LargestRectangleInHistogram.java](../src/stackqueue/LargestRectangleInHistogram.java)*
+
+```java
+public class LargestRectangleInHistogram {
+    public int largestRectangleArea(int[] heights) {
+        int n = heights.length;
+        int[] hs = new int[n + 1];
+        System.arraycopy(heights, 0, hs, 0, n);
+        hs[n] = 0;
+        int[] stack = new int[n + 2];
+        int top = -1;
+        int maxArea = 0;
+        for (int i = 0; i <= n; i++) {
+            while (top >= 0 && hs[i] < hs[stack[top]]) {
+                int height = hs[stack[top--]];
+                int left = top == -1 ? -1 : stack[top];
+                int width = i - left - 1;
+                int area = height * width;
+                if (area > maxArea) maxArea = area;
+            }
+            stack[++top] = i;
+        }
+        return maxArea;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度： $\mathcal{O}(n)$，每个柱最多进出栈一次
+* 空间复杂度： $\mathcal{O}(n)$，辅助栈空间
