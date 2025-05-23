@@ -61,6 +61,10 @@
       * [算法思路](#算法思路-7)
       * [代码实现](#代码实现-7)
       * [复杂度分析](#复杂度分析-8)
+    * [完成「力扣」第 1019 题：链表中的下一个更大节点](#完成力扣第-1019-题链表中的下一个更大节点)
+      * [算法思路](#算法思路-8)
+      * [代码实现](#代码实现-8)
+      * [复杂度分析](#复杂度分析-9)
 <!-- TOC -->
 
 # 栈与队列
@@ -788,3 +792,57 @@ public class LargestRectangleInHistogram {
 
 * 时间复杂度： $\mathcal{O}(n)$，每个柱最多进出栈一次
 * 空间复杂度： $\mathcal{O}(n)$，辅助栈空间
+
+### 完成「力扣」第 1019 题：[链表中的下一个更大节点](https://leetcode.cn/problems/next-greater-node-in-linked-list)
+
+#### 算法思路
+
+这道题本质上是求解"下一个更大元素"问题，可以使用单调栈来解决。单调栈是一种维护栈内元素单调性的数据结构，
+可以在 $\mathcal{O}(n)$ 的时间复杂度内解决此类问题。
+
+算法步骤：
+
+1. 先将链表转换成数组，方便处理
+2. 使用单调递减栈（栈底到栈顶递减）来处理数组
+3. 栈中存储元素的索引，而不是元素值本身
+4. 遍历数组，对于每个元素：
+    * 当前元素大于栈顶元素，则栈顶元素的"下一个更大元素"就是当前元素
+    * 弹出栈顶元素，并在结果数组中记录
+    * 重复此过程直到栈为空或栈顶元素大于当前元素
+    * 将当前元素的索引入栈
+
+#### 代码实现
+
+```java
+public class NextGreaterNodeInLinkedList {
+    public int[] nextLargerNodes(ListNode head) {
+        int length = 0;
+        ListNode curr = head;
+        while (curr != null) {
+            length++;
+            curr = curr.next;
+        }
+        int[] values = new int[length];
+        curr = head;
+        for (int i = 0; i < length; i++) {
+            values[i] = curr.val;
+            curr = curr.next;
+        }
+        int[] result = new int[length];
+        int[] stack = new int[length];
+        int top = -1;
+        for (int i = 0; i < length; i++) {
+            while (top >= 0 && values[i] > values[stack[top]])
+                result[stack[top--]] = values[i];
+            stack[++top] = i;
+        }
+        return result;
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}(n)$，其中 $n$ 是链表的长度。我们需要遍历一次链表来构建数组，再遍历一次数组来构建答案。
+                 每个元素最多入栈出栈各一次，因此总体时间复杂度是 $\mathcal{O}(n)$。
+* **空间复杂度**： $\mathcal{O}(n)$，需要存储链表值的数组、结果数组和单调栈，它们的空间都是 $\mathcal{O}(n)$。
