@@ -3,6 +3,18 @@
 > 个人算法学习练习记录<br>
 > [零起步学算法](https://leetcode.cn/leetbook/detail/learning-algorithms-with-leetcode/)
 
+---
+
+- [二分查找](doc/binary-search.md)
+- [基础排序算法](doc/base-sort)
+- [高级排序算法](doc/advanced-sort.md)
+- [非比较排序算法](doc/non-comparison-sort.md)
+- [数组里常见的两类算法](doc/common-array-algorithms.md)
+- [链表](doc/linked-list.md)
+- [栈与队列](doc/stack-and-queue.md)
+
+---
+
 ## 关于时间复杂度与空间复杂度
 
 *评估算法性能的两个指标*
@@ -152,12 +164,3 @@ $T(n) = aT\left(\frac{n}{b}\right) + f(n)$
    \frac{n}{b}\right) \leq kf(n)$ 对于某个常数 $k < 1$ 和所有足够大的 $n$ ，这意味着分割和合并的工作相比于解决子问题的工作来说是渐进大的，那么
    $T(n) = \Theta(f(n))$ 。
 
----
-
-- [二分查找](doc/binary-search.md)
-- [基础排序算法](doc/base-sort)
-- [高级排序算法](doc/advanced-sort.md)
-- [非比较排序算法](doc/non-comparison-sort.md)
-- [数组里常见的两类算法](doc/common-array-algorithms.md)
-- [链表](doc/linked-list.md)
-- [栈与队列](doc/stack-and-queue.md)
