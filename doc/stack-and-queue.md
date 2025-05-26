@@ -78,6 +78,11 @@
       * [5. 单调队列（Monotonic Queue）](#5-单调队列monotonic-queue)
       * [6. 优化队列变种举例](#6-优化队列变种举例)
       * [7. 其他专用队列](#7-其他专用队列)
+  * [典型问题 1：用栈实现队列、用队列实现栈](#典型问题-1用栈实现队列用队列实现栈)
+    * [例 1 ：「力扣」第 232 题：用栈实现队列](#例-1-力扣第-232-题用栈实现队列)
+      * [算法思路](#算法思路-9)
+      * [代码实现](#代码实现-9)
+      * [复杂度分析](#复杂度分析-10)
 <!-- TOC -->
 
 # 栈与队列
@@ -993,3 +998,66 @@ class MyQueue {
 
 * **消息队列**（如RabbitMQ、Kafka）：实现进程/系统间异步通信
 * **任务队列**、**事件队列**等
+
+## 典型问题 1：用栈实现队列、用队列实现栈
+
+### 例 1 ：「力扣」[第 232 题：用栈实现队列](https://leetcode.cn/problems/implement-queue-using-stacks)
+
+#### 算法思路
+
+* **核心思想**：用两个栈 `inStack`, `outStack`。
+* **入队（`push`）**：所有新元素直接入 `inStack`。
+* **出队/取头（`pop`/`peek`）**：
+    * 若 `outStack` 为空，将 `inStack` 中所有元素依次 pop 出并 push 进 `outStack`，顺序完成逆转。
+    * 这样 `outStack` 栈顶就是队首元素，实现了先进先出
+    * 后续不断 pop/peek 都只访问 `outStack`，直到它为空才再次倒栈。
+
+#### 代码实现
+
+```java
+public class MyQueue {
+
+    private final Deque<Integer> inStack;
+    private final Deque<Integer> outStack;
+
+    public MyQueue() {
+        inStack = new ArrayDeque<>();
+        outStack = new ArrayDeque<>();
+    }
+
+    public void push(int x) {
+        inStack.push(x);
+    }
+
+    public int pop() {
+        move();
+        return outStack.pop();
+    }
+
+    public int peek() {
+        move();
+        return outStack.isEmpty() ? -1 : outStack.peek();
+    }
+
+    public boolean empty() {
+        return inStack.isEmpty() && outStack.isEmpty();
+    }
+
+    private void move() {
+        if (outStack.isEmpty()) {
+            while (!inStack.isEmpty()) {
+                outStack.push(inStack.pop());
+            }
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* **均摊时间复杂度分析**：
+    * `push`： $\mathcal{O}(1)$
+    * `pop`、`peek`：几乎都是 $\mathcal{O}(1)$，只有当 `outStack` 为空时，
+      `inStack` 元素才会整体倒入，假设共 $n$ 个操作，每个元素最多只会被移动两次
+      （倒入、再弹出），所以是**均摊 $\mathcal{O}(1)$**。
+* **空间复杂度**：最多存下所有元素， $\mathcal{O}(n)$
