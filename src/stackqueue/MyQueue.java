@@ -30,7 +30,7 @@ public class MyQueue {
 
     public int peek() {
         move();
-        return outStack.isEmpty() ? -1 : outStack.peek();
+        return outStack.peek();
     }
 
     public boolean empty() {

@@ -83,6 +83,10 @@
       * [算法思路](#算法思路-9)
       * [代码实现](#代码实现-9)
       * [复杂度分析](#复杂度分析-10)
+    * [例 2：「力扣」第 225 题：用队列实现栈](#例-2力扣第-225-题用队列实现栈)
+      * [算法思路](#算法思路-10)
+      * [代码实现](#代码实现-10)
+      * [复杂度分析](#复杂度分析-11)
 <!-- TOC -->
 
 # 栈与队列
@@ -1014,6 +1018,8 @@ class MyQueue {
 
 #### 代码实现
 
+* *[../src/stackqueue/MyQueue.java](../src/stackqueue/MyQueue.java)*
+
 ```java
 public class MyQueue {
 
@@ -1036,7 +1042,7 @@ public class MyQueue {
 
     public int peek() {
         move();
-        return outStack.isEmpty() ? -1 : outStack.peek();
+        return outStack.peek();
     }
 
     public boolean empty() {
@@ -1061,3 +1067,70 @@ public class MyQueue {
       `inStack` 元素才会整体倒入，假设共 $n$ 个操作，每个元素最多只会被移动两次
       （倒入、再弹出），所以是**均摊 $\mathcal{O}(1)$**。
 * **空间复杂度**：最多存下所有元素， $\mathcal{O}(n)$
+
+### 例 2：「力扣」[第 225 题：用队列实现栈](https://leetcode.cn/problems/implement-stack-using-queues)
+
+#### 算法思路
+
+借助两个队列 $q_1$、 $q_2$，将每次`push`都使得新元素成为“队头”，这样就能满足LIFO需要。核心思想——
+**每次插入都移动老数据，保证"栈顶"（LIFO）映射到队列的队头位置。**
+
+* 始终只保留一个主队列，另一个队列作为辅助。
+
+* `push`时：
+
+    1. 直接将 $x$ 放入辅助队列 $q_2$；
+    2. 把主队列 $q_1$ 的全部元素依次出队加入 $q_2$；
+    3. 交换 $q_1$ 与 $q_2$ 的身份（ $q_2$清空变新主队列）。
+
+* `pop`/`top`时：
+
+    * 都只需操作主队列 $q_1$ 的队首即可。
+    * `pop`直接弹出队首。
+    * `top`直接获取队首。
+
+这种做法可以让每次`pop`和`top`的复杂度为 $\mathcal{O}(1)$，而`push`操作为 $\mathcal{O}(n)$。
+
+#### 代码实现
+
+* *[../src/stackqueue/MyStack.java](../src/stackqueue/MyStack.java)*
+
+```java
+public class MyStack {
+    
+    private Queue<Integer> q1;
+    private Queue<Integer> q2;
+    
+    public MyStack() {
+        q1 = new LinkedList<>();
+        q2 = new LinkedList<>();
+    }
+    
+    public void push(int x) {
+        q2.offer(x);
+        while (!q1.isEmpty()) {
+            q2.offer(q1.poll());
+        }
+        Queue<Integer> tmp = q1;
+        q1 = q2;
+        q2 = tmp;
+    }
+    
+    public int pop() {
+        return q1.poll();
+    }
+    
+    public int top() {
+        return q1.peek();
+    }
+    
+    public boolean empty() {
+        return q1.isEmpty();
+    }
+}
+```
+
+#### 复杂度分析
+
+* `push`: $\mathcal{O}(n)$（ $n$为栈内元素数量，每次需要将 $q_1$所有元素转移到 $q_2$）
+* `pop`、`top`、`empty`: $\mathcal{O}(1)$
