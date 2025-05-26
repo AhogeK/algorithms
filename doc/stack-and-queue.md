@@ -87,6 +87,11 @@
       * [算法思路](#算法思路-10)
       * [代码实现](#代码实现-10)
       * [复杂度分析](#复杂度分析-11)
+    * [完成「力扣」第 155 题：最小栈](#完成力扣第-155-题最小栈)
+      * [算法思路](#算法思路-11)
+      * [核心知识点与技巧](#核心知识点与技巧)
+      * [代码实现](#代码实现-11)
+      * [复杂度分析](#复杂度分析-12)
 <!-- TOC -->
 
 # 栈与队列
@@ -1134,3 +1139,72 @@ public class MyStack {
 
 * `push`: $\mathcal{O}(n)$（ $n$为栈内元素数量，每次需要将 $q_1$所有元素转移到 $q_2$）
 * `pop`、`top`、`empty`: $\mathcal{O}(1)$
+
+### 完成「力扣」第 155 题：[最小栈](https://leetcode.cn/problems/min-stack)
+
+#### 算法思路
+
+核心思想：**用两个栈同步维护**。
+
+* 主栈(`stack`)：正常存所有数据
+* 辅助栈(`minStack`)：同步压“当前最小值”快照
+
+如何维护辅助栈？
+
+* 每次入栈（`push`），同时把当前最小值压入辅助栈。
+
+    * 若栈空，直接压入
+    * 否则，压入`Math.min(val, minStack.peek())`
+
+* 每次出栈（`pop`），两个栈一起弹出
+
+这样，`minStack`的顶部始终为栈中元素的**实时最小值**。
+
+#### 核心知识点与技巧
+
+1. **辅助栈同步快照**思想：每一步先算“到此为止”的最小值；始终与主栈保持元素数量一致。
+2. **`ArrayDeque`极致竞速**：代替`Stack`和`LinkedList`更为高效（无锁，少对象，原生方法）。
+3. **`push`时同步维护最小值快照，不需要分支或者额外记录上一个最小值出现次数统计，代码最短执行最快**。
+
+#### 代码实现
+
+* *[../src/stackqueue/MinStack.java](../src/stackqueue/MinStack.java)*
+
+```java
+public class MinStack {
+    private final Deque<Integer> stack;
+    private final Deque<Integer> minStack;
+
+    public MinStack() {
+        stack = new ArrayDeque<>();
+        minStack = new ArrayDeque<>();
+    }
+
+    public void push(int val) {
+        stack.push(val);
+        if (minStack.isEmpty()) {
+            minStack.push(val);
+        } else {
+            minStack.push(Math.min(val, minStack.peek()));
+        }
+    }
+
+    public void pop() {
+        stack.pop();
+        minStack.pop();
+    }
+
+    public int top() {
+        return stack.peek();
+    }
+
+    public int getMin() {
+        return minStack.peek();
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**：全部操作皆为 $\mathcal{O}(1)$常数时间。
+* **空间复杂度**： $\mathcal{O}(n)$，辅助栈与主栈等长。
