@@ -92,6 +92,12 @@
       * [核心知识点与技巧](#核心知识点与技巧)
       * [代码实现](#代码实现-11)
       * [复杂度分析](#复杂度分析-12)
+  * [典型问题 2：设计循环队列、设计循环双端队列](#典型问题-2设计循环队列设计循环双端队列)
+    * [例 1：「力扣」第 622 题：设计循环队列](#例-1力扣第-622-题设计循环队列)
+      * [算法思路](#算法思路-12)
+      * [知识点与技巧](#知识点与技巧)
+      * [代码实现](#代码实现-12)
+      * [复杂度分析](#复杂度分析-13)
 <!-- TOC -->
 
 # 栈与队列
@@ -1208,3 +1214,87 @@ public class MinStack {
 
 * **时间复杂度**：全部操作皆为 $\mathcal{O}(1)$常数时间。
 * **空间复杂度**： $\mathcal{O}(n)$，辅助栈与主栈等长。
+
+## 典型问题 2：设计循环队列、设计循环双端队列
+
+### 例 1：「力扣」第 622 题：[设计循环队列](https://leetcode.cn/problems/design-circular-queue)
+
+#### 算法思路
+
+基本结构可用**定长数组**模拟。注意：
+
+* “满”与“空”状态不能都用`front == rear`来判定，否则会混淆。因此常用**多存一格**，即容量为 $k + 1$，只放 $k$个元素。
+
+**核心指针：**
+
+* `front`：总是指向队首元素的位置
+* `rear`：总是指向**下一个**插入的位置
+
+**指针变化：**
+
+* 入队：`q[rear]=value`, `rear = (rear + 1) % cap`
+* 出队：`front = (front + 1) % cap`
+
+#### 知识点与技巧
+
+1. **判满判空**
+    * **判空**：若`front == rear`，即队列没有元素
+    * **判满**：下一个`rear`等于`front`表示满，即 $(rear + 1) \bmod cap == front$
+2. **环形映射**
+    * 索引操作均需对`cap`取模，防止越界，并形成环状
+3. **多留一格空间**
+    * 实际只允许 $k$个元素，容量为 $k+1$，这样为空和为满就不会混淆
+
+#### 代码实现
+
+* *[../src/stackqueue/MyCircularQueue.java](../src/stackqueue/MyCircularQueue.java)*
+
+```java
+public class MyCircularQueue {
+    private final int[] q;
+    private final int cap;
+    private int front;
+    private int rear;
+
+    public MyCircularQueue(int k) {
+        this.cap = k + 1;
+        this.q = new int[this.cap];
+        this.front = 0;
+        this.rear = 0;
+    }
+
+    public boolean enQueue(int value) {
+        if (isFull()) return false;
+        q[rear] = value;
+        rear = (rear + 1) % cap;
+        return true;
+    }
+
+    public boolean deQueue() {
+        if (isEmpty()) return false;
+        front = (front + 1) % cap;
+        return true;
+    }
+
+    public int Front() {
+        return isEmpty() ? -1 : q[front];
+    }
+
+    public int Rear() {
+        return isEmpty() ? -1 : q[(rear - 1 + cap) % cap];
+    }
+
+    private boolean isEmpty() {
+        return front == rear;
+    }
+
+    private boolean isFull() {
+        return (rear + 1) % cap == front;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 每次`enQueue`、`deQueue`、`Front`、`Rear`、`isEmpty`、`isFull`操作的时间复杂度和空间复杂度均为 $\mathcal{O}(1)$。
+* 空间复杂度总共为 $\mathcal{O}(k)$，仅用静态数组，不会扩容。
