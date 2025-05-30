@@ -98,6 +98,11 @@
       * [知识点与技巧](#知识点与技巧)
       * [代码实现](#代码实现-12)
       * [复杂度分析](#复杂度分析-13)
+    * [例 2：「力扣」第 641 题：设计循环双端队列](#例-2力扣第-641-题设计循环双端队列)
+      * [算法思路](#算法思路-13)
+      * [核心知识点与技巧](#核心知识点与技巧-1)
+      * [代码实现](#代码实现-13)
+      * [复杂度分析](#复杂度分析-14)
 <!-- TOC -->
 
 # 栈与队列
@@ -1298,3 +1303,92 @@ public class MyCircularQueue {
 
 * 每次`enQueue`、`deQueue`、`Front`、`Rear`、`isEmpty`、`isFull`操作的时间复杂度和空间复杂度均为 $\mathcal{O}(1)$。
 * 空间复杂度总共为 $\mathcal{O}(k)$，仅用静态数组，不会扩容。
+
+### 例 2：「力扣」第 641 题：[设计循环双端队列](https://leetcode.cn/problems/design-circular-deque)
+
+#### 算法思路
+
+循环队列“头尾指针/下标模拟法”是最主流做法，双端同理扩展即可。
+
+**设计要点：**
+
+* 用一个长度为 $k+1$ 的 `int[]` 环状数组（ $+1$ 保证“判满判空”可无歧义分辨）。
+* `front/rear` 两个下标：始终指向当前位置“元素”或“空位”。
+    * 定义：`front` 指向**队首元素下标**；`rear` 指向**队尾元素的下一个位置** 。
+* 判空：`front == rear`
+* 判满：`(rear + 1) % capacity == front`
+* 插入/删除操作均需用到模运算 `(x + cap) % cap` 避免负数下标/数组越界。
+
+#### 核心知识点与技巧
+
+* 循环数组判空判满：“多开一格”+指针挪动，“模 $k+1$”对下标回绕
+* 插入头部/尾部分别调整不同指针
+* 所有操作 $\mathcal{O}(1)$，无任何移动数组元素
+
+#### 代码实现
+
+* *[../src/stackqueue/MyCircularDeque.java](../src/stackqueue/MyCircularDeque.java)*
+ 
+```java
+public class MyCircularDeque {
+    private int[] data;
+    private int front, rear;
+    private int capacity;
+
+    public MyCircularDeque(int k) {
+        capacity = k + 1;
+        data = new int[capacity];
+        front = 0;
+        rear = 0;
+    }
+
+    public boolean insertFront(int value) {
+        if (isFull()) return false;
+        front = (front - 1 + capacity) % capacity;
+        data[front] = value;
+        return true;
+    }
+
+    public boolean insertLast(int value) {
+        if (isFull()) return false;
+        data[rear] = value;
+        rear = (rear + 1) % capacity;
+        return true;
+    }
+
+    public boolean deleteFront() {
+        if (isEmpty()) return false;
+        front = (front + 1) % capacity;
+        return true;
+    }
+
+    public boolean deleteLast() {
+        if (isEmpty()) return false;
+        rear = (rear - 1 + capacity) % capacity;
+        return true;
+    }
+
+    public int getFront() {
+        if (isEmpty()) return -1;
+        return data[front];
+    }
+
+    public int getRear() {
+        if (isEmpty()) return -1;
+        return data[(rear - 1 + capacity) % capacity];
+    }
+
+    private boolean isEmpty() {
+        return front == rear;
+    }
+
+    private boolean isFull() {
+        return (rear + 1) % capacity == front;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 所有操作均为 $\mathcal{O}(1)$。
+* 空间复杂度为 $\mathcal{O}(k)$。
