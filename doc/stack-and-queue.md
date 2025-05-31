@@ -1392,3 +1392,59 @@ public class MyCircularDeque {
 
 * 所有操作均为 $\mathcal{O}(1)$。
 * 空间复杂度为 $\mathcal{O}(k)$。
+
+## 典型问题 3：单调队列
+
+### 例 1：「力扣」第 239 题：[滑动窗口的最大值](https://leetcode.cn/problems/sliding-window-maximum)
+
+#### 算法思路
+
+要维护滑动窗口最大值，最暴力的做法是每次遍历窗口 $\mathcal{O}(nk)$。但可以用**单调队列**高效维护窗口最大值，将复杂度降到 $\mathcal{O}(n)$。
+
+* 单调队列采用**下标**存储，队列中保持元素下标对应的值**单调递减**。
+* 当新元素加入时，队尾弹出所有比当前元素小的下标，保证队首始终是当前窗口最大值。
+* 元素失效（滑出窗口）时，队首若已离开窗口则从队首弹出。
+
+#### 核心知识点与技巧
+
+**数组模拟单调队列的解法与技巧**
+
+1. 为什么要数组
+    * Java 中 `Deque` 实际底层是链表结构，操作存在一定常数开销和GC压力。
+    * 数组作为存储结构，可用两个下标快进快出，不用对象分配，缓存友好，卡常胜出。
+    * 实现时维护 `head` 为队首，`tail - 1` 为队尾，区间 $[\text{head}, \text{tail})$ 有效。
+2. 主要操作, 每次循环新元素 $i$ 时：
+    1. **队尾维护递减**：弹出所有 $nums[dq[tail-1]] < nums[i]$
+    2. **入队**：把 $i$ 入队
+    3. **队首过期判断**：若 $dq[head] \leq i-k$，说明已不在窗口，弹出
+    4. **窗口满时记录最大值**：窗口满后每轮取 $nums[dq[head]]$ 记入答案
+
+#### 代码实现
+
+* *[../src/stackqueue/SlidingWindowMaximum.java](../src/stackqueue/SlidingWindowMaximum.java)*
+
+```java
+public class SlidingWindowMaximum {
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        int n = nums.length;
+        int[] ans = new int[n - k + 1];
+        int[] dq = new int[n];
+        int head = 0, tail = 0;
+        for (int i = 0; i < n; i++) {
+            while (head < tail && nums[i] >= nums[dq[tail - 1]])
+                tail--;
+            dq[tail++] = i;
+            if (dq[head] <= i - k)
+                head++;
+            if (i >= k - 1)
+                ans[i - k + 1] = nums[dq[head]];
+        }
+        return ans;
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}(n)$。每个下标最多入队、出队各一次。
+* **空间复杂度**： $\mathcal{O}(k)$。队列理论最大长度为 $k$，实现中用 $n$ 也不会溢出。
