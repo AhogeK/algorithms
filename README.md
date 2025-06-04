@@ -12,6 +12,7 @@
 - [数组里常见的两类算法](doc/common-array-algorithms.md)
 - [链表](doc/linked-list.md)
 - [栈与队列](doc/stack-and-queue.md)
+- [优先队列](doc/priority-queue.md)
 
 ---
 
