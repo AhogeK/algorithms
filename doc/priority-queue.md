@@ -390,6 +390,115 @@ public class Heapify {
 }
 ```
 
+## 堆排序
+
+> 堆排序（Heap Sort）是一种利用堆（完全二叉树）结构来排序的数据结构优先队列思想的排序算法。它是一个**原地排序算法**，
+> 能保证最坏情况下的时间复杂度为 $\mathcal{O}(n \log n)$，不稳定。
+
+### 堆排序的基本思想
+
+1. **建堆**：首先将整个数组整理成最大堆（或最小堆，本文以最大堆为例）。
+
+2. **排序过程**：
+
+    * 将堆顶元素（最大值）与最后一个元素交换，现在最大值到了数组的最后面。
+    * 缩小堆的有效大小（去掉最后一个最大值），对新的堆顶元素做下沉（down/heapify），恢复堆的最大堆性质。
+    * 重复上一步直到堆的大小为 $1$。
+
+### 核心步骤与流程（以最大堆为例）
+
+* **初始化最大堆**，让整个区间 $[0, n-1]$ 满足最大堆性质。
+
+* 依次将堆顶（最大元素）放到"已排序区间"的最前面：
+
+    * 交换 $arr[0]$ 与 $arr[n-1]$，最大值固定在 $arr[n-1]$。
+    * 对 $[0,n-2]$ 区间做下沉调整，继续保持最大堆。
+    * 交换 $arr[0]$ 与 $arr[n-2]$，再调整前 $n-2$ 个元素……依此类推。
+
+### 复杂度分析
+
+* **时间复杂度：** $\mathcal{O}(n \log n)$
+
+    * 建堆 $\mathcal{O}(n)$
+    * 每次取最大 $\mathcal{O}(\log n)$，共 $n-1$次
+
+* **空间复杂度：** $\mathcal{O}(1)$，原地排序，不需要额外空间
+
+* **稳定性：** 不稳定，因为会发生交换导致相同元素相对次序变化
+
+### 代码示例
+
+```java
+public class HeapSort {
+    public static void sort(int[] arr) {
+        int n = arr.length;
+        // 建堆
+        for (int i = n / 2 - 1; i >= 0; i--) down(arr, n, i);
+        // 排序
+        for (int i = n - 1; i > 0; i--) {
+            int tmp = arr[0]; arr[0] = arr[i]; arr[i] = tmp;
+            down(arr, i, 0);
+        }
+    }
+    private static void down(int[] arr, int n, int i) {
+        int largest = i, l = i * 2 + 1, r = i * 2 + 2;
+        if (l < n && arr[l] > arr[largest]) largest = l;
+        if (r < n && arr[r] > arr[largest]) largest = r;
+        if (largest != i) {
+            int tmp = arr[i]; arr[i] = arr[largest]; arr[largest] = tmp;
+            down(arr, n, largest);
+        }
+    }
+}
+```
+
+## 典型问题1: 合并K个排序链表
+
+### 例题：「力扣」第 23 题：合并 $K$ 个排序链表 （使用优先队列思想）
+
+#### 算法思路
+
+1. **归并思想**\
+  类似归并排序的 $k$ 路归并，每次都把所有当前链表的头节点放到**最小堆（优先队列）**，弹出最小的节点作为结果链表的新节点，再把弹出节点的下一个节点放入堆中，循环直到堆空。
+
+2. **为什么选优先队列？**
+
+    * 每次能够在 $\mathcal{O}(1)$ 时间获得最小节点（堆顶）。
+    * 新节点只有 $k$ 种候选（每个链表的当前头指针），堆大小最多 $k$，所以堆相关操作 $\mathcal{O}(\log k)$。
+    * 总结：**整体复杂度 $\mathcal{O}(N \log k)$**， $N$ 为所有节点总数。
+
+#### 代码
+
+```java
+public class MergeKSortedLists {
+    public ListNode mergeKLists(ListNode[] lists) {
+        Queue<ListNode> pq = new PriorityQueue<>(Comparator.comparingInt(a -> a.val));
+        for (ListNode node : lists)
+            if (node != null)
+                pq.offer(node);
+        ListNode dummy = new ListNode(-1), cur = dummy;
+        while (!pq.isEmpty()) {
+            ListNode node = pq.poll();
+            cur.next = node;
+            cur = node;
+            if (node.next != null)
+                pq.offer(node.next);
+        }
+        return dummy.next;
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $N = \sum\limits_{i=1}^{k} l_i$（所有节点数量）
+
+    * 每个节点至多进一次堆，堆操作 $\mathcal{O}(\log k)$
+    * 整体 $\mathcal{O}(N \log k)$
+
+* **空间复杂度**： $\mathcal{O}(k)$（堆至多存 $k$ 个链表头节点，不新建节点）
+
+
 ---
 
 [返回](../README.md)
