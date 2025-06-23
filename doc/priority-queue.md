@@ -38,6 +38,11 @@
       * [算法思路](#算法思路-1)
       * [代码示例](#代码示例-2)
       * [复杂度分析](#复杂度分析-3)
+    * [完成「力扣」第 347 题：前 K 个高频元素](#完成力扣第-347-题前-k-个高频元素)
+      * [算法思路](#算法思路-2)
+      * [核心知识点与技巧](#核心知识点与技巧)
+      * [代码示例](#代码示例-3)
+      * [复杂度分析](#复杂度分析-4)
 <!-- TOC -->
 # 优先队列
 
@@ -553,6 +558,68 @@ public class KthLargestElementInAnArray {
 
 * **时间复杂度**： $\mathcal{O}(n \log k)$，实际工程数据 $k \ll n$，极快
 * **空间复杂度**： $\mathcal{O}(k)$，堆中最大为 $k$个元素
+
+### 完成「力扣」第 347 题：[前 K 个高频元素](https://leetcode.cn/problems/top-k-frequent-elements)
+
+#### 算法思路
+
+代码采用了一种高效的方法来解决问题：
+
+1. 首先对数组进行排序，使相同的元素相邻
+2. 遍历排序后的数组，统计每个不同元素的出现频率
+3. 将每个元素及其频率存入最大堆（优先队列）
+4. 从最大堆中取出前 $k$ 个元素作为结果
+
+#### 核心知识点与技巧
+
+1. **排序后计数**：排序使得相同的元素相邻，便于在一次遍历中统计频率
+2. **最大堆（优先队列）**：使用优先队列快速获取频率最高的元素
+3. **自定义比较器**：通过比较器使优先队列按元素频率降序排列
+4. **二维数组表示元素-频率对**：使用 `int[]` 存储元素及其频率
+
+#### 代码示例
+
+```java
+public class TopKFrequentElements {
+    public int[] topKFrequent(int[] nums, int k) {
+        int n = nums.length;
+        Arrays.sort(nums);
+        int count = 1;
+        Queue<int[]> pq = new PriorityQueue<>((a, b) -> b[1] - a[1]);
+        for (int i = 1; i < n; i++) {
+            if (nums[i] == nums[i - 1])
+                count++;
+            else {
+                pq.add(new int[]{nums[i - 1], count});
+                count = 1;
+            }
+        }
+        pq.add(new int[]{nums[n - 1], count});
+        int[] res = new int[k];
+        for (int i = 0; i < k; i++)
+            res[i] = Objects.requireNonNull(pq.poll())[0];
+        return res;
+    }
+}
+```
+
+#### 复杂度分析
+
+1. **时间复杂度**： $\mathcal{O}(n \log n)$
+
+    * 排序操作： $\mathcal{O}(n \log n)$，其中 $n$ 是数组长度
+    * 遍历数组统计频率： $\mathcal{O}(n)$
+    * 堆操作：每次插入操作是 $\mathcal{O}(\log m)$，总共有 $m$ 次插入，其中 $m$ 是不同元素的个数
+    * 提取前 $k$ 个元素： $\mathcal{O}(k \log m)$
+    * 总体时间复杂度受排序操作主导，为 $\mathcal{O}(n \log n)$
+
+2. **空间复杂度**： $\mathcal{O}(m)$
+
+    * 优先队列存储 $m$ 个元素，其中 $m$ 是不同元素的个数
+    * 结果数组需要 $\mathcal{O}(k)$ 的空间
+    * 总体空间复杂度为 $\mathcal{O}(m)$
+
+
 
 ---
 
