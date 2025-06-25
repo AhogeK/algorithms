@@ -43,6 +43,11 @@
       * [核心知识点与技巧](#核心知识点与技巧)
       * [代码示例](#代码示例-3)
       * [复杂度分析](#复杂度分析-4)
+    * [完成「力扣」第 295 题：数据流的中位数](#完成力扣第-295-题数据流的中位数)
+      * [算法思路](#算法思路-3)
+      * [核心知识点与技巧](#核心知识点与技巧-1)
+      * [代码示例](#代码示例-4)
+      * [复杂度分析](#复杂度分析-5)
 <!-- TOC -->
 # 优先队列
 
@@ -619,7 +624,82 @@ public class TopKFrequentElements {
     * 结果数组需要 $\mathcal{O}(k)$ 的空间
     * 总体空间复杂度为 $\mathcal{O}(m)$
 
+### 完成「力扣」第 295 题：[数据流的中位数](https://leetcode.cn/problems/find-median-from-data-stream)
 
+#### 算法思路
+
+要高效地解决这个问题，关键在于如何在添加新元素后快速找到中位数。如果使用排序，
+每次插入后的时间复杂度会是 $\mathcal{O}(n\log n)$，这显然不够高效。
+
+我们可以使用两个堆来维护数据流的中位数：
+
+1. 一个最大堆 `smaller` 存储较小的一半元素
+2. 一个最小堆 `larger` 存储较大的一半元素
+
+通过维护这两个堆的平衡，可以使得：
+
+* `smaller` 的堆顶是较小一半中的最大元素
+* `larger` 的堆顶是较大一半中的最小元素
+
+这样，中位数就可以通过堆顶元素直接获得。
+
+#### 核心知识点与技巧
+
+1. **双堆结构**：使用两个优先队列（堆）分别存储数据的两部分
+
+2. **堆的平衡维护**：
+
+    * 维持 `smaller.size() >= larger.size()` 且差值最多为1
+    * 这样可以确保在奇数个元素时，中位数就是 `smaller` 堆顶
+    * 偶数个元素时，中位数是两个堆顶的平均值
+
+3. **比较器使用**：
+
+    * 使用Lambda表达式创建最大堆：`(a, b) -> b - a`
+    * 默认的优先队列是最小堆
+
+4. **特殊情况处理**：
+
+    * 数据结构为空时的处理
+    * 奇偶数判断
+
+#### 代码示例
+
+```java
+public class MedianFinder {
+    private final PriorityQueue<Integer> smaller;
+    private final PriorityQueue<Integer> larger;
+
+    public MedianFinder() {
+        smaller = new PriorityQueue<>((a, b) -> b - a);
+        larger = new PriorityQueue<>();
+    }
+
+    public void addNum(int num) {
+        if (smaller.isEmpty() || smaller.peek() >= num) smaller.offer(num);
+        else larger.offer(num);
+        if (smaller.size() > larger.size() + 1) larger.offer(smaller.poll());
+        else if (larger.size() > smaller.size()) smaller.offer(larger.poll());
+    }
+
+    public double findMedian() {
+        int size = smaller.size() + larger.size();
+        if (size == 0) return 0.0;
+        if (size % 2 == 0) return (smaller.peek() + larger.peek()) / 2.0;
+        else return smaller.peek();
+    }
+}
+```
+
+#### 复杂度分析
+
+1. **时间复杂度**：
+
+    * `addNum()`: $\mathcal{O}(\log n)$ - 堆的插入和删除操作
+    * `findMedian()`: $\mathcal{O}(1)$ - 直接访问堆顶元素
+
+2. **空间复杂度**：
+    * $\mathcal{O}(n)$ - 需要存储所有元素
 
 ---
 
