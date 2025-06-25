@@ -48,6 +48,11 @@
       * [核心知识点与技巧](#核心知识点与技巧-1)
       * [代码示例](#代码示例-4)
       * [复杂度分析](#复杂度分析-5)
+    * [完成「力扣」第 451 题：根据字符出现频率排序](#完成力扣第-451-题根据字符出现频率排序)
+      * [算法思路](#算法思路-4)
+      * [核心知识点与技巧](#核心知识点与技巧-2)
+      * [代码示例](#代码示例-5)
+      * [复杂度分析](#复杂度分析-6)
 <!-- TOC -->
 # 优先队列
 
@@ -700,6 +705,74 @@ public class MedianFinder {
 
 2. **空间复杂度**：
     * $\mathcal{O}(n)$ - 需要存储所有元素
+
+### 完成「力扣」第 451 题：[根据字符出现频率排序](https://leetcode.cn/problems/sort-characters-by-frequency)
+
+#### 算法思路
+
+使用优先队列（大顶堆）求解此题是一种高效的方法。具体步骤如下：
+
+1. 使用哈希表统计每个字符出现的频率
+2. 将字符和对应频率存入优先队列，按频率降序排列
+3. 从优先队列依次取出字符，按照其频率重复添加到结果字符串中
+
+#### 核心知识点与技巧
+
+1. **频率统计**：使用HashMap或数组快速统计字符出现频率
+2. **优先队列**：利用优先队列按频率自动排序
+3. **字符拼接**：使用StringBuilder提高字符串拼接效率
+4. **自定义排序**：通过Comparator实现自定义排序规则
+
+#### 代码示例
+
+```java
+public class SortCharactersByFrequency {
+    public String frequencySort(String s) {
+        int[][] freqPair = new int[128][2];
+        for (int i = 0; i < 128; i++)
+            freqPair[i][0] = i;
+        for (char c : s.toCharArray())
+            freqPair[c][1]++;
+        Arrays.sort(freqPair, (a, b) -> b[1] - a[1]);
+        StringBuilder sb = new StringBuilder(s.length());
+        for (int i = 0; i < 128 && freqPair[i][1] > 0; i++) {
+            char c = (char) freqPair[i][0];
+            int freq = freqPair[i][1];
+            sb.append(String.valueOf(c).repeat(Math.max(0, freq)));
+        }
+        return sb.toString();
+    }
+}
+```
+
+**代码对思路进行了优化：**
+
+* 使用二维数组代替HashMap和优先队列，减少对象创建开销
+* 提前分配StringBuilder的容量，减少扩容操作
+* 直接使用Arrays.sort替代优先队列，在字符集有限的情况下更高效
+
+#### 复杂度分析
+
+* **时间复杂度**：
+
+    * 统计频率： $\mathcal{O}(n)$，其中 $n$ 是字符串长度
+    * 初始化二维数组： $\mathcal{O}(1)$，仅需128次操作
+    * 排序操作： $\mathcal{O}(1)$，因为排序固定大小(128)的数组是常数时间
+    * 构建结果字符串： $\mathcal{O}(n)$
+    * 总体时间复杂度： $\mathcal{O}(n)$，其中统计频率和构建结果字符串是主要耗时
+
+* **空间复杂度**：
+
+    * 二维数组存储： $\mathcal{O}(1)$，大小固定为 $128 \times 2$
+    * 结果字符串： $\mathcal{O}(n)$，需要存储原始字符串所有字符
+    * 总体空间复杂度： $\mathcal{O}(n)$
+
+相比原始的HashMap+优先队列方案，优化版本有以下性能优势：
+
+* 避免了HashMap的哈希计算和碰撞处理开销
+* 避免了优先队列的堆化操作和动态调整
+* 使用连续内存布局，提高缓存命中率
+* 减少了对象创建和垃圾回收压力
 
 ---
 
