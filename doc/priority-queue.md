@@ -58,6 +58,10 @@
       * [核心知识点与技巧](#核心知识点与技巧-3)
       * [代码示例](#代码示例-6)
       * [复杂度分析](#复杂度分析-7)
+    * [完成「力扣」第 218 题：天际线问题](#完成力扣第-218-题天际线问题)
+      * [算法思路概览](#算法思路概览)
+      * [完整代码](#完整代码)
+      * [复杂度分析](#复杂度分析-8)
 <!-- TOC -->
 # 优先队列
 
@@ -834,6 +838,67 @@ public class KClosestPointsToOrigin {
 
 * **空间复杂度**：
     * $\mathcal{O}(n)$，所有点都进堆
+
+### 完成「力扣」第 218 题：[天际线问题](https://leetcode.cn/problems/the-skyline-problem)
+
+#### 算法思路概览
+
+**整体思路**
+
+1. 取出所有建筑的左右端点（所有可能的 $x$），排序，作为“扫描线”。
+
+2. 每次处理当前扫描线 $x$：
+
+    * 将左端点 $\leq x$的所有建筑插入最大堆（按右端和高度）
+    * 堆中剔除右端 $\leq x$的（已经结束的楼）。
+    * 堆顶就是当前位置的最大高度
+    * 若最大高度变化，则记为天际线关键点。
+
+**技术要点**
+
+* 堆存储的是三元组`[right, height]`，堆顶为最高、未结束的楼。
+
+* $x$的枚举序列只取建筑物左右端点，能极大降低枚举量/复杂度。
+
+* 最大高度不连跳，无需频繁出入堆，而是合并处理。
+
+#### 完整代码
+
+```java
+public class TheSkylineProblem {
+    public List<List<Integer>> getSkyline(int[][] buildings) {
+        int n = buildings.length;
+        int[] boundaries = new int[n * 2];
+        for (int i = 0; i < n; i++) {
+            boundaries[i * 2] = buildings[i][0];
+            boundaries[i * 2 + 1] = buildings[i][1];
+        }
+        Arrays.sort(boundaries);
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> b[1] - a[1]);
+        List<List<Integer>> ans = new ArrayList<>();
+        int index = 0;
+        for (int b : boundaries) {
+           while (index < n && buildings[index][0] <= b) {
+               pq.offer(new int[]{buildings[index][1], buildings[index][2]});
+               index++;
+           }
+           while (!pq.isEmpty() && pq.peek()[0] <= b) pq.poll();
+           int maxHeight = pq.isEmpty() ? 0 : pq.peek()[1];
+           if (ans.isEmpty() || ans.getLast().get(1) != maxHeight) {
+               ans.add(Arrays.asList(b, maxHeight));
+           }
+        }
+        return ans;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度：
+    * $2n$个端点排序： $\mathcal{O}(n\log n)$
+    * 每个建筑最多只入堆一次，最多出堆一次，完全 $\mathcal{O}(n \log n)$
+* 空间复杂度： $\mathcal{O}(n)$
 
 ---
 
