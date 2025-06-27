@@ -878,15 +878,15 @@ public class TheSkylineProblem {
         List<List<Integer>> ans = new ArrayList<>();
         int index = 0;
         for (int b : boundaries) {
-           while (index < n && buildings[index][0] <= b) {
-               pq.offer(new int[]{buildings[index][1], buildings[index][2]});
-               index++;
-           }
-           while (!pq.isEmpty() && pq.peek()[0] <= b) pq.poll();
-           int maxHeight = pq.isEmpty() ? 0 : pq.peek()[1];
-           if (ans.isEmpty() || ans.getLast().get(1) != maxHeight) {
-               ans.add(Arrays.asList(b, maxHeight));
-           }
+            while (index < n && buildings[index][0] <= b) {
+                pq.offer(new int[]{buildings[index][1], buildings[index][2]});
+                index++;
+            }
+            while (!pq.isEmpty() && pq.peek()[0] <= b) pq.poll();
+            int maxHeight = pq.isEmpty() ? 0 : pq.peek()[1];
+            if (ans.isEmpty() || ans.getLast().get(1) != maxHeight) {
+                ans.add(Arrays.asList(b, maxHeight));
+            }
         }
         return ans;
     }
