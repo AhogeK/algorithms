@@ -1,4 +1,5 @@
 # Algorithms
+n
 
 > 个人算法学习练习记录<br>
 > [零起步学算法](https://leetcode.cn/leetbook/detail/learning-algorithms-with-leetcode/)
@@ -13,6 +14,7 @@
 - [链表](doc/linked-list.md)
 - [栈与队列](doc/stack-and-queue.md)
 - [优先队列](doc/priority-queue.md)
+- [并查集](doc/union-find.md)
 
 ---
 
