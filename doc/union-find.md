@@ -20,6 +20,18 @@
       * [核心知识点与技巧](#核心知识点与技巧)
       * [代码实现](#代码实现-1)
       * [复杂度分析](#复杂度分析-1)
+  * [并查集的 quick-union 实现](#并查集的-quick-union-实现)
+    * [基本思想](#基本思想)
+    * [操作详解](#操作详解)
+    * [代码实现（未优化版本）](#代码实现未优化版本)
+    * [复杂度分析](#复杂度分析-2)
+    * [优缺点](#优缺点-1)
+      * [优点](#优点)
+      * [缺点](#缺点)
+    * [完成「力扣」第 547 题：朋友圈(即省份数量，用quick-union实现)](#完成力扣第-547-题朋友圈即省份数量用quick-union实现)
+      * [quick-union 思路](#quick-union-思路)
+      * [整体步骤](#整体步骤)
+      * [时间复杂度](#时间复杂度)
 <!-- TOC -->
 
 # 并查集
@@ -353,6 +365,145 @@ public class NumberOfProvinces {
 * **总时间复杂度： $\mathcal{O}(n^3)$**（理论最坏）
     * 不如路径压缩版高效，但学习 quick-find 推荐！
 * 空间复杂度： $\mathcal{O}(n)$
+
+## 并查集的 quick-union 实现
+
+### 基本思想
+
+* quick-union 是“树形结构”的并查集，核心思想是**只改变根结点，合并时只做一次父指针修改**，合并和查找都沿指针树走，不需要遍历全体。
+* 用一维数组 `parent[]`，`parent[x]` 记录 $x$ 的父节点。
+    * 如果 $x = parent[x]$，说明 $x$ 是自己的根（即集合代表元）。
+
+### 操作详解
+
+1. **查找（find 操作）**
+    * 查找某个元素 $x$ 所属的集合代表元（根节点），不断向上查：
+        * `while (x != parent[x]) x = parent[x];`
+    * 路径：不断找父亲，直至树的根。
+
+2. **合并（union 操作）**
+    * 将两个不同集合合并，就是将一棵树的根挂到另一棵树的根下（合并“祖先”）。
+        * 找到 $x$、 $y$ 的根（`find(x)`, `find(y)`），若两者不同，强制把一个根挂到另一个根即可（如`parent[rootX] = rootY`）。
+
+3. **优化（可选：路径压缩、按秩合并）**
+    * 基础 quick-union 不做路径压缩和按秩合并，树可能退化成链。
+    * 但加了路径压缩/按秩优化后，性能极高，这也是现代模板。
+
+### 代码实现（未优化版本）
+
+```java
+class QuickUnionUF {
+    int[] parent;
+
+    // 初始化
+    public QuickUnionUF(int n) {
+        parent = new int[n];
+        for (int i = 0; i < n; i++) parent[i] = i;
+    }
+
+    // 查找根
+    public int find(int x) {
+        while (x != parent[x]) x = parent[x];
+        return x;
+    }
+
+    // 合并
+    public void union(int x, int y) {
+        int rootX = find(x), rootY = find(y);
+        if (rootX == rootY) return;
+        parent[rootX] = rootY;
+    }
+
+    // 判断是否同一集合
+    public boolean connected(int x, int y) {
+        return find(x) == find(y);
+    }
+}
+```
+
+### 复杂度分析
+
+* **初始化**： $\mathcal{O}(n)$
+* **查找**：最坏 $\mathcal{O}(n)$（树可能退化成链）
+* **合并**：最坏 $\mathcal{O}(n)$
+* 若采用路径压缩/按秩合并，性能可达近乎 $\mathcal{O}(1)$。
+
+### 优缺点
+
+#### 优点
+
+* 合并操作只需父结点指针修改，无需全体遍历
+* 数据量大时，比 quick-find 实用得多
+* 基础框架容易加路径压缩/按秩优化
+
+#### 缺点
+
+* 若不优化，树可能退化成链，导致性能变差
+* 真实竞赛/工程都推荐加路径压缩与按秩
+
+### 完成「力扣」第 547 题：[朋友圈](https://leetcode.cn/problems/number-of-provinces)(即省份数量，用quick-union实现)
+
+```java
+public class NumberOfProvincesV2 {
+    public int findCircleNum(int[][] isConnected) {
+        int n = isConnected.length;
+        int[] parent = new int[n];
+        for (int i = 0; i < n; i++) parent[i] = i;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (isConnected[i][j] == 1) {
+                    union(parent, i, j);
+                }
+            }
+        }
+        int provinces = 0;
+        for (int i = 0; i < n; i++) {
+            if (parent[i] == i) {
+                provinces++;
+            }
+        }
+        return provinces;
+    }
+
+    private void union(int[] parent, int x, int y) {
+        int rootX = find(parent, x);
+        int rootY = find(parent, y);
+        if (rootX != rootY) {
+            parent[rootX] = rootY;
+        }
+    }
+
+    private int find(int[] parent, int x) {
+        while (x != parent[x]) x = parent[x];
+        return x;
+    }
+}
+```
+
+#### quick-union 思路
+
+quick-union 是一种并查集实现方式，它通过"向上查找父节点"来确定元素所属的集合。在这个问题中：
+
+* 每个城市初始化为自己的集合
+* 当两个城市连通时，将它们合并到同一集合
+* 最后计算有多少个不同的集合，即为省份数
+
+#### 整体步骤
+
+1. 初始化并查集，每个城市指向自己作为根
+2. 遍历邻接矩阵，将有连接的城市合并
+3.  统计并查集中根节点的数量，即为省份数
+
+#### 时间复杂度
+
+* **时间复杂度**： $\mathcal{O}(n^3)$
+
+    * 遍历邻接矩阵需要 $\mathcal{O}(n^2)$
+    * 每次 find 操作最坏情况下需要 $\mathcal{O}(n)$
+
+* **空间复杂度**： $\mathcal{O}(n)$，存储父节点数组
+
+***注意这里的 quick-union 是基础版本，而非使用了路径压缩+按秩合并的优化版本***
 
 ---
 
