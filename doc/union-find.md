@@ -32,6 +32,16 @@
       * [quick-union 思路](#quick-union-思路)
       * [整体步骤](#整体步骤)
       * [时间复杂度](#时间复杂度)
+  * [quick-union 实现优化 1：按秩合并](#quick-union-实现优化-1按秩合并)
+    * [为什么需要按秩合并优化？](#为什么需要按秩合并优化)
+    * [按秩合并（Rank-Based Union）](#按秩合并rank-based-union)
+    * [实现按秩合并的并查集](#实现按秩合并的并查集)
+    * [时间复杂度分析](#时间复杂度分析)
+    * [通过在按秩合并优化完成「力扣」第 547 题：朋友圈](#通过在按秩合并优化完成力扣第-547-题朋友圈)
+    * [除按`rank`合并外还有按`size`合并](#除按rank合并外还有按size合并)
+      * [代码实现](#代码实现-2)
+      * [何时选择按秩合并：](#何时选择按秩合并)
+      * [何时选择按大小合并：](#何时选择按大小合并)
 <!-- TOC -->
 
 # 并查集
@@ -504,6 +514,213 @@ quick-union 是一种并查集实现方式，它通过"向上查找父节点"来
 * **空间复杂度**： $\mathcal{O}(n)$，存储父节点数组
 
 ***注意这里的 quick-union 是基础版本，而非使用了路径压缩+按秩合并的优化版本***
+
+## quick-union 实现优化 1：按秩合并
+
+### 为什么需要按秩合并优化？
+
+在基本的Quick-Union实现中，合并两个集合时，我们简单地将一个集合的根节点指向另一个集合的根节点，没有考虑两个树的结构。
+这可能导致树变得很高（深度增加），进而使`find`操作的效率降低。
+
+例如，考虑以下情况：我们依次合并元素1和2，2和3，3和4...，如果每次都是将前一个集合的根节点指向后一个集合的根节点，
+最终会形成一条链，`find`操作的时间复杂度会达到 $\mathcal{O}(n)$。
+
+### 按秩合并（Rank-Based Union）
+
+按秩合并的核心思想是：**总是将较小的树连接到较大的树上**。这样可以避免树高度的无谓增加。
+
+在这里，"秩"(rank)通常表示树的高度或大致高度的上界。我们在合并两棵树时，根据它们的秩做出决策：
+
+* 如果一棵树的秩小于另一棵，则将秩小的树的根连接到秩大的树的根上
+* 如果两棵树的秩相等，则任选一棵树的根作为新的根，并将合并后树的秩加1
+
+### 实现按秩合并的并查集
+
+```java
+class UnionFind {
+    private int[] parent;
+    private int[] rank;   // 用于记录每个节点为根的子树的高度上界
+    
+    public UnionFind(int n) {
+        parent = new int[n];
+        rank = new int[n];
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;  // 初始时每个节点的父节点是自己
+            rank[i] = 0;    // 初始时每个节点的秩为0
+        }
+    }
+    
+    // 查找操作
+    public int find(int x) {
+        while (x != parent[x]) {
+            x = parent[x];
+        }
+        return x;
+    }
+    
+    // 按秩合并
+    public void union(int x, int y) {
+        int rootX = find(x);
+        int rootY = find(y);
+        
+        if (rootX == rootY) return;
+        
+        // 按秩合并：将秩小的树连接到秩大的树上
+        if (rank[rootX] < rank[rootY]) {
+            parent[rootX] = rootY;
+        } else if (rank[rootX] > rank[rootY]) {
+            parent[rootY] = rootX;
+        } else {
+            // 秩相等时，任选一个作为根，并增加新根的秩
+            parent[rootY] = rootX;
+            rank[rootX]++;
+        }
+    }
+}
+```
+
+### 时间复杂度分析
+
+在按秩合并的并查集中：
+
+* **查找(Find)操作**：最坏情况下的时间复杂度是 $\mathcal{O}(\log n)$，因为通过按秩合并，树的高度被限制在 $\mathcal{O}(\log n)$。
+* **合并(Union)操作**：因为包含了两次查找，所以时间复杂度也是 $\mathcal{O}(\log n)$。
+
+### 通过在按秩合并优化完成「力扣」第 547 题：[朋友圈](https://leetcode.cn/problems/number-of-provinces/)
+
+```java
+/**
+ * 547. 省份数量 (quick-union方案, 按秩合并优化)
+ *
+ * @author AhogeK
+ * @since 2025-07-04 15:49:12
+ */
+public class NumberOfProvincesV3 {
+    public int findCircleNum(int[][] isConnected) {
+        int n = isConnected.length;
+        int[] parent = new int[n];
+        int[] rank = new int[n];
+
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;
+            rank[i] = 0;
+        }
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (isConnected[i][j] == 1) {
+                    union(parent, rank, i, j);
+                }
+            }
+        }
+        int provinces = 0;
+        for (int i = 0; i < n; i++) {
+            if (parent[i] == i) {
+                provinces++;
+            }
+        }
+        return provinces;
+    }
+
+    private void union(int[] parent, int[] rank, int x, int y) {
+        int rootX = find(parent, x);
+        int rootY = find(parent, y);
+
+        if (rootX == rootY) return;
+
+        if (rank[rootX] < rank[rootY]) {
+            parent[rootX] = rootY;
+        } else if (rank[rootX] > rank[rootY]) {
+            parent[rootY] = rootX;
+        } else {
+            parent[rootX] = rootY;
+            rank[rootY]++;
+        }
+    }
+
+    private int find(int[] parent, int x) {
+        while (x != parent[x]) x = parent[x];
+        return x;
+    }
+}
+```
+
+**按秩合并优化后：**
+
+* **Find 操作**：最坏情况下为 $\mathcal{O}(\log n)$
+* **Union 操作**：包含两次 Find 和常数时间的秩比较，因此也是 $\mathcal{O}(\log n)$
+* **总时间复杂度**： $\mathcal{O}(n^2) \times \mathcal{O}(\log n) = \mathcal{O}(n^2 \log n)$
+    * $\mathcal{O}(n^2)$ 来自遍历邻接矩阵
+    * $\mathcal{O}(\log n)$ 来自每次优化后的 Union 操作
+
+### 除按`rank`合并外还有按`size`合并
+
+> 按大小合并是通过记录每棵树包含的节点数量，在合并时总是将节点较少的树连接到节点较多的树下。
+
+**按大小合并的特点：**
+
+1. **间接控制树高**：通过确保小树连接到大树，间接限制树的高度
+2. **大小的更新**：每次合并都需要更新合并后树的大小
+3. **附加功能**：可以轻松获取任何元素所在集合的大小
+4. **理论保证**：同样可以证明使用按大小合并后，树的高度也不超过 $\log_2 n$
+
+#### 代码实现
+
+```java
+class UnionFindBySize {
+    private int[] parent;
+    private int[] size;   // 用于记录子树的节点数
+    
+    public UnionFindBySize(int n) {
+        parent = new int[n];
+        size = new int[n];
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;
+            size[i] = 1;  // 初始每棵树只有一个节点
+        }
+    }
+    
+    public int find(int x) {
+        while (x != parent[x]) {
+            x = parent[x];
+        }
+        return x;
+    }
+    
+    // 按大小合并
+    public void unionBySize(int x, int y) {
+        int rootX = find(x);
+        int rootY = find(y);
+        
+        if (rootX == rootY) return;
+        
+        // 按大小合并策略
+        if (size[rootX] < size[rootY]) {
+            parent[rootX] = rootY;
+            size[rootY] += size[rootX];  // 更新合并后树的大小
+        } else {
+            parent[rootY] = rootX;
+            size[rootX] += size[rootY];
+        }
+    }
+    
+    // 获取元素x所在集合的大小
+    public int getSize(int x) {
+        return size[find(x)];
+    }
+}
+```
+
+#### 何时选择按秩合并：
+
+1. 当更关注理论上的最优性能保证时
+2. 当内存使用是关键考虑因素，且不需要知道集合大小时
+3. 在纯理论分析或教学场景中，按秩合并的高度增长更容易理解和证明
+
+#### 何时选择按大小合并：
+
+1. 当需要知道每个集合包含的元素数量时
+2. 在某些特定应用中，集合大小是重要信息
+3. 当实现直观性比绝对理论最优性更重要时
 
 ---
 
