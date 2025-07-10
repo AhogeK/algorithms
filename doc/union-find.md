@@ -42,6 +42,18 @@
       * [代码实现](#代码实现-2)
       * [何时选择按秩合并：](#何时选择按秩合并)
       * [何时选择按大小合并：](#何时选择按大小合并)
+  * [quick-union 实现优化 2：路径压缩](#quick-union-实现优化-2路径压缩)
+    * [路径压缩的基本思想](#路径压缩的基本思想)
+    * [为什么需要路径压缩？](#为什么需要路径压缩)
+    * [路径压缩的实现方式](#路径压缩的实现方式)
+      * [递归实现（完全路径压缩）](#递归实现完全路径压缩)
+      * [迭代实现（两遍查找）](#迭代实现两遍查找)
+      * [路径减半（Path Halving）](#路径减半path-halving)
+      * [路径分裂（Path Splitting）](#路径分裂path-splitting)
+    * [时间复杂度分析](#时间复杂度分析-1)
+      * [单独使用路径压缩](#单独使用路径压缩)
+      * [结合按秩/按大小合并与路径压缩](#结合按秩按大小合并与路径压缩)
+    * [完整的优化并查集实现](#完整的优化并查集实现)
 <!-- TOC -->
 
 # 并查集
@@ -721,6 +733,162 @@ class UnionFindBySize {
 1. 当需要知道每个集合包含的元素数量时
 2. 在某些特定应用中，集合大小是重要信息
 3. 当实现直观性比绝对理论最优性更重要时
+
+## quick-union 实现优化 2：路径压缩
+
+> 路径压缩是并查集最重要的优化技术之一，它能显著提高 find 操作的效率，进而提升整个并查集的性能。
+
+### 路径压缩的基本思想
+
+在标准 Quick-Union 中，`find` 操作需要从当前节点一路向上遍历至根节点。路径压缩的核心思想非常简单：
+**在查找过程中，将路径上的每个节点直接连接到根节点**，这样后续的查找操作就能以 $\mathcal{O}(1)$ 的时间复杂度直接到达根节点。
+
+### 为什么需要路径压缩？
+
+考虑以下情形：
+
+在标准 Quick-Union 中，即使采用了按秩合并或按大小合并，树的高度依然可能达到 $\mathcal{O}(\log n)$，
+这意味着每次 `find` 操作在最坏情况下需要 $\mathcal{O}(\log n)$ 的时间复杂度。
+
+路径压缩通过"扁平化"树结构，使大多数节点直接连接到根节点，从而将平均查找时间接近 $\mathcal{O}(1)$。
+
+### 路径压缩的实现方式
+
+#### 递归实现（完全路径压缩）
+
+```java
+public int find(int x) {
+    if (x != parent[x]) {
+        parent[x] = find(parent[x]);  // 递归查找根节点，并将沿途所有节点直接连接到根
+    }
+    return parent[x];
+}
+```
+
+#### 迭代实现（两遍查找）
+
+```java
+public int find(int x) {
+    // 第一遍：找到根节点
+    int root = x;
+    while (root != parent[root]) {
+        root = parent[root];
+    }
+    
+    // 第二遍：将路径上所有节点直接连接到根节点
+    while (x != root) {
+        int next = parent[x];
+        parent[x] = root;
+        x = next;
+    }
+    
+    return root;
+}
+```
+
+#### 路径减半（Path Halving）
+
+```java
+public int find(int x) {
+    while (x != parent[x]) {
+        // 将当前节点连接到其祖父节点（跳过父节点）
+        parent[x] = parent[parent[x]];
+        x = parent[x];
+    }
+    return x;
+}
+```
+
+#### 路径分裂（Path Splitting）
+
+```java
+public int find(int x) {
+    while (x != parent[x]) {
+        int next = parent[x];
+        parent[x] = parent[next];  // 将当前节点连接到其祖父节点
+        x = next;
+    }
+    return x;
+}
+```
+
+### 时间复杂度分析
+
+#### 单独使用路径压缩
+
+* **不使用路径压缩时**：`find` 操作最坏情况下为 $\mathcal{O}(n)$
+* **使用路径压缩后**：`find` 操作的均摊时间复杂度为 $\mathcal{O}(\log n)$
+
+#### 结合按秩/按大小合并与路径压缩
+
+当路径压缩与按秩合并或按大小合并结合使用时，并查集操作的均摊时间复杂度降低到接近常数级别： 
+ $\mathcal{O}(\alpha(n))$，其中 $\alpha(n)$ 是阿克曼函数的反函数。
+
+**阿克曼函数的反函数 $\alpha(n)$ 的特点**：
+
+* 极其缓慢增长
+* 对于任何实际应用中可能遇到的 $n$ 值， $\alpha(n) \leq 4$
+* 因此在实践中，可以将 $\mathcal{O}(\alpha(n))$ 视为接近 $\mathcal{O}(1)$ 的常数时间复杂度
+
+
+### 完整的优化并查集实现
+
+```java
+public class OptimizedUnionFind {
+    private int[] parent;
+    private int[] rank;
+    private int count;  // 跟踪集合数量
+    
+    public OptimizedUnionFind(int n) {
+        parent = new int[n];
+        rank = new int[n];
+        count = n;
+        
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;
+            rank[i] = 0;
+        }
+    }
+    
+    // 带路径压缩的查找
+    public int find(int x) {
+        if (x != parent[x]) {
+            parent[x] = find(parent[x]);  // 路径压缩
+        }
+        return parent[x];
+    }
+    
+    // 按秩合并
+    public void union(int x, int y) {
+        int rootX = find(x);
+        int rootY = find(y);
+        
+        if (rootX == rootY) return;
+        
+        // 按秩合并
+        if (rank[rootX] < rank[rootY]) {
+            parent[rootX] = rootY;
+        } else if (rank[rootX] > rank[rootY]) {
+            parent[rootY] = rootX;
+        } else {
+            parent[rootY] = rootX;
+            rank[rootX]++;
+        }
+        
+        count--;  // 每次合并，集合数量减1
+    }
+    
+    // 检查两个元素是否属于同一个集合
+    public boolean connected(int x, int y) {
+        return find(x) == find(y);
+    }
+    
+    // 获取集合数量
+    public int getCount() {
+        return count;
+    }
+}
+```
 
 ---
 
