@@ -55,6 +55,10 @@
       * [结合按秩/按大小合并与路径压缩](#结合按秩按大小合并与路径压缩)
     * [完整的优化并查集实现](#完整的优化并查集实现)
     * [参考](#参考)
+    * [完成「力扣」第 684 题：冗余连接](#完成力扣第-684-题冗余连接)
+      * [算法思路](#算法思路-1)
+      * [代码实现](#代码实现-3)
+      * [复杂度分析](#复杂度分析-3)
 <!-- TOC -->
 
 # 并查集
@@ -897,6 +901,103 @@ public class OptimizedUnionFind {
 * 《算法导论》第 21 章：用于不相交集合的数据结构（有关于复杂度的证明）
 * 知乎问题：《[为什么并查集在路径压缩之后的时间复杂度是阿克曼函数?](https://leetcode.cn/link/?target=https://www.zhihu.com/question/35090745)》。
 
+### 完成「力扣」第 684 题：[冗余连接](https://leetcode.cn/problems/redundant-connection/)
+
+#### 算法思路
+
+**并查集（Quick Union，按秩合并 + 路径压缩）**
+
+* 对每条边 $(a, b)$，判断 $a$、 $b$ 是否已经连通。
+
+    * 如果已连通，则这条边必然构成环，就是多余边。
+    * 如果不连通，则将 $a$、 $b$ 合并。
+
+* 按秩合并 + 路径压缩，保证**均摊复杂度**趋于常数，非常高效。
+
+**并查集（Disjoint Set Union，DSU）**
+
+* 用 `parent[]` 记录每个节点的代表元素（祖先），初始都是自身。
+* 用 `rank[]` 记录树的“高度”，用于按秩优化合并。
+
+*伪代码流程*
+
+1. 初始化：`parent[i] = i`, `rank[i] = 1`
+
+2. 对于每条边 $(a, b)$：
+
+    * 若 `find(a) == find(b)` 说明 $a$ 和 $b$ 已连通，本边就是答案
+    * 否则合并 $a$、 $b$ 所在的集合
+
+**知识点**
+
+* **树的定义**： $n$ 个点 $n-1$ 条边连通无环。
+
+* **并查集（路径压缩 + 按秩合并）**：工程与竞赛中最通用的环检测方法。
+
+
+#### 代码实现
+
+```java
+public class OptimizedUnionFind {
+    private int[] parent;
+    private int[] rank;
+    private int count;  // 跟踪集合数量
+    
+    public OptimizedUnionFind(int n) {
+        parent = new int[n];
+        rank = new int[n];
+        count = n;
+        
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;
+            rank[i] = 0;
+        }
+    }
+    
+    // 带路径压缩的查找
+    public int find(int x) {
+        if (x != parent[x]) {
+            parent[x] = find(parent[x]);  // 路径压缩
+        }
+        return parent[x];
+    }
+    
+    // 按秩合并
+    public void union(int x, int y) {
+        int rootX = find(x);
+        int rootY = find(y);
+        
+        if (rootX == rootY) return;
+        
+        // 按秩合并
+        if (rank[rootX] < rank[rootY]) {
+            parent[rootX] = rootY;
+        } else if (rank[rootX] > rank[rootY]) {
+            parent[rootY] = rootX;
+        } else {
+            parent[rootY] = rootX;
+            rank[rootX]++;
+        }
+        
+        count--;  // 每次合并，集合数量减1
+    }
+    
+    // 检查两个元素是否属于同一个集合
+    public boolean connected(int x, int y) {
+        return find(x) == find(y);
+    }
+    
+    // 获取集合数量
+    public int getCount() {
+        return count;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 单次 `find`、`union` 均摊**常数**（Ackermann 函数极慢增长），总复杂度 $\mathcal{O}(n)$。
+* 空间复杂度 $\mathcal{O}(n)$。
 
 ---
 
