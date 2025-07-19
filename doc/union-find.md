@@ -59,6 +59,11 @@
       * [算法思路](#算法思路-1)
       * [代码实现](#代码实现-3)
       * [复杂度分析](#复杂度分析-3)
+    * [完成「力扣」第 1319 题：连通网络的操作次数](#完成力扣第-1319-题连通网络的操作次数)
+      * [算法思路](#算法思路-2)
+      * [核心知识点与技巧](#核心知识点与技巧-1)
+      * [代码实现](#代码实现-4)
+      * [复杂度分析](#复杂度分析-4)
 <!-- TOC -->
 
 # 并查集
@@ -998,6 +1003,104 @@ public class OptimizedUnionFind {
 
 * 单次 `find`、`union` 均摊**常数**（Ackermann 函数极慢增长），总复杂度 $\mathcal{O}(n)$。
 * 空间复杂度 $\mathcal{O}(n)$。
+
+### 完成「力扣」第 1319 题：[连通网络的操作次数](https://leetcode.cn/problems/number-of-operations-to-make-network-connected)
+
+#### 算法思路
+
+**1. 判定连线数量**
+
+要让 $n$ 个点**恰好连通**，最少需要 $n-1$ 条边（树的性质）。若初始连线数 $< n-1$，无论操作，都不可能全连通，直接返回 $-1$。
+
+**2. 统计连通分量数（Union-Find）**
+
+将 $n$ 个节点通过现有连线连起来，用并查集维护，操作时用**quick-union**方案，并施加**按秩合并+路径压缩**两大优化以获得极快速度。
+（按秩合并用秩或大小皆可）
+
+* 对每条连接 $[a,b]$，执行并查集合并操作。
+* 最终统计集合根的数量 $cnt$，即当前连通分量数。
+
+**3. 计算所需操作数**
+
+每次拔一根“多的”线再插到两块之间，就能合并两个分量。所以所需操作数为 $cnt-1$。
+
+#### 核心知识点与技巧
+
+* **并查集**（quick-union with path compression & union by rank）—— 保证最优 $\mathcal{O}(\alpha(n))$ 性能
+* **树的连通性** —— $n$ 个点至少 $n-1$ 条边全连通
+* **多余边数量判断**（只要够 $n-1$）
+
+#### 代码实现
+
+```java
+/**
+ * 1319. 连通网络的操作次数
+ *
+ * @author AhogeK
+ * @since 2025-07-20 00:14:34
+ */
+public class NumberOfOperationsToMakeNetworkConnected {
+    public int makeConnected(int n, int[][] connections) {
+        if (connections.length < n - 1) return -1;
+        UnionFind uf = new UnionFind(n);
+        for (int[] edge : connections) {
+            uf.union(edge[0], edge[1]);
+        }
+        // 连通分量数-1 即为最少“插线”次数
+        return uf.getCount() - 1;
+    }
+
+    // 并查集结构
+    static class UnionFind {
+        int[] parent;
+        int[] rank;
+        int count;
+
+        UnionFind(int n) {
+            parent = new int[n];
+            rank = new int[n];
+            count = n;
+            for (int i = 0; i < n; i++) {
+                parent[i] = i;
+                rank[i] = 1;
+            }
+        }
+
+        int find(int x) {
+            if (parent[x] != x)
+                parent[x] = find(parent[x]);
+            return parent[x];
+        }
+
+        void union(int x, int y) {
+            int rootX = find(x);
+            int rootY = find(y);
+            // 已连通
+            if (rootX == rootY) return;
+            if (rank[rootX] < rank[rootY])
+                parent[rootX] = rootY;
+            else if (rank[rootX] > rank[rootY])
+                parent[rootY] = rootX;
+            else {
+                parent[rootY] = rootX;
+                rank[rootX]++;
+            }
+            // 合并后连通分量-1
+            count--;
+        }
+
+        int getCount() {
+            return count;
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* 初始化 $n$ 次， $\mathcal{O}(n)$
+* 所有并查集操作，总摊还 $\mathcal{O}(n + m \alpha(n))$，其中 $\alpha(n)$ 为反阿克曼函数，极慢增长，视为常数。
+* 整体 $\mathcal{O}(n+m)$， $m$ 为连线数。
 
 ---
 
