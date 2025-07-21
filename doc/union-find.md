@@ -64,6 +64,14 @@
       * [核心知识点与技巧](#核心知识点与技巧-1)
       * [代码实现](#代码实现-4)
       * [复杂度分析](#复杂度分析-4)
+  * [典型问题 1：等式方程的可满足性](#典型问题-1等式方程的可满足性)
+    * [问题理解](#问题理解)
+    * [并查集思想](#并查集思想)
+    * [「力扣」第 990 题：等式方程的可满足性](#力扣第-990-题等式方程的可满足性)
+      * [算法思路](#算法思路-3)
+      * [核心知识点与技巧](#核心知识点与技巧-2)
+      * [代码实现](#代码实现-5)
+      * [复杂度分析](#复杂度分析-5)
 <!-- TOC -->
 
 # 并查集
@@ -99,8 +107,10 @@
 ```java
 // 初始化
 int[] parent = new int[n];
-for (int i = 0; i < n; i++) {
-    parent[i] = i;
+for(
+int i = 0;
+i<n;i++){
+parent[i]=i;
 }
 
 // 查找根节点 + 路径压缩
@@ -139,7 +149,7 @@ void union(int x, int y) {
 
 * 节点只需要记录“父节点是谁”，只需一个 `parent[]` 数组，空间和实现都很高效。
 * 查找某元素属于哪个集合，只需往上查找其父亲直到根节点（树的根就是代表这个集合的标记）。
-  * “查找”就是“向上找根结点”的过程。
+    * “查找”就是“向上找根结点”的过程。
 * 合并两个集合，只需把一棵树的根挂到另一棵树的根下面。
 
 ### 连通分量
@@ -150,8 +160,8 @@ void union(int x, int y) {
 
 1. **更通俗的理解**
 
-    把无向图的所有节点想象成一群点，通过边连起来。如果一群点之间可以互相走到，那么它们属于同一个连通分量；走不到的，属于不同的连通分量。\
-    比如下面这个无向图：
+   把无向图的所有节点想象成一群点，通过边连起来。如果一群点之间可以互相走到，那么它们属于同一个连通分量；走不到的，属于不同的连通分量。\
+   比如下面这个无向图：
 
     ```
     A --- B --- C
@@ -161,17 +171,17 @@ void union(int x, int y) {
     F
     ```
 
-    这个图有：
+   这个图有：
     * $3$ 个连通分量：
-      * ${A, B, C}$
-      * ${D, E}$
-      * ${F}$
+        * ${A, B, C}$
+        * ${D, E}$
+        * ${F}$
 
 2. **形式化定义**
- 
+
    对于无向图 $G = (V, E)$：
 
-   * 连通分量是极大的连通子图。极大是指：没有更多的顶点能加入当前子图而保持连通。
+    * 连通分量是极大的连通子图。极大是指：没有更多的顶点能加入当前子图而保持连通。
 
 3. **和并查集的关系**
 
@@ -179,7 +189,7 @@ void union(int x, int y) {
     * 当我们对边 $(u, v)$ 执行合并操作时，就是把 $u$ 和 $v$ 两个连通分量合成一个。
     * 最终，树的数量（根结点的数量）就是连通分量数量。
 
-    比如代码求无向图的连通分量个数：
+   比如代码求无向图的连通分量个数：
 
     ```java
     int count = 0;
@@ -198,13 +208,13 @@ void union(int x, int y) {
 
 1. **连通性（Connectivity）**
 
-    **定义：**
+   **定义：**
 
     * 连通性指的是图中任意两个点之间能否通过若干条边互相到达。
     * 在**无向图**里，只要有一条路径可以连接起 $u$ 和 $v$，则它们“连通”。
     * 如果图被分成了几块（连通分量），则不同分量之间任意两个点都无法互通。
 
-    **例1：**
+   **例1：**
 
     * 下面的无向图中 $A, B, C, D$ 连通， $E, F$ 连通，但AB能不能走到E？不能——它们不连通。
 
@@ -214,7 +224,7 @@ void union(int x, int y) {
           D     E---F
       ```
 
-    **应用：**
+   **应用：**
 
     * 判断网络是否“整体连通”？
     * 两个人在朋友圈里是否能通过朋友关系互相认识？
@@ -222,18 +232,18 @@ void union(int x, int y) {
 
 2. **路径问题（Path Problem）**
 
-    **定义：**
+   **定义：**
 
     * 路径问题研究的是：从一个点 $u$ 到另一个点 $v$，是否存在一条边路径？如果有，路径最短是多少？一共有多少条？等等。
     * 路径可以有多种约束：最短路径、最大权路径、固定长度的路径等。
 
-    **常见类型：**
+   **常见类型：**
 
     * 判断路径是否存在（可达问题）
     * 求最短/最长路径长度
     * 计算所有可能路径条数
 
-    **例2：**
+   **例2：**
 
     * 在下图中，从 $A$ 到 $D$ 是否有路径？
       ```
@@ -243,7 +253,7 @@ void union(int x, int y) {
       ```
       可以走 $A \to B \to D$ 或 $A \to B \to C \to B \to D$（但第二条包含环，通常只关心最短路径）。
 
-    **算法工具：**
+   **算法工具：**
 
     * 并查集解决“可达性/连通性”问题，即问“ $u$ 到 $v$ 有无路”。
     * BFS/DFS 或 Dijkstra 算法解决“路径长度/方案数/最短距离”等。
@@ -265,7 +275,6 @@ void union(int x, int y) {
 | `boolean` | `isConnected(int x, int y)` | 如果 `x` 和 `y` 存在于同一个连通分量中则返回 `true` |
 | `int`     | `getCount()`                | 返回连通分量的数量                          |
 
-
 ## 并查集的 quick-find 实现
 
 ### 原理说明
@@ -273,7 +282,7 @@ void union(int x, int y) {
 * 用数组 `id[]` 记录，每个元素的“集合编号”或“代表元”。初始时 `id[i] = i`，各自为一集。
 * **查找**：直接返回 `id[x]`，即 $x$ 属于哪个集合，**时间复杂度为 $\mathcal{O}(1)$**。
 * **合并**：把两个集合的所有元素编号统一（即全体替换）。遍历一遍整个 `id[]`，
-           把所有属于某集合的元素的集合编号都改掉，**时间复杂度为 $\mathcal{O}(n)$**。
+  把所有属于某集合的元素的集合编号都改掉，**时间复杂度为 $\mathcal{O}(n)$**。
 
 ### 例子
 
@@ -301,7 +310,9 @@ void union(int x, int y) {
 ```java
 // 初始化
 int[] id = new int[n];
-for (int i = 0; i < n; i++) id[i] = i;
+for(
+int i = 0;
+i<n;i++)id[i]=i;
 
 // 查找集合编号
 int find(int x) {
@@ -524,7 +535,7 @@ quick-union 是一种并查集实现方式，它通过"向上查找父节点"来
 
 1. 初始化并查集，每个城市指向自己作为根
 2. 遍历邻接矩阵，将有连接的城市合并
-3.  统计并查集中根节点的数量，即为省份数
+3. 统计并查集中根节点的数量，即为省份数
 
 #### 时间复杂度
 
@@ -562,7 +573,7 @@ quick-union 是一种并查集实现方式，它通过"向上查找父节点"来
 class UnionFind {
     private int[] parent;
     private int[] rank;   // 用于记录每个节点为根的子树的高度上界
-    
+
     public UnionFind(int n) {
         parent = new int[n];
         rank = new int[n];
@@ -571,7 +582,7 @@ class UnionFind {
             rank[i] = 0;    // 初始时每个节点的秩为0
         }
     }
-    
+
     // 查找操作
     public int find(int x) {
         while (x != parent[x]) {
@@ -579,14 +590,14 @@ class UnionFind {
         }
         return x;
     }
-    
+
     // 按秩合并
     public void union(int x, int y) {
         int rootX = find(x);
         int rootY = find(y);
-        
+
         if (rootX == rootY) return;
-        
+
         // 按秩合并：将秩小的树连接到秩大的树上
         if (rank[rootX] < rank[rootY]) {
             parent[rootX] = rootY;
@@ -605,7 +616,8 @@ class UnionFind {
 
 在按秩合并的并查集中：
 
-* **查找(Find)操作**：最坏情况下的时间复杂度是 $\mathcal{O}(\log n)$，因为通过按秩合并，树的高度被限制在 $\mathcal{O}(\log n)$。
+* **查找(Find)操作**：最坏情况下的时间复杂度是 $\mathcal{O}(\log n)$
+  ，因为通过按秩合并，树的高度被限制在 $\mathcal{O}(\log n)$。
 * **合并(Union)操作**：因为包含了两次查找，所以时间复杂度也是 $\mathcal{O}(\log n)$。
 
 ### 通过在按秩合并优化完成「力扣」第 547 题：[朋友圈](https://leetcode.cn/problems/number-of-provinces/)
@@ -691,7 +703,7 @@ public class NumberOfProvincesV3 {
 class UnionFindBySize {
     private int[] parent;
     private int[] size;   // 用于记录子树的节点数
-    
+
     public UnionFindBySize(int n) {
         parent = new int[n];
         size = new int[n];
@@ -700,21 +712,21 @@ class UnionFindBySize {
             size[i] = 1;  // 初始每棵树只有一个节点
         }
     }
-    
+
     public int find(int x) {
         while (x != parent[x]) {
             x = parent[x];
         }
         return x;
     }
-    
+
     // 按大小合并
     public void unionBySize(int x, int y) {
         int rootX = find(x);
         int rootY = find(y);
-        
+
         if (rootX == rootY) return;
-        
+
         // 按大小合并策略
         if (size[rootX] < size[rootY]) {
             parent[rootX] = rootY;
@@ -724,7 +736,7 @@ class UnionFindBySize {
             size[rootX] += size[rootY];
         }
     }
-    
+
     // 获取元素x所在集合的大小
     public int getSize(int x) {
         return size[find(x)];
@@ -784,14 +796,14 @@ public int find(int x) {
     while (root != parent[root]) {
         root = parent[root];
     }
-    
+
     // 第二遍：将路径上所有节点直接连接到根节点
     while (x != root) {
         int next = parent[x];
         parent[x] = root;
         x = next;
     }
-    
+
     return root;
 }
 ```
@@ -831,15 +843,14 @@ public int find(int x) {
 
 #### 结合按秩/按大小合并与路径压缩
 
-当路径压缩与按秩合并或按大小合并结合使用时，并查集操作的均摊时间复杂度降低到接近常数级别： 
- $\mathcal{O}(\alpha(n))$，其中 $\alpha(n)$ 是阿克曼函数的反函数。
+当路径压缩与按秩合并或按大小合并结合使用时，并查集操作的均摊时间复杂度降低到接近常数级别：
+$\mathcal{O}(\alpha(n))$，其中 $\alpha(n)$ 是阿克曼函数的反函数。
 
 **阿克曼函数的反函数 $\alpha(n)$ 的特点**：
 
 * 极其缓慢增长
 * 对于任何实际应用中可能遇到的 $n$ 值， $\alpha(n) \leq 4$
 * 因此在实践中，可以将 $\mathcal{O}(\alpha(n))$ 视为接近 $\mathcal{O}(1)$ 的常数时间复杂度
-
 
 ### 完整的优化并查集实现
 
@@ -848,18 +859,18 @@ public class OptimizedUnionFind {
     private int[] parent;
     private int[] rank;
     private int count;  // 跟踪集合数量
-    
+
     public OptimizedUnionFind(int n) {
         parent = new int[n];
         rank = new int[n];
         count = n;
-        
+
         for (int i = 0; i < n; i++) {
             parent[i] = i;
             rank[i] = 0;
         }
     }
-    
+
     // 带路径压缩的查找
     public int find(int x) {
         if (x != parent[x]) {
@@ -867,14 +878,14 @@ public class OptimizedUnionFind {
         }
         return parent[x];
     }
-    
+
     // 按秩合并
     public void union(int x, int y) {
         int rootX = find(x);
         int rootY = find(y);
-        
+
         if (rootX == rootY) return;
-        
+
         // 按秩合并
         if (rank[rootX] < rank[rootY]) {
             parent[rootX] = rootY;
@@ -884,15 +895,15 @@ public class OptimizedUnionFind {
             parent[rootY] = rootX;
             rank[rootX]++;
         }
-        
+
         count--;  // 每次合并，集合数量减1
     }
-    
+
     // 检查两个元素是否属于同一个集合
     public boolean connected(int x, int y) {
         return find(x) == find(y);
     }
-    
+
     // 获取集合数量
     public int getCount() {
         return count;
@@ -904,7 +915,8 @@ public class OptimizedUnionFind {
 
 * 《算法》（第 4 版）第 1 章第 5 节：案例研究：union-find 算法（有关于复杂度的证明）
 * 《算法导论》第 21 章：用于不相交集合的数据结构（有关于复杂度的证明）
-* 知乎问题：《[为什么并查集在路径压缩之后的时间复杂度是阿克曼函数?](https://leetcode.cn/link/?target=https://www.zhihu.com/question/35090745)》。
+*
+知乎问题：《[为什么并查集在路径压缩之后的时间复杂度是阿克曼函数?](https://leetcode.cn/link/?target=https://www.zhihu.com/question/35090745)》。
 
 ### 完成「力扣」第 684 题：[冗余连接](https://leetcode.cn/problems/redundant-connection/)
 
@@ -939,7 +951,6 @@ public class OptimizedUnionFind {
 
 * **并查集（路径压缩 + 按秩合并）**：工程与竞赛中最通用的环检测方法。
 
-
 #### 代码实现
 
 ```java
@@ -947,18 +958,18 @@ public class OptimizedUnionFind {
     private int[] parent;
     private int[] rank;
     private int count;  // 跟踪集合数量
-    
+
     public OptimizedUnionFind(int n) {
         parent = new int[n];
         rank = new int[n];
         count = n;
-        
+
         for (int i = 0; i < n; i++) {
             parent[i] = i;
             rank[i] = 0;
         }
     }
-    
+
     // 带路径压缩的查找
     public int find(int x) {
         if (x != parent[x]) {
@@ -966,14 +977,14 @@ public class OptimizedUnionFind {
         }
         return parent[x];
     }
-    
+
     // 按秩合并
     public void union(int x, int y) {
         int rootX = find(x);
         int rootY = find(y);
-        
+
         if (rootX == rootY) return;
-        
+
         // 按秩合并
         if (rank[rootX] < rank[rootY]) {
             parent[rootX] = rootY;
@@ -983,15 +994,15 @@ public class OptimizedUnionFind {
             parent[rootY] = rootX;
             rank[rootX]++;
         }
-        
+
         count--;  // 每次合并，集合数量减1
     }
-    
+
     // 检查两个元素是否属于同一个集合
     public boolean connected(int x, int y) {
         return find(x) == find(y);
     }
-    
+
     // 获取集合数量
     public int getCount() {
         return count;
@@ -1101,6 +1112,116 @@ public class NumberOfOperationsToMakeNetworkConnected {
 * 初始化 $n$ 次， $\mathcal{O}(n)$
 * 所有并查集操作，总摊还 $\mathcal{O}(n + m \alpha(n))$，其中 $\alpha(n)$ 为反阿克曼函数，极慢增长，视为常数。
 * 整体 $\mathcal{O}(n+m)$， $m$ 为连线数。
+
+## 典型问题 1：等式方程的可满足性
+
+> 给你一组形如 $a_i = b_i$ 或 $a_j \neq b_j$ 的变量比较关系，问能否给每个变量赋值，使所有关系都成立？
+
+*常见原题：LeetCode 990. Satisfiability of Equality Equations (「力扣」第 990 题：等式方程的可满足性)*
+
+### 问题理解
+
+* 每个 $a_i$, $b_i$ 都代表一个变量，可能用 `'a'~'z'`。
+* 你要判断：有没有办法给这些变量赋值，把所有 $=$ 和 $\neq$ 的约束都满足？
+
+**举例：**
+
+* 若等式为 $a = b, b = c$，那么显然 $a,b,c$ 三者都必须一样。
+* 若再有 $a \neq c$，那就不可满足！（因为 $a,c$ 已经被判等了）
+
+### 并查集思想
+
+我们把“变量属于同一组”视作**连通性关系**。\
+**等式 $a = b$**，就把 $a,b$ 合成同一组/集合。\
+**不等式 $a \neq b$**，就要求 $a$ 和 $b$ 绝不能同属一组！
+
+并查集就是维护“分组”，即快速判断“两个变量是否归为同一集合”。
+
+**步骤：**
+
+1. **遍历所有 $=$，用并查集把等价元素都合并到同一组。**
+2. **遍历所有 $\neq$，如果两者已经同组，说明矛盾，返回不可满足。**
+3. **检查完毕无冲突，说明有可行赋值方案。**
+
+* “等式方程的可满足性”实际上就是把所有 $a = b$ 串成若干“大团”，然后检查所有 $a \neq b$ 是不是也不在一团。
+* 并查集正好高效支持这种“连通性分组”的判定和管理，复杂度 $\mathcal{O}(n \alpha(n))$，非常快！
+
+### 「力扣」第 990 题：[等式方程的可满足性](https://leetcode.cn/problems/satisfiability-of-equality-equations)
+
+#### 算法思路
+
+1. **并查集建等价类**
+   * 对每个 $a==b$，用 **并查集（Quick-union + 路径压缩 + 按秩合并）** 连通 $a,b$，构建所有等价类。
+     * 等价类中的变量含义：它们的值**必须相等**。
+2. **判冲突**
+   * 遍历所有 $a!=b$ 约束：若发现 $a$ 与 $b$ 在一个等价类（即 $find(a)==find(b)$），矛盾，直接返回 false。
+3. **全部检查完无冲突则可行**
+
+#### 核心知识点与技巧
+
+* **并查集** $DSU$，合并所有 $a==b$，保持极致合并查找效率， $\mathcal{O}(\alpha(n))$。
+* 变量仅 $26$ 个，全部小写可直接用 $0\sim25$ 映射。
+* 必须先处理所有“==”，再统一处理“!=”，顺序反则可能留下错误。
+
+#### 代码实现
+
+```java
+public class SatisfiabilityOfEqualityEquations {
+    public boolean equationsPossible(String[] equations) {
+        UnionFind uf = new UnionFind();
+        for (String eq : equations) {
+            if (eq.charAt(1) == '=') {
+                int x = eq.charAt(0) - 'a';
+                int y = eq.charAt(3) - 'a';
+                uf.union(x, y);
+            }
+        }
+        for (String eq : equations) {
+            if (eq.charAt(1) == '!') {
+                int x = eq.charAt(0) - 'a';
+                int y = eq.charAt(3) - 'a';
+                if (uf.find(x) == uf.find(y)) return false;
+            }
+        }
+        return true;
+    }
+
+    static class UnionFind {
+        int[] parent = new int[26];
+        int[] rank = new int[26];
+
+        UnionFind() {
+            for (int i = 0; i < 26; i++) {
+                parent[i] = i;
+                rank[i] = 1;
+            }
+        }
+
+        int find(int x) {
+            if (parent[x] != x)
+                parent[x] = find(parent[x]);
+            return parent[x];
+        }
+
+        void union(int x, int y) {
+            int fx = find(x);
+            int fy = find(y);
+            if (fx == fy) return;
+            if (rank[fx] < rank[fy]) parent[fx] = fy;
+            else if (rank[fx] > rank[fy]) parent[fy] = fx;
+            else {
+                parent[fy] = fx;
+                rank[fx]++;
+            }
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* 每条等式/不等式 $\mathcal{O}(1)$，并查集摊还 $\mathcal{O}(\alpha(n))$。
+* 总体 $\mathcal{O}(L)$（ $L$ 为方程数），极快。
 
 ---
 
