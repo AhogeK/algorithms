@@ -82,6 +82,11 @@
       * [核心知识点与技巧](#核心知识点与技巧-3)
       * [代码](#代码-1)
       * [复杂度分析](#复杂度分析-7)
+    * [完成「力扣」第 130 题：被围绕的区域](#完成力扣第-130-题被围绕的区域)
+      * [算法思路（并查集解法）](#算法思路并查集解法)
+      * [核心知识点与技巧](#核心知识点与技巧-4)
+      * [完整代码](#完整代码)
+      * [复杂度分析](#复杂度分析-8)
 <!-- TOC -->
 
 # 并查集
@@ -1444,6 +1449,119 @@ public class NumberOfIslands {
 
 * **时间复杂度：** $\mathcal{O}(MN\alpha(MN))$，其中 $M$ 为行数， $N$ 为列数， $\alpha(MN)$ 为反阿克曼函数，可视为常数。
 * **空间复杂度：** $\mathcal{O}(MN)$，并查集数组。
+
+### 完成「力扣」第 130 题：[被围绕的区域](https://leetcode.cn/problems/surrounded-regions)
+
+#### 算法思路（并查集解法）
+
+1. **建模**
+
+    把每个 $'O'$ 当作一个点，这些点**上下左右连通**。关键在于：
+
+    * **被包围** = 该 $'O'$ 所在连通块“不与任何边界上的 $'O'$ 直接或间接连通”。
+    * 只需要区分：“能跑到边界”的 `'O'`，与“完全被 $'X'$ 包裹”的 `'O'`。
+
+2. **虚拟节点**
+
+    我们引入一个“虚拟边界节点” `dummy`，编号为 $m \times n$，专门代表“所有可以逃出边界的 $'O'$”。
+
+3. **合并原则**
+
+    * 对于每个本身为 $'O'$ 的格子 $(i, j)$：
+
+        * 如果它在矩阵**边界**，则直接将其与 `dummy` 合并。
+        * 否则，枚举其 $4$ 个方向相邻格 $(nx, ny)$，只要也是 $'O'$，就将 $(i, j)$ 和 $(nx, ny)$ 两点合并。
+
+4. **最终判定**
+
+    遍历所有点：
+
+    * 若该点 $'O'$ **属于 `dummy` 所在集合**，说明它能逃出边界，**不翻转**。
+    * 否则，该 $'O'$ 永远不会与边界联通，**直接翻转为 $'X'$**。
+
+#### 核心知识点与技巧
+
+* **虚拟节点技巧**：泛化“能跑出边界”的问题（实用且本质）
+* **并查集高级优化**：按秩合并 + 路径压缩，保证近乎常数复杂度
+* **原地遍历与翻转**：最后只需遍历矩阵一次即可完成操作
+
+#### 完整代码
+
+```java
+public class SurroundedRegions {
+    public void solve(char[][] board) {
+        int m = board.length, n = board[0].length;
+        int dummy = m * n;
+        UnionFind uf = new UnionFind(dummy + 1);
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (board[i][j] == 'O') {
+                    int pos = i * n + j;
+                    if (i == 0 || i == m - 1 || j == 0 || j == n - 1) uf.union(pos, dummy);
+                    else {
+                        // 上下左右
+                        int[][] dirs = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+                        for (int[] d : dirs) {
+                            int ni = i + d[0], nj = j + d[1];
+                            if (ni >= 0 && ni < m && nj >= 0 && nj < n && board[ni][nj] == 'O') {
+                                int npos = ni * n + nj;
+                                uf.union(pos, npos);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (board[i][j] == 'O') {
+                    int pos = i * n + j;
+                    if (uf.find(pos) != uf.find(dummy)) board[i][j] = 'X';
+                }
+            }
+        }
+    }
+
+    static class UnionFind {
+        int[] parent;
+        int[] rank;
+
+        public UnionFind(int total) {
+            parent = new int[total];
+            rank = new int[total];
+            for (int i = 0; i < total; i++) {
+                parent[i] = i;
+                rank[i] = 1;
+            }
+        }
+
+        public int find(int x) {
+            if (parent[x] != x)
+                parent[x] = find(parent[x]);
+            return parent[x];
+        }
+
+        public void union(int x, int y) {
+            int fx = find(x), fy = find(y);
+            if (fx == fy) return;
+            if (rank[fx] < rank[fy]) parent[fx] = fy;
+            else if (rank[fx] > rank[fy]) parent[fy] = fx;
+            else {
+                parent[fy] = fx;
+                rank[fx]++;
+            }
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度：**
+    * 任意 $N$ 次 $find/union$ 操作摊还 $\mathcal{O}(1)$（路径压缩+按秩合并，Ackermann函数极慢增长）
+    * 总访问 $m \times n$ 次，时间复杂度 $\mathcal{O}(mn)$
+* **空间复杂度：**
+    * 额外 $1$ 个并查集 parent/rank 数组， $\mathcal{O}(mn)$
 
 ---
 
