@@ -76,6 +76,12 @@
       * [算法思路](#算法思路-4)
       * [代码](#代码)
       * [复杂度分析](#复杂度分析-6)
+  * [典型问题 2：岛屿数量](#典型问题-2岛屿数量)
+    * [「力扣」第 200 题：岛屿数量](#力扣第-200-题岛屿数量)
+      * [算法思路](#算法思路-5)
+      * [核心知识点与技巧](#核心知识点与技巧-3)
+      * [代码](#代码-1)
+      * [复杂度分析](#复杂度分析-7)
 <!-- TOC -->
 
 # 并查集
@@ -1342,6 +1348,102 @@ public class LargestComponentSizeByCommonFactor {
 * **并查集**: 路径压缩+按秩合并， $\alpha(N)$ 常数极低。
 * **总复杂度**： $\mathcal{O}(N + n\log{m})$， $m = \max(nums)$。
 * **空间复杂度**： $O(N)$。
+
+## 典型问题 2：岛屿数量
+
+> “岛屿数量”这类题是并查集的经典应用场景。它可以高效地将相邻的“陆地”格子合并成一个岛屿，最终岛屿数量就是并查集中连通分量的个数。
+
+### 「力扣」第 200 题：[岛屿数量](https://leetcode.cn/problems/number-of-islands)
+
+***仅供学习，此题使用查集并不是最好的方案***
+
+#### 算法思路
+
+**核心：** 将每个陆地格子看作一个节点，相邻陆地格子合并到同一个集合，最终集合数量即为岛屿数量。
+
+**步骤：**
+
+1. 初始化并查集，每个陆地格子初始为一个独立集合。
+2. 遍历 `grid`，将相邻陆地格子合并到同一集合。
+3. 统计集合数量（根节点数量）。
+
+**竞速优化：**
+
+* **按秩合并：** 将秩小的集合合并到秩大的集合，避免树的高度增长过快。
+* **路径压缩：** 在 `find` 操作中，将节点的父节点直接指向根节点，减少后续查找时间。
+
+#### 核心知识点与技巧
+
+* 并查集：`find`、`union` 操作。
+* 按秩合并、路径压缩优化。
+* 二维坐标到一维索引的转换： $index = row \times cols + col$。
+
+#### 代码
+
+```java
+public class NumberOfIslands {
+    private int rows, cols;
+    private int[] parent, rank;
+
+    public int numIslands(char[][] grid) {
+        rows = grid.length;
+        cols = grid[0].length;
+        parent = new int[rows * cols];
+        rank = new int[rows * cols];
+        for (int i = 0; i < rows * cols; i++) parent[i] = i;
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (grid[i][j] == '1') {
+                    // 二维坐标到一维索引的转换
+                    int index = i * cols + j;
+                    // 上
+                    if (i > 0 && grid[i - 1][j] == '1') union(index, (i - 1) * cols + j);
+                    // 下
+                    if (i < rows - 1 && grid[i + 1][j] == '1') union(index, (i + 1) * cols + j);
+                    // 左
+                    if (j > 0 && grid[i][j - 1] == '1') union(index, i * cols + j - 1);
+                    // 右
+                    if (j < cols - 1 && grid[i][j + 1] == '1') union(index, i * cols + j + 1);
+                }
+            }
+        }
+        int numIslands = 0;
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (grid[i][j] == '1') {
+                    int index = i * cols + j;
+                    if (parent[index] == index) numIslands++;
+                }
+            }
+        }
+        return numIslands;
+    }
+
+    private int find(int x) {
+        if (parent[x] != x)
+            parent[x] = find(parent[x]);
+        return parent[x];
+    }
+
+    private void union(int x, int y) {
+        int rootX = find(x);
+        int rootY = find(y);
+        if (rootX != rootY) {
+            if (rank[rootX] < rank[rootY]) parent[rootX] = rootY;
+            else if (rank[rootX] > rank[rootY]) parent[rootY] = rootX;
+            else {
+                parent[rootY] = rootX;
+                rank[rootX]++;
+            }
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度：** $\mathcal{O}(MN\alpha(MN))$，其中 $M$ 为行数， $N$ 为列数， $\alpha(MN)$ 为反阿克曼函数，可视为常数。
+* **空间复杂度：** $\mathcal{O}(MN)$，并查集数组。
 
 ---
 
