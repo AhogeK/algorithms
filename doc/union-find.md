@@ -72,6 +72,10 @@
       * [核心知识点与技巧](#核心知识点与技巧-2)
       * [代码实现](#代码实现-5)
       * [复杂度分析](#复杂度分析-5)
+    * [完成「力扣」第 952 题：按公因数计算最大组件大小](#完成力扣第-952-题按公因数计算最大组件大小)
+      * [算法思路](#算法思路-4)
+      * [代码](#代码)
+      * [复杂度分析](#复杂度分析-6)
 <!-- TOC -->
 
 # 并查集
@@ -1222,6 +1226,122 @@ public class SatisfiabilityOfEqualityEquations {
 
 * 每条等式/不等式 $\mathcal{O}(1)$，并查集摊还 $\mathcal{O}(\alpha(n))$。
 * 总体 $\mathcal{O}(L)$（ $L$ 为方程数），极快。
+
+### 完成「力扣」第 952 题：[按公因数计算最大组件大小](https://leetcode.cn/problems/largest-component-size-by-common-factor)
+
+#### 算法思路
+
+**最大公约数视图的建模**
+
+将“是否连通”看做“是否共享某些质因数”，需要高效判定**所有可达分量**。
+
+**用并查集归并所有有公共质因数的数**
+
+* 拆分：对每个 $x$，把 $x$ 与其所有质因数“绑定”到并查集一个集合（通过“并查集节点合并”，实现“公共质因数传递归并”）。
+* 只要 $a$、 $b$ 有某质因数 $p$，则通过 $p$将 $a$、 $b$归并。
+
+*这样，所有能够通过质因数“传递”连通的点，都在同一并查集祖先下。*
+
+**并查集涉及的节点**
+
+* 只要开 $1 \sim \max(nums)$ 范围的并查集即可（无需给所有质因数也逐一开节点，省空间+节省查找次数）。
+
+**利用线性筛优化质因数分解**
+
+* 普通 $\sqrt{x}$ 试除分解会比较慢。
+* 竞速最佳：**线性筛最小质因数法**（预处理 $[2,N)$ 区间每个 $x$ 的最小质因数）。
+
+**每个 $x$ 只需不断用 $sieve[x]$ 拆解即可，平均不超过 $\log x$ 次。**\
+极大减少分解与合并次数，复杂度压到 $\mathcal{O}(n\log x)$ 级。
+
+#### 代码
+
+```java
+/**
+ * 952. 按公因数计算最大组件大小
+ *
+ * @author AhogeK
+ * @since 2025-07-22 09:46:22
+ */
+public class LargestComponentSizeByCommonFactor {
+    private static final int N = 100001;
+    private static final int[] SIEVE = new int[N];
+
+    private static void linearSieve() {
+        for (int i = 2; i * i < N; i++) {
+            if (SIEVE[i] != 0)
+                continue;
+            SIEVE[i] = i;
+            for (int j = i * i; j < N; j += i)
+                if (SIEVE[j] == 0)
+                    SIEVE[j] = i;
+        }
+    }
+
+    public static int largestComponentSize(int[] nums) {
+        linearSieve();
+        for (int i = 2; i < N; i++)
+            if (SIEVE[i] == 0)
+                SIEVE[i] = i;
+        int m = 0;
+        for (int x : nums)
+            m = Math.max(m, x);
+        UnionFind uf = new UnionFind(m + 1);
+        for (int x : nums) {
+            int t = x;
+            while (t > 1) {
+                int p = SIEVE[t];
+                uf.union(x, p);
+                while (t % p == 0)
+                    t /= p;
+            }
+        }
+        int[] counts = new int[m + 1];
+        int res = 0;
+        for (int x : nums) {
+            int root = uf.find(x);
+            res = Math.max(res, ++counts[root]);
+        }
+        return res;
+    }
+
+    static class UnionFind {
+        int[] parent, rank;
+
+        public UnionFind(int n) {
+            parent = new int[n];
+            rank = new int[n];
+            for (int i = 0; i < n; i++)
+                parent[i] = i;
+        }
+
+        int find(int x) {
+            if (parent[x] != x)
+                parent[x] = find(parent[x]);
+            return parent[x];
+        }
+
+        void union(int x, int y) {
+            int fx = find(x), fy = find(y);
+            if (fx == fy) return;
+            if (rank[fx] < rank[fy]) parent[fx] = fy;
+            else if (rank[fx] > rank[fy]) parent[fy] = fx;
+            else {
+                parent[fy] = fx;
+                rank[fx]++;
+            }
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* **线性筛**: $O(N)$， $N=10^5+1$。
+* **每数质因数分解**: 最多 $O(\log x)$次， $n$个数总计 $O(n\log x)$。
+* **并查集**: 路径压缩+按秩合并， $\alpha(N)$ 常数极低。
+* **总复杂度**： $\mathcal{O}(N + n\log{m})$， $m = \max(nums)$。
+* **空间复杂度**： $O(N)$。
 
 ---
 
