@@ -87,6 +87,11 @@
       * [核心知识点与技巧](#核心知识点与技巧-4)
       * [完整代码](#完整代码)
       * [复杂度分析](#复杂度分析-8)
+    * [完成「力扣」第 959 题：由斜杠划分区域](#完成力扣第-959-题由斜杠划分区域)
+      * [算法思路（顶点并查集+冗余环计数）](#算法思路顶点并查集冗余环计数)
+      * [核心知识点与技巧](#核心知识点与技巧-5)
+      * [完整代码](#完整代码-1)
+      * [复杂度分析](#复杂度分析-9)
 <!-- TOC -->
 
 # 并查集
@@ -1562,6 +1567,117 @@ public class SurroundedRegions {
     * 总访问 $m \times n$ 次，时间复杂度 $\mathcal{O}(mn)$
 * **空间复杂度：**
     * 额外 $1$ 个并查集 parent/rank 数组， $\mathcal{O}(mn)$
+
+### 完成「力扣」第 959 题：[由斜杠划分区域](https://leetcode.cn/problems/regions-cut-by-slashes)
+
+#### 算法思路（顶点并查集+冗余环计数）
+
+**建模方法**
+
+1. 把棋盘看作**点阵**
+
+    * 一个 $n\times n$ 方格有 $(n+1)\times(n+1)$ 个“顶点”（还是以方格角点视为点，更接近图论思想）。
+    * 若将所有顶点之间相邻区域用线段连接，实际上就是在顶点之间不断画斜线/边界，产生若干圈。
+
+2. **并查集思路**核心
+
+    * 把所有顶点均编号成 $[0, (n+1)^2-1]$。
+
+    * 对于每一条“斜线”，就等价于“把对应的两个端点连一根边”。
+
+        * `\` 斜线：连接 $(i, j)$ 与 $(i+1, j+1)$。
+        * `/` 斜线：连接 $(i+1, j)$ 与 $(i, j+1)$。
+
+    * 边界点全部与虚拟源点 $0$ 联通，方便约束整个联通性的判断（表示“和无穷远连通”）。
+
+3. 区域数计数方式
+
+    * 并查集，若尝试合并两个点（即这两个顶点本来就在一个连通块里），此时说明内部出现“环”（多余的圈），这些就是新出现的封闭区块，需要 $\text{regions} ++$。
+    * 最终，区域数即为“合并过程中形成的冗余环数”+1（围住外部大区域）。
+
+#### 核心知识点与技巧
+
+* **圆方格点技巧**：点阵编号 $(i, j) \mapsto i\times(n+1)+j$，静态映射无误。
+* **只连顶点，无需三角拆分**：本解空间与效率均大幅提升，远优于“三角格子模型”。
+* **判断环的出现**：合并前判断若根已同，说明形成环/冗余闭合，计数器加 $1$。
+* **边界合并简化边界流出**：确保所有外围顶点都与“虚拟根节点”联通，避免外部被重复计数。
+
+#### 完整代码
+
+```java
+public class RegionsCutBySlashes {
+    public int regionsBySlashes(String[] grid) {
+        int n = grid.length;
+        UnionFind uf = new UnionFind((n + 1) * (n + 1));
+        for (int i = 0; i <= n; i++) {
+            // 左边列
+            uf.union(0, i * (n + 1));
+            // 右边列
+            uf.union(0, i * (n + 1) + n);
+            // 顶行
+            uf.union(0, i);
+            // 底行
+            uf.union(0, n * (n + 1) + i);
+        }
+        int regions = 1;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                char c = grid[i].charAt(j);
+                if (c == '\\') {
+                    // (i,j)-(i+1,j+1)
+                    int a = i * (n + 1) + j;
+                    int b = (i + 1) * (n + 1) + (j + 1);
+                    if (uf.find(a) == uf.find(b)) regions++;
+                    uf.union(a, b);
+                } else if (c == '/') {
+                    // (i+1,j)-(i,j+1)
+                    int a = (i + 1) * (n + 1) + j;
+                    int b = i * (n + 1) + (j + 1);
+                    if (uf.find(a) == uf.find(b)) regions++;
+                    uf.union(a, b);
+                }
+            }
+        }
+        return regions;
+    }
+
+    static class UnionFind {
+        int[] parent, rank;
+
+        public UnionFind(int n) {
+            parent = new int[n];
+            rank = new int[n];
+            for (int i = 0; i < n; i++) parent[i] = i;
+        }
+
+        public int find(int x) {
+            if (parent[x] != x) parent[x] = find(parent[x]);
+            return parent[x];
+        }
+
+        public void union(int x, int y) {
+            int fx = find(x), fy = find(y);
+            if (fx == fy) return;
+            if (rank[fx] < rank[fy]) parent[fx] = fy;
+            else if (rank[fx] > rank[fy]) parent[fy] = fx;
+            else {
+                parent[fy] = fx;
+                rank[fx]++;
+            }
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度：**
+
+    * $n^2$ 次操作，每次 `union`/`find` 均接近摊还 $\mathcal{O}(1)$。
+    * 总复杂度 $\mathcal{O}(n^2)$。
+
+* **空间复杂度：**
+    * 只用 `parent`/`rank` 数组，空间 $\mathcal{O}(n^2)$。
 
 ---
 
