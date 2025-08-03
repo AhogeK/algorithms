@@ -92,6 +92,11 @@
       * [核心知识点与技巧](#核心知识点与技巧-5)
       * [完整代码](#完整代码-1)
       * [复杂度分析](#复杂度分析-9)
+  * [典型问题 3: 除法求职](#典型问题-3-除法求职)
+    * [例：「力扣」第 399 题：除法求值](#例力扣第-399-题除法求值)
+      * [算法思路](#算法思路-6)
+      * [完整代码](#完整代码-2)
+      * [复杂度分析](#复杂度分析-10)
 <!-- TOC -->
 
 # 并查集
@@ -1678,6 +1683,82 @@ public class RegionsCutBySlashes {
 
 * **空间复杂度：**
     * 只用 `parent`/`rank` 数组，空间 $\mathcal{O}(n^2)$。
+
+## 典型问题 3: 除法求职
+
+### 例：「力扣」第 399 题：[除法求值](https://leetcode.cn/problems/evaluate-division)
+
+#### 算法思路
+
+使用并查集（Union-Find）维护变量之间的关系。并查集的核心思想是将变量分组，每个组代表一个连通分量。对于每个变量，维护其到根节点的路径权重之积。
+
+1. **初始化:** 为每个变量创建一个独立的集合，其根节点为自身，到根节点的路径权重为 $1.0$。
+2. **合并:** 遍历 `equations` 和 `values`，对于等式 $A_i / B_i = v_i$，将 $A_i$ 和 $B_i$ 所在的集合合并。
+            合并时，需要维护到根节点的路径权重。假设 $A_i$ 的根节点为 $\text{root}_A$， $B_i$ 的根节点为 
+            $\text{root}_B$，则合并后 $\text{root}_A$ 的父节点设为 $\text{root}_B$，并将 
+            $\text{weight}[\text{root}_A]$ 更新为 $\frac{\text{weight}[B_i] \times v_i}{\text{weight}[A_i]}$，
+            其中 $\text{weight}[x]$ 表示变量 $x$ 到其根节点的路径权重之积。
+3. **查询:** 对于查询 $C_j / D_j$，如果 $C_j$ 和 $D_j$ 不在同一个集合中，
+            或者它们没有出现在 `equations` 中，则返回 $-1.0$。否则，返回 $\frac{\text{weight}[C_j]}{\text{weight}[D_j]}$。
+
+#### 完整代码
+
+```java
+public class EvaluateDivision {
+
+    private HashMap<String, String> parent = new HashMap<>();
+    private HashMap<String, Double> weight = new HashMap<>();
+
+    public double[] calcEquation(List<List<String>> equations, double[] values, List<List<String>> queries) {
+        for (int i = 0; i < equations.size(); i++)
+            union(equations.get(i).get(0), equations.get(i).get(1), values[i]);
+        double[] result = new double[queries.size()];
+        for (int i = 0; i < queries.size(); i++) {
+            String c = queries.get(i).get(0);
+            String d = queries.get(i).get(1);
+            if (!parent.containsKey(c) || !parent.containsKey(d))
+                result[i] = -1.0;
+            else {
+                String rootC = find(c);
+                String rootD = find(d);
+                if (!rootC.equals(rootD))
+                    result[i] = -1.0;
+                else
+                    result[i] = weight.get(c) / weight.get(d);
+            }
+        }
+        return result;
+    }
+
+    private void union(String x, String y, double value) {
+        String rootX = find(x);
+        String rootY = find(y);
+        if (!rootX.equals(rootY)) {
+            parent.put(rootX, rootY);
+            weight.put(rootX, weight.get(y) * value / weight.get(x));
+        }
+    }
+
+    private String find(String x) {
+        if (!parent.containsKey(x)) {
+            parent.put(x, x);
+            weight.put(x, 1.0);
+            return x;
+        }
+        if (x.equals(parent.get(x))) return x;
+        String root = find(parent.get(x));
+        weight.put(x, weight.get(x) * weight.get(parent.get(x)));
+        parent.put(x, root);
+        return root;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度： $\mathcal{O}(n\alpha(n) + m\alpha(n))$，其中 $n$ 为变量个数， $m$ 为查询个数， 
+             $\alpha(n)$ 为阿克曼函数的反函数，可以认为是一个很小的常数。
+* 空间复杂度： $\mathcal{O}(n)$，用于存储并查集和权重。
 
 ---
 
