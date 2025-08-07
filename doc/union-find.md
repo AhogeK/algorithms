@@ -1701,6 +1701,60 @@ public class RegionsCutBySlashes {
 3. **查询:** 对于查询 $C_j / D_j$，如果 $C_j$ 和 $D_j$ 不在同一个集合中，
             或者它们没有出现在 `equations` 中，则返回 $-1.0$。否则，返回 $\frac{\text{weight}[C_j]}{\text{weight}[D_j]}$。
 
+#### 并查集与权重维护的数学原理
+
+并查集的核心思想是将变量分组，每个组代表一个连通分量。每个变量都维护一个到其所在集合根节点的权重，表示该变量与根节点的比值。通过合并操作，我们可以将不同的集合连接起来，并更新权重，最终实现计算任意两个变量之间比值的目的。
+
+**1. 权重定义:**
+
+我们用 $\text{weight}[x]$ 表示变量 $x$ 到其根节点 $\text{root}(x)$ 的权重，其含义为 $x / \text{root}(x)$ 的值。初始时，每个变量都是一个独立的集合，其根节点是自身，因此 $\text{weight}[x] = x / x = 1.0$。
+
+**2. 合并操作:**
+
+当我们合并两个集合时，需要更新权重。假设我们要合并变量 $a$ 和 $b$，且 $a / b = v$。设 $a$ 的根节点为 $\text{root}_a$， $b$ 的根节点为 $\text{root}_b$。合并操作将 $\text{root}_a$ 的父节点设为 $\text{root}_b$。为了维护权重，我们需要更新 $\text{weight}[\text{root}_a]$，使其满足 $\text{root}_a / \text{root}_b$ 的关系。
+
+推导过程如下：
+
+已知 $a / b = v$，根据权重定义，有：
+
+$a / \text{root}_a = \text{weight}[a]$
+
+$b / \text{root}_b = \text{weight}[b]$
+
+我们需要求 $\text{root}_a / \text{root}_b$。由 $a / b = v$ 可得 $a = vb$。将 $a$ 和 $b$ 的表达式代入，得到：
+
+$\frac{a}{\text{root}_a} = \text{weight}[a] \Rightarrow a = \text{weight}[a] \times \text{root}_a$
+
+$\frac{b}{\text{root}_b} = \text{weight}[b] \Rightarrow b = \text{weight}[b] \times \text{root}_b$
+
+将 $a = vb$ 代入第一个等式：
+
+$vb = \text{weight}[a] \times \text{root}_a$
+
+将 $b$ 的表达式代入：
+
+$v(\text{weight}[b] \times \text{root}_b) = \text{weight}[a] \times \text{root}_a$
+
+最终得到：
+
+$\frac{\text{root}_a}{\text{root}_b} = \frac{v \times \text{weight}[b]}{\text{weight}[a]}$
+
+因此，我们将 $\text{weight}[\text{root}_a]$ 更新为 $\frac{v \times \text{weight}[b]}{\text{weight}[a]}$。
+
+**3. 查询操作:**
+
+当我们查询 $c / d$ 的值时，如果 $c$ 和 $d$ 在同一个集合中，设它们的根节点为 $\text{root}$，则：
+
+$c / \text{root} = \text{weight}[c]$
+
+$d / \text{root} = \text{weight}[d]$
+
+因此：
+
+$\frac{c}{d} = \frac{c / \text{root}}{d / \text{root}} = \frac{\text{weight}[c]}{\text{weight}[d]}$
+
+如果 $c$ 和 $d$ 不在同一个集合中，则无法计算 $c / d$ 的值，返回 $-1.0$。
+
 #### 完整代码
 
 ```java
