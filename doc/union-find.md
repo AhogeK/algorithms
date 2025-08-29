@@ -95,8 +95,12 @@
   * [典型问题 3: 除法求职](#典型问题-3-除法求职)
     * [例：「力扣」第 399 题：除法求值](#例力扣第-399-题除法求值)
       * [算法思路](#算法思路-6)
+      * [并查集与权重维护的数学原理](#并查集与权重维护的数学原理)
       * [完整代码](#完整代码-2)
       * [复杂度分析](#复杂度分析-10)
+    * [「力扣」第 952 题：按公因数计算最大组件大小](#力扣第-952-题按公因数计算最大组件大小)
+      * [算法思路](#算法思路-7)
+      * [复杂度分析](#复杂度分析-11)
 <!-- TOC -->
 
 # 并查集
@@ -1813,6 +1817,99 @@ public class EvaluateDivision {
 * 时间复杂度： $\mathcal{O}(n\alpha(n) + m\alpha(n))$，其中 $n$ 为变量个数， $m$ 为查询个数， 
              $\alpha(n)$ 为阿克曼函数的反函数，可以认为是一个很小的常数。
 * 空间复杂度： $\mathcal{O}(n)$，用于存储并查集和权重。
+
+### 「力扣」第 952 题：[按公因数计算最大组件大小](https://leetcode.cn/problems/largest-component-size-by-common-factor)
+
+#### 算法思路
+
+1. **思想核心**
+    * **每个数和它的所有质因子 union 合并，所有与同一质因子有关系的数都在同一连通块。**
+    * 如果 $a$、 $b$ 均含某质因子 $p$，则经 $union(a, p)$ 和 $union(b, p)$ 合并， $a$ 和 $b$ 自然被连起来。
+2. **质因子分解速解**
+    * 预处理 $[2, N)$ 的线性筛，**SIEVE\[i] 表示 i 的最小质因子（或本身）**。
+    * 对每个 $x$，不断用 $SIEVE[x]$ 取分解质因子，方便 $union$ 合并。
+3. **并查集优化**
+    * 每次 $union(a, p)$，用 quick-union + 路径压缩 + 按秩合并，保证近乎常数时间合并与查询，防止退化。
+    * 节点范围 $[0, m+1)$，充分利用空间换效率。
+
+```java
+public class LargestComponentSizeByCommonFactor {
+    private static final int N = 100001;
+    private static final int[] SIEVE = new int[N];
+
+    private static void linearSieve() {
+        for (int i = 2; i * i < N; i++) {
+            if (SIEVE[i] != 0)
+                continue;
+            SIEVE[i] = i;
+            for (int j = i * i; j < N; j += i)
+                if (SIEVE[j] == 0)
+                    SIEVE[j] = i;
+        }
+    }
+
+    public static int largestComponentSize(int[] nums) {
+        linearSieve();
+        for (int i = 2; i < N; i++)
+            if (SIEVE[i] == 0)
+                SIEVE[i] = i;
+        int m = 0;
+        for (int x : nums)
+            m = Math.max(m, x);
+        UnionFind uf = new UnionFind(m + 1);
+        for (int x : nums) {
+            int t = x;
+            while (t > 1) {
+                int p = SIEVE[t];
+                uf.union(x, p);
+                while (t % p == 0)
+                    t /= p;
+            }
+        }
+        int[] counts = new int[m + 1];
+        int res = 0;
+        for (int x : nums) {
+            int root = uf.find(x);
+            res = Math.max(res, ++counts[root]);
+        }
+        return res;
+    }
+
+    static class UnionFind {
+        int[] parent, rank;
+
+        public UnionFind(int n) {
+            parent = new int[n];
+            rank = new int[n];
+            for (int i = 0; i < n; i++)
+                parent[i] = i;
+        }
+
+        int find(int x) {
+            if (parent[x] != x)
+                parent[x] = find(parent[x]);
+            return parent[x];
+        }
+
+        void union(int x, int y) {
+            int fx = find(x), fy = find(y);
+            if (fx == fy) return;
+            if (rank[fx] < rank[fy]) parent[fx] = fy;
+            else if (rank[fx] > rank[fy]) parent[fy] = fx;
+            else {
+                parent[fy] = fx;
+                rank[fx]++;
+            }
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* 筛法建表，复杂度 $\mathcal{O}(N\sqrt{N})$，实际远低于暴力分解。
+* 每个 $x$ 分解所有质因子，均摊 $\mathcal{O}(\log x)$。
+* 并查集 $O(\alpha(n))$ 近乎常数，结合质因子合并极快。
 
 ---
 
