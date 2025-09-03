@@ -1911,6 +1911,146 @@ public class LargestComponentSizeByCommonFactor {
 * 每个 $x$ 分解所有质因子，均摊 $\mathcal{O}(\log x)$。
 * 并查集 $O(\alpha(n))$ 近乎常数，结合质因子合并极快。
 
+### 完成「力扣」第 685 题：[冗余连接 II](https://leetcode.cn/problems/redundant-connection-ii)
+
+#### 算法思路
+
+问题的关键在于识别两种可能的异常情况：
+
+**情况分类**
+
+1. **入度为 $2$ 的节点**：违反了有根树的基本性质
+2. **环的存在**：破坏了树的无环性质
+
+**解决策略**
+
+采用**分情况讨论** + **并查集判环**的策略：
+
+```
+Step 1: 检测是否存在入度为 2 的节点
+Step 2: 根据情况选择不同的处理方式
+   - 无入度为 2：直接用并查集找成环边
+   - 有入度为 2：分别尝试删除两条冲突边，看哪个能形成有根树
+```
+
+#### 核心知识点与技巧
+
+1. **并查集（Union-Find）**
+    * **路径压缩**：`fa[x] = find(fa[x])` 优化查找
+    * **按秩合并**：平衡树的高度，提升效率
+    * **环检测**：如果 `find(u) == find(v)`，说明 $u$ 和 $v$ 已连通
+2. **有向图的特殊性质**
+    * **入度统计**：`parent[v] = u` 记录节点 $v$ 的父节点
+    * **冲突边识别**：当发现 `parent[v] != 0` 时，说明节点 $v$ 有第二个父节点
+
+#### 代码实现
+
+```java
+class Solution {
+    public int[] findRedundantDirectedConnection(int[][] edges) {
+        int n = edges.length;
+        int[] parent = new int[n + 1]; // parent[i] 记录节点i的父节点
+        Arrays.fill(parent, 0); // 初始化为0表示无父节点
+        
+        int[] first = null, second = null; // 入度为2的两条边
+        
+        // Step1: 检测入度为2的节点
+        for (int[] e : edges) {
+            int u = e[0], v = e[1];
+            if (parent[v] == 0) {
+                parent[v] = u; // 记录第一个父节点
+            } else {
+                // 发现第二个父节点，记录两条冲突边
+                first = new int[]{parent[v], v}; // 第一条边
+                second = new int[]{u, v};        // 第二条边（当前边）
+                break;
+            }
+        }
+        
+        // Step2: 使用并查集判环
+        UnionFind uf = new UnionFind(n + 1);
+        
+        if (first == null) {
+            // 情况1：无入度为2的节点，直接找成环边
+            for (int[] e : edges) {
+                int u = e[0], v = e[1];
+                if (!uf.union(u, v)) {
+                    return e; // 返回导致成环的边
+                }
+            }
+        } else {
+            // 情况2：有入度为2的节点，尝试删除second边
+            for (int[] e : edges) {
+                if (Arrays.equals(e, second)) continue; // 跳过second边
+                
+                int u = e[0], v = e[1];
+                if (!uf.union(u, v)) {
+                    // 删除second后仍成环，说明first是问题边
+                    return first;
+                }
+            }
+            // 删除second后无环，说明second是问题边
+            return second;
+        }
+        
+        return new int[0]; // 理论上不会到达
+    }
+    
+    // 并查集实现
+    static class UnionFind {
+        int[] fa;   // 父节点数组
+        int[] rank; // 秩数组，用于按秩合并
+        
+        UnionFind(int n) {
+            fa = new int[n];
+            rank = new int[n];
+            for (int i = 0; i < n; i++) {
+                fa[i] = i;    // 初始化：每个节点的父节点是自己
+                rank[i] = 1;  // 初始秩为1
+            }
+        }
+        
+        // 路径压缩的查找
+        int find(int x) {
+            if (fa[x] != x) {
+                fa[x] = find(fa[x]); // 路径压缩
+            }
+            return fa[x];
+        }
+        
+        // 按秩合并，返回是否成功合并
+        boolean union(int x, int y) {
+            int fx = find(x), fy = find(y);
+            if (fx == fy) return false; // 已经连通，形成环
+            
+            // 按秩合并
+            if (rank[fx] < rank[fy]) {
+                fa[fx] = fy;
+            } else if (rank[fx] > rank[fy]) {
+                fa[fy] = fx;
+            } else {
+                fa[fy] = fx;
+                rank[fx]++;
+            }
+            return true;
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+时间复杂度： $\mathcal{O}(n \alpha(n))$
+
+* $n$ 条边的遍历： $\mathcal{O}(n)$
+* 并查集操作：每次 `find` 和 `union` 的摊销复杂度为 $\mathcal{O}(\alpha(n))$
+* $\alpha(n)$ 是阿克曼函数的反函数，实际中可视为常数
+
+空间复杂度： $\mathcal{O}(n)$
+
+* `parent` 数组： $\mathcal{O}(n)$
+* 并查集的 `fa` 和 `rank` 数组： $\mathcal{O}(n)$
+
 ---
 
 [返回](../README.md)
