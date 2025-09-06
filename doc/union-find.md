@@ -2093,6 +2093,80 @@ $$
 4.  在并查集中合并 $c_1$ 和 $c_2$。如果它们原本不属于同一个集合，则合并后连通分量总数减一。
 5.  最终结果为 $n$ 减去最终的连通分量数。
 
+#### 代码实现
+
+```java
+/**
+ * 765. 情侣牵手
+ *
+ * @author AhogeK
+ * @since 2025-09-06 18:53:27
+ */
+public class CouplesHoldingHands {
+    public int minSwapsCouples(int[] row) {
+        int n = row.length / 2;
+        UnionFind uf = new UnionFind(n);
+        for (int i = 0; i < row.length; i += 2) {
+            int personA = row[i];
+            int personB = row[i + 1];
+            int coupleAId = personA / 2;
+            int coupleBId = personB / 2;
+            if (coupleAId != coupleBId)
+                uf.union(coupleAId, coupleBId);
+        }
+        return n - uf.getCount();
+    }
+
+    private static class UnionFind {
+        private int[] parent;
+        private int[] rank;
+        private int count;
+
+        public UnionFind(int n) {
+            parent = new int[n];
+            rank = new int[n];
+            count = n;
+            for (int i = 0; i < n; i++) {
+                parent[i] = i;
+                rank[i] = 1;
+            }
+        }
+
+        public int find(int i) {
+            if (parent[i] != i) parent[i] = find(parent[i]);
+            return parent[i];
+        }
+
+        public void union(int i, int j) {
+            int rootI = find(i);
+            int rootJ = find(j);
+            if (rootI == rootJ) return;
+            if (rank[rootI] < rank[rootJ]) parent[rootI] = rootJ;
+            else if (rank[rootI] > rank[rootJ]) parent[rootJ] = rootI;
+            else {
+                parent[rootJ] = rootI;
+                rank[rootI]++;
+            }
+            count--;
+        }
+
+        public int getCount() {
+            return count;
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**: $O(n \cdot \alpha(n))$。
+    * 初始化并查集需要 $O(n)$ 的时间。
+    * 主循环遍历 `n` 对座位。在循环内部，我们执行一次 `union` 操作。
+    * 同时使用路径压缩和按秩合并的并查集，其 `union` 和 `find` 操作的摊还时间复杂度为 $O(\alpha(n))$，其中 $\alpha(n)$ 是反阿克曼函数，其增长极其缓慢，对于所有实际输入的 $n$ 值，$\alpha(n) < 5$。因此，可以认为其近乎是常数时间。
+    * 综上，总时间复杂度为 $O(n)$。
+* **空间复杂度**: $O(n)$。
+    * 并查集需要 `parent` 和 `rank` 两个数组，大小都为 `n`。因此，空间开销与情侣对数成正比。
+
 ---
 
 [返回](../README.md)
