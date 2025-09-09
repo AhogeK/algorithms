@@ -101,6 +101,21 @@
     * [「力扣」第 952 题：按公因数计算最大组件大小](#力扣第-952-题按公因数计算最大组件大小)
       * [算法思路](#算法思路-7)
       * [复杂度分析](#复杂度分析-11)
+    * [完成「力扣」第 685 题：冗余连接 II](#完成力扣第-685-题冗余连接-ii)
+      * [算法思路](#算法思路-8)
+      * [核心知识点与技巧](#核心知识点与技巧-6)
+      * [代码实现](#代码实现-6)
+      * [复杂度分析](#复杂度分析-12)
+    * [完成「力扣」第 765 题：情侣牵手](#完成力扣第-765-题情侣牵手)
+      * [算法思路](#算法思路-9)
+      * [代码实现](#代码实现-7)
+      * [复杂度分析](#复杂度分析-13)
+    * [完成 「力扣」第 1168 题：水资源分配优化 (plus会员题，后续补发)](#完成-力扣第-1168-题水资源分配优化-plus会员题后续补发)
+    * [完成「力扣」第 1584 题：连接所有点的最小费用](#完成力扣第-1584-题连接所有点的最小费用)
+      * [算法思路](#算法思路-10)
+      * [核心知识点与技巧](#核心知识点与技巧-7)
+      * [代码](#代码-2)
+      * [复杂度分析](#复杂度分析-14)
 <!-- TOC -->
 
 # 并查集
@@ -2166,6 +2181,92 @@ public class CouplesHoldingHands {
     * 综上，总时间复杂度为 $O(n)$。
 * **空间复杂度**: $O(n)$。
     * 并查集需要 `parent` 和 `rank` 两个数组，大小都为 `n`。因此，空间开销与情侣对数成正比。
+
+### 完成 「力扣」第 1168 题：水资源分配优化 (plus会员题，后续补发)
+
+### 完成「力扣」第 1584 题：连接所有点的最小费用
+
+#### 算法思路
+
+首先枚举所有点对生成边集，计算边权；然后对所有边按权重升序排序；最后通过并查集按权小到大尝试合并两端节点，若不在同一集合则加入答案，直到加入 $n-1$ 条边为止。
+
+* 构造边集时共 $\frac{n(n-1)}{2}$ 条边，边权为两点的曼哈顿距离。
+* 并查集使用快速并查（quick-union）结构，并在合并时按秩（rank）合并并进行路径压缩，保证接近常数的查找和合并效率。
+* Kruskal 保证每次选择当前最小可行边，最终形成权值最小的生成树。
+
+#### 核心知识点与技巧
+
+* 并查集（Disjoint Set Union）：用于动态维护连通性。
+* 按秩合并（union by rank）与路径压缩（path compression）：将并查集的时间复杂度摊销到 $\alpha(n)$。
+* Kruskal 最小生成树框架：对边排序 + 并查集判断 + 合并。
+* 全距离预计算：适用于点数不超过千级的完全图。
+
+#### 代码
+
+```java
+public class MinCostToConnectAllPoints {
+    public int minCostConnectPoints(int[][] points) {
+        int n = points.length;
+        List<int[]> edges = new ArrayList<>();
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int w = Math.abs(points[i][0] - points[j][0]) + Math.abs(points[i][1] - points[j][1]);
+                edges.add(new int[]{w, i, j});
+            }
+        }
+        edges.sort(Comparator.comparingInt(a -> a[0]));
+        UnionFind uf = new UnionFind(n);
+        int total = 0;
+        int count = 0;
+        for (int[] e : edges) {
+            int w = e[0];
+            int u = e[1];
+            int v = e[2];
+            if (uf.union(u, v)) {
+                total += w;
+                if (++count == n - 1) break;
+            }
+        }
+        return total;
+    }
+
+    static class UnionFind {
+        int[] parent;
+        int[] rank;
+
+        UnionFind(int n) {
+            parent = new int[n];
+            rank = new int[n];
+            for (int i = 0; i < n; i++) parent[i] = i;
+        }
+
+        int find(int x) {
+            if (parent[x] != x) parent[x] = find(parent[x]);
+            return parent[x];
+        }
+
+        boolean union(int x, int y) {
+            int rx = find(x);
+            int ry = find(y);
+            if (rx == ry) return false;
+            if (rank[rx] < rank[ry]) parent[rx] = ry;
+            else if (rank[rx] > rank[ry]) parent[ry] = rx;
+            else {
+                parent[ry] = rx;
+                rank[rx]++;
+            }
+            return true;
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* 边生成： $O(n^2)$
+* 排序： $O\bigl(E\log E\bigr)=O\bigl(n^2\log n\bigr)$
+* 并查集合并查找： $O(E\alpha(n))\approx O(n^2)$\
+  总体时间复杂度为 $O(n^2\log n)$，空间复杂度为 $O(n^2)$ 用于存储所有边。
 
 ---
 
