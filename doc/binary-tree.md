@@ -339,6 +339,50 @@ public class BinaryTreeLevelOrderTraversalII {
 * **时间复杂度**：遍历所有节点一次，整体为 $\mathcal{O}(n)$，其中 $n$ 为节点数。
 * **空间复杂度**：队列和结果列表最大占用 $\mathcal{O}(w)$， $w$为最大层宽。
 
+### 完成《剑指 Offer》第 32 - I 题：[从上到下打印二叉树](https://leetcode.cn/problems/cong-shang-dao-xia-da-yin-er-cha-shu-lcof/description/)
+
+#### 算法思路
+
+* 使用**广度优先搜索**（BFS）实现层序遍历。
+* 借助队列维护每层节点顺序。
+* 遍历过程中按访问顺序，把节点值存到结果列表中。
+* 最后将列表转成数组返回。
+
+#### 知识点与技巧
+
+* 利用队列保证节点访问的**从左到右**顺序。
+* 每次先弹出队头节点，访问后将左右子节点依次入队。
+* 及时判空避免空指针异常。
+* 利用数组直接输出，节省空间和时间开销。
+
+#### 代码实现
+
+```java
+public class CongShangDaoXiaDaYinErChaShuLcof {
+    public int[] decorateRecord(TreeNode root) {
+        if (root == null) return new int[0];
+        List<Integer> resList = new ArrayList<>();
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+        while (!queue.isEmpty()) {
+            TreeNode node = queue.poll();
+            resList.add(node.val);
+            if (node.left != null) queue.offer(node.left);
+            if (node.right != null) queue.offer(node.right);
+        }
+        int[] res = new int[resList.size()];
+        for (int i = 0; i < resList.size(); i++)
+            res[i] = resList.get(i);
+        return res;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度：每个节点访问一次，约为 $\mathcal{O}(n)$， $n$是节点数。
+* 空间复杂度：队列与结果存储开销均为 $\mathcal{O}(n)$。
+
 ---
 
 **[返回](../README.md)**
