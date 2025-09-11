@@ -27,6 +27,16 @@
       * [核心知识与技巧](#核心知识与技巧)
       * [代码实现](#代码实现-1)
       * [复杂度分析](#复杂度分析-1)
+    * [完成《剑指 Offer》第 32 - I 题：从上到下打印二叉树](#完成剑指-offer第-32---i-题从上到下打印二叉树)
+      * [算法思路](#算法思路-2)
+      * [知识点与技巧](#知识点与技巧)
+      * [代码实现](#代码实现-2)
+      * [复杂度分析](#复杂度分析-2)
+    * [完成《剑指 Offer》第 32 - III 题：从上到下打印二叉树 III](#完成剑指-offer第-32---iii-题从上到下打印二叉树-iii)
+      * [算法思路](#算法思路-3)
+      * [知识点与技巧](#知识点与技巧-1)
+      * [代码实现](#代码实现-3)
+      * [复杂度分析](#复杂度分析-3)
 <!-- TOC -->
 
 # 二叉树
@@ -382,6 +392,59 @@ public class CongShangDaoXiaDaYinErChaShuLcof {
 
 * 时间复杂度：每个节点访问一次，约为 $\mathcal{O}(n)$， $n$是节点数。
 * 空间复杂度：队列与结果存储开销均为 $\mathcal{O}(n)$。
+
+### 完成《剑指 Offer》第 32 - III 题：[从上到下打印二叉树 III](https://leetcode.cn/problems/cong-shang-dao-xia-da-yin-er-cha-shu-iii-lcof/description/)
+
+#### 算法思路
+
+使用标准的层序遍历BFS，按层访问节点。对于每层：
+
+* 提前判断当前层是奇数层还是偶数层（可通过层数计数 `level` 模拟）。
+* 访问节点时，将节点值按正常顺序存入数组。
+* 若当前层是需要反转的层，则在将该层结果加入总表前，调用反转操作（或使用双端队列插入顺序控制兼容）。
+
+可选优化：
+* 利用 `LinkedList`，根据层数决定是**尾插**还是**头插**当前层值，从而省去反转时间。
+
+#### 知识点与技巧
+
+* 队列维持层序访问顺序。
+* 双端结构或后期反转实现单层逆序存储。
+* 使用整数 `level` 计数，判断奇偶以控制层次方向。
+* 节点入队顺序不变，控制层结果输出顺序。
+
+#### 代码实现
+
+```java
+public class CongShangDaoXiaDaYinErChaShuIII {
+    public List<List<Integer>> decorateRecord(TreeNode root) {
+        List<List<Integer>> res = new ArrayList<>();
+        if (root == null) return res;
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+        boolean leftToRight = true;
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            List<Integer> levelList = new LinkedList<>();
+            for (int i = 0; i < size; i++) {
+                TreeNode node = queue.poll();
+                if (leftToRight) levelList.addLast(node.val);
+                else levelList.addFirst(node.val);
+                if (node.left != null) queue.offer(node.left);
+                if (node.right != null) queue.offer(node.right);
+            }
+            res.add(levelList);
+            leftToRight = !leftToRight;
+        }
+        return res;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度：所有节点访问一次，插入集合操作均为 $\mathcal{O}(1)$（双端链表头尾插入），整体为 $\mathcal{O}(n)$。
+* 空间复杂度：队列与结果存储占 $\mathcal{O}(n)$。
 
 ---
 
