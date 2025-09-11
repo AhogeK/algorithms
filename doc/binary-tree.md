@@ -37,6 +37,10 @@
       * [知识点与技巧](#知识点与技巧-1)
       * [代码实现](#代码实现-3)
       * [复杂度分析](#复杂度分析-3)
+    * [「力扣」第 103 题：二叉树的锯齿形层次遍历](#力扣第-103-题二叉树的锯齿形层次遍历)
+      * [算法思路](#算法思路-4)
+      * [代码实现](#代码实现-4)
+      * [复杂度分析](#复杂度分析-4)
 <!-- TOC -->
 
 # 二叉树
@@ -445,6 +449,51 @@ public class CongShangDaoXiaDaYinErChaShuIII {
 
 * 时间复杂度：所有节点访问一次，插入集合操作均为 $\mathcal{O}(1)$（双端链表头尾插入），整体为 $\mathcal{O}(n)$。
 * 空间复杂度：队列与结果存储占 $\mathcal{O}(n)$。
+
+### 「力扣」第 103 题：[二叉树的锯齿形层次遍历]()
+
+#### 算法思路
+
+* 采用广度优先搜索（BFS）实现层序遍历。
+* 使用队列保证节点按层顺序访问。
+* 用一个布尔变量 `leftToRight` 标记当前层遍历方向。
+* 访问当前层节点时：
+    * 若 `leftToRight == true`，按正常顺序将节点值加入列表尾部。
+    * 若 `leftToRight == false`，将节点值插入列表头部，反转顺序。
+* 每层结束翻转 `leftToRight`，使遍历方向交替。
+
+#### 代码实现
+
+```java
+public class BinaryTreeZigzagLevelOrderTraversal {
+    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+        List<List<Integer>> res = new ArrayList<>();
+        if (root == null) return res;
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+        boolean leftToRight = true;
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            List<Integer> levelList = new LinkedList<>();
+            for (int i = 0; i < size; i++) {
+                TreeNode node = queue.poll();
+                if (leftToRight) levelList.addLast(node.val);
+                else levelList.addFirst(node.val);
+                if (node.left != null) queue.offer(node.left);
+                if (node.right != null) queue.offer(node.right);
+            }
+            res.add(levelList);
+            leftToRight = !leftToRight;
+        }
+        return res;
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**：所有节点访问一次，队列操作和链表插入均为 $\mathcal{O}(1)$，总体为 $\mathcal{O}(n)$。
+* **空间复杂度**：队列、结果列表均需存储节点，最大开销为 $\mathcal{O}(n)$。
 
 ---
 
