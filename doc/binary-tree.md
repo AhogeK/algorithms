@@ -284,6 +284,56 @@ public class BinaryTreeLevelOrderTraversal {
 
 理解两者特点有助于针对具体问题选择合适遍历策略，兼顾时间与空间效率。
 
+### 完成「力扣」第 107 题：[二叉树的层次遍历 II](https://leetcode.cn/problems/binary-tree-level-order-traversal-ii/description/)
+
+#### 算法思路
+
+本题在本质上等于普通层序遍历(广度优先搜索BFS)，**完成后将结果列表逆序即可**。
+
+具体步骤：
+
+1. 使用队列实现层序遍历，逐层访问节点并收集结果。
+2. 每层节点访问顺序为从左到右。
+3. 将每层节点值临时存储在列表中，遍历结束获得从上到下的层序。
+4. **对结果列表整体反转**，得到自底向上的层序遍历结果。
+
+#### 核心知识与技巧
+
+* 利用队列完成层序遍历。
+* 每层访问节点数量固定，保证层次边界划分。
+* 对结果的最终列表进行反转，是本题主要技巧之一。
+* 性能优化：直接使用 `LinkedList` 的 `addFirst()` 方法逐层头插结果，避免显式反转操作，提高效率。
+
+#### 代码实现
+
+```java
+public class BinaryTreeLevelOrderTraversalII {
+    public List<List<Integer>> levelOrderBottom(TreeNode root) {
+        List<List<Integer>> res = new LinkedList<>();
+        if (root == null) return res;
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+        while (!queue.isEmpty()) {
+            int levelSize = queue.size();
+            List<Integer> levelList = new LinkedList<>();
+            for (int i = 0; i < levelSize; i++) {
+                TreeNode node = queue.poll();
+                levelList.add(node.val);
+                if (node.left != null) queue.offer(node.left);
+                if (node.right != null) queue.offer(node.right);
+            }
+            res.addFirst(levelList);
+        }
+        return res;
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**：遍历所有节点一次，整体为 $\mathcal{O}(n)$，其中 $n$ 为节点数。
+* **空间复杂度**：队列和结果列表最大占用 $\mathcal{O}(w)$， $w$为最大层宽。
+
 ---
 
 **[返回](../README.md)**
