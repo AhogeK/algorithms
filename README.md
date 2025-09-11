@@ -14,6 +14,7 @@
 - [栈与队列](doc/stack-and-queue.md)
 - [优先队列](doc/priority-queue.md)
 - [并查集](doc/union-find.md)
+- [二叉树](doc/binary-tree.md)
 
 ---
 
