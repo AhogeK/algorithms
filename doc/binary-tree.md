@@ -41,6 +41,10 @@
       * [算法思路](#算法思路-4)
       * [代码实现](#代码实现-4)
       * [复杂度分析](#复杂度分析-4)
+  * [二叉树的遍历](#二叉树的遍历-1)
+    * [二叉树的前序遍历](#二叉树的前序遍历)
+      * [代码示例（递归版）](#代码示例递归版)
+      * [复杂度分析](#复杂度分析-5)
 <!-- TOC -->
 
 # 二叉树
@@ -494,6 +498,40 @@ public class BinaryTreeZigzagLevelOrderTraversal {
 
 * **时间复杂度**：所有节点访问一次，队列操作和链表插入均为 $\mathcal{O}(1)$，总体为 $\mathcal{O}(n)$。
 * **空间复杂度**：队列、结果列表均需存储节点，最大开销为 $\mathcal{O}(n)$。
+
+## 二叉树的遍历
+
+### 二叉树的前序遍历
+
+二叉树的前序遍历是一种深度优先遍历方法，其遍历顺序是：先访问根节点，再遍历左子树，最后遍历右子树。
+
+具体步骤如下：
+
+1. 访问当前节点（根节点）。
+2. 递归地前序遍历左子树。
+3. 递归地前序遍历右子树。
+
+用递归形式表达为：
+
+$$\text{preorder}(node) = \begin{cases} \text{访问} \ node, \\\ \text{preorder}(node.left), \\\ \text{preorder}(node.right) \end{cases}$$
+
+#### 代码示例（递归版）
+
+```java
+public void preorder(TreeNode node) {
+    if (node == null) {
+        return;
+    }
+    System.out.println(node.val);  // 访问根节点
+    preorder(node.left);           // 遍历左子树
+    preorder(node.right);          // 遍历右子树
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度为 $\mathcal{O}(n)$，其中 $n$ 是二叉树节点数，每个节点访问一次。
+* 空间复杂度取决于递归深度，最坏情况为 $\mathcal{O}(n)$（退化成链表），平均为 $\mathcal{O}(\log n)$（平衡树）。
 
 ---
 
