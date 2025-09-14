@@ -533,6 +533,65 @@ public void preorder(TreeNode node) {
 * 时间复杂度为 $\mathcal{O}(n)$，其中 $n$ 是二叉树节点数，每个节点访问一次。
 * 空间复杂度取决于递归深度，最坏情况为 $\mathcal{O}(n)$（退化成链表），平均为 $\mathcal{O}(\log n)$（平衡树）。
 
+#### 前序遍历使用栈的模拟
+
+前序遍历使用栈模拟的关键在于：因为前序遍历顺序是根-左-右，而栈是后进先出（LIFO），为了保证左子节点先被访问，必须先将右子节点压入栈，再压入左子节点。这样出栈时，左子节点先访问，匹配前序遍历顺序。
+
+**模拟步骤**
+
+1. 创建一个栈，将根节点压入栈。
+2. 当栈不为空时，弹出栈顶节点，并访问它。
+3. 如果该节点有右子节点，先将右子节点压入栈。
+4. 如果该节点有左子节点，再将左子节点压入栈。
+5. 重复步骤 2-4，直到栈空。
+
+```java
+public void preorderIterative(TreeNode root) {
+    if (root == null) return;
+    Stack<TreeNode> stack = new Stack<>();
+    stack.push(root);
+    while (!stack.isEmpty()) {
+        TreeNode node = stack.pop();
+        System.out.println(node.val); // 访问节点
+        if (node.right != null) stack.push(node.right); // 先压右子节点
+        if (node.left != null) stack.push(node.left);   // 再压左子节点
+    }
+}
+```
+
+**关键点总结**
+
+* 栈保证访问顺序，先入后出。
+* 先压右子节点，再压左子节点，确保左子节点先弹出访问。
+* 时间复杂度为 $\mathcal{O}(n)$，空间复杂度最坏 $\mathcal{O}(n)$。
+
+### 例 1：「力扣」第 144 题：[二叉树的前序遍历](https://leetcode.cn/problems/binary-tree-preorder-traversal/description/)
+
+#### 代码实现
+
+```java
+public class BinaryTreePreorderTraversal {
+    public List<Integer> preorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        if (root == null) return res;
+        Deque<TreeNode> stack = new LinkedList<>();
+        stack.push(root);
+        while (!stack.isEmpty()) {
+            TreeNode node = stack.pop();
+            res.add(node.val);
+            if (node.right != null) stack.push(node.right);
+            if (node.left != null) stack.push(node.left);
+        }
+        return res;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度为 $\mathcal{O}(n)$，其中 $n$ 是节点总数，每个节点入栈和出栈各一次。\
+* 空间复杂度为 $\mathcal{O}(n)$，最坏情况下（如链状二叉树）栈中最多保存所有节点。
+
 ---
 
 **[返回](../README.md)**
