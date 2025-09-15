@@ -45,6 +45,14 @@
     * [二叉树的前序遍历](#二叉树的前序遍历)
       * [代码示例（递归版）](#代码示例递归版)
       * [复杂度分析](#复杂度分析-5)
+      * [前序遍历使用栈的模拟](#前序遍历使用栈的模拟)
+    * [例 1：「力扣」第 144 题：二叉树的前序遍历](#例-1力扣第-144-题二叉树的前序遍历)
+      * [代码实现](#代码实现-5)
+      * [复杂度分析](#复杂度分析-6)
+    * [二叉树的中序遍历](#二叉树的中序遍历)
+      * [递归实现](#递归实现)
+      * [迭代实现（基于栈）](#迭代实现基于栈)
+      * [Morris 遍历](#morris-遍历)
 <!-- TOC -->
 
 # 二叉树
@@ -515,6 +523,8 @@ public class BinaryTreeZigzagLevelOrderTraversal {
 
 $$\text{preorder}(node) = \begin{cases} \text{访问} \ node, \\\ \text{preorder}(node.left), \\\ \text{preorder}(node.right) \end{cases}$$
 
+![](img/1600918132-VIgfpr-11-02-01-preorder-traversal-use-stack.gif)
+
 #### 代码示例（递归版）
 
 ```java
@@ -589,8 +599,124 @@ public class BinaryTreePreorderTraversal {
 
 #### 复杂度分析
 
-* 时间复杂度为 $\mathcal{O}(n)$，其中 $n$ 是节点总数，每个节点入栈和出栈各一次。\
+* 时间复杂度为 $\mathcal{O}(n)$，其中 $n$ 是节点总数，每个节点入栈和出栈各一次。
 * 空间复杂度为 $\mathcal{O}(n)$，最坏情况下（如链状二叉树）栈中最多保存所有节点。
+
+### 二叉树的中序遍历
+
+二叉树中序遍历按“左子树 → 根节点 → 右子树”的顺序访问所有节点，常见实现有递归、基于栈的迭代和 Morris 遍历，三者的时间复杂度均为 $\mathcal{O}(n)$，空间复杂度分别为 $\mathcal{O}(h)$（递归/迭代）和 $\mathcal{O}(1)$（Morris）。
+
+![](img/1600841382-mXqJlI-11-02-01.gif)
+
+#### 递归实现
+
+递归方法直接反映中序遍历定义：
+
+* 终止条件：当前节点为空时返回
+* 递归遍历左子树
+* 访问当前节点
+* 递归遍历右子树
+
+```java
+public class Solution {
+    public List<Integer> inorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        inorder(root, res);
+        return res;
+    }
+
+    private void inorder(TreeNode node, List<Integer> res) {
+        if (node == null) return;
+        inorder(node.left, res);
+        res.add(node.val);
+        inorder(node.right, res);
+    }
+}
+```
+
+时间复杂度： $\mathcal{O}(n)$；\
+空间复杂度：递归调用栈深度最坏为树高， $\mathcal{O}(h)$。
+
+#### 迭代实现（基于栈）
+
+利用显式栈模拟递归调用栈：
+
+1. 从根节点开始，将所有左子节点入栈
+2. 栈顶节点出栈并访问
+3. 将该节点的右子树作为新的当前节点，重复上述过程
+
+```java
+public class Solution {
+    public List<Integer> inorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        Deque<TreeNode> stack = new ArrayDeque<>();
+        TreeNode curr = root;
+        while (curr != null || !stack.isEmpty()) {
+            while (curr != null) {
+                stack.push(curr);
+                curr = curr.left;
+            }
+            curr = stack.pop();
+            res.add(curr.val);
+            curr = curr.right;
+        }
+        return res;
+    }
+}
+```
+
+时间复杂度： $\mathcal{O}(n)$；\
+空间复杂度：显式栈最坏存储路径节点， $\mathcal{O}(h)$。
+
+#### Morris 遍历
+
+Morris 遍历通过在树中临时建立线程链接，避免栈或递归：
+
+* 若节点无左子树，访问并转向右子树
+* 若有左子树，找到左子树的最右节点（前驱）
+    * 若前驱节点右指针为空，令其指向当前节点，转向左子树
+    * 否则恢复前驱右指针为空，访问当前节点，转向右子树
+
+```java
+public class Solution {
+    public List<Integer> inorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        TreeNode curr = root;
+        while (curr != null) {
+            if (curr.left == null) {
+                res.add(curr.val);
+                curr = curr.right;
+            } else {
+                TreeNode pred = curr.left;
+                while (pred.right != null && pred.right != curr) {
+                    pred = pred.right;
+                }
+                if (pred.right == null) {
+                    pred.right = curr;
+                    curr = curr.left;
+                } else {
+                    pred.right = null;
+                    res.add(curr.val);
+                    curr = curr.right;
+                }
+            }
+        }
+        return res;
+    }
+}
+```
+
+* 当不存在左子树时，直接访问节点并右移。
+* 当存在左子树时，第一次遇到前驱时建线索并下移左子树；第二次遇到前驱时说明左子树已遍历完，需拆线索并访问当前节点。
+
+**复杂度分析**
+
+时间复杂度为 $\mathcal{O}(n)$，因为每个节点最多被访问和修改指针两次；\
+空间复杂度为 $\mathcal{O}(1)$，仅在树内部临时改动指针，无额外数据结构。
+
+**树结构恢复**
+
+在第二次遇到前驱节点时，代码中有 `pred.right = null` 的操作保证了线索被拆除，最终 Morris 遍历结束后，树的结构与初始保持一致。
 
 ---
 
