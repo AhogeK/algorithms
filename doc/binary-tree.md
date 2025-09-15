@@ -46,13 +46,12 @@
       * [代码示例（递归版）](#代码示例递归版)
       * [复杂度分析](#复杂度分析-5)
       * [前序遍历使用栈的模拟](#前序遍历使用栈的模拟)
-    * [例 1：「力扣」第 144 题：二叉树的前序遍历](#例-1力扣第-144-题二叉树的前序遍历)
-      * [代码实现](#代码实现-5)
-      * [复杂度分析](#复杂度分析-6)
+      * [例 1：「力扣」第 144 题：二叉树的前序遍历](#例-1力扣第-144-题二叉树的前序遍历)
     * [二叉树的中序遍历](#二叉树的中序遍历)
       * [递归实现](#递归实现)
       * [迭代实现（基于栈）](#迭代实现基于栈)
       * [Morris 遍历](#morris-遍历)
+      * [例 2：「力扣」第 94 题：二叉树的中序遍历](#例-2力扣第-94-题二叉树的中序遍历)
 <!-- TOC -->
 
 # 二叉树
@@ -575,9 +574,9 @@ public void preorderIterative(TreeNode root) {
 * 先压右子节点，再压左子节点，确保左子节点先弹出访问。
 * 时间复杂度为 $\mathcal{O}(n)$，空间复杂度最坏 $\mathcal{O}(n)$。
 
-### 例 1：「力扣」第 144 题：[二叉树的前序遍历](https://leetcode.cn/problems/binary-tree-preorder-traversal/description/)
+#### 例 1：「力扣」第 144 题：[二叉树的前序遍历](https://leetcode.cn/problems/binary-tree-preorder-traversal/description/)
 
-#### 代码实现
+**代码实现**
 
 ```java
 public class BinaryTreePreorderTraversal {
@@ -597,7 +596,7 @@ public class BinaryTreePreorderTraversal {
 }
 ```
 
-#### 复杂度分析
+**复杂度分析**
 
 * 时间复杂度为 $\mathcal{O}(n)$，其中 $n$ 是节点总数，每个节点入栈和出栈各一次。
 * 空间复杂度为 $\mathcal{O}(n)$，最坏情况下（如链状二叉树）栈中最多保存所有节点。
@@ -717,6 +716,42 @@ public class Solution {
 **树结构恢复**
 
 在第二次遇到前驱节点时，代码中有 `pred.right = null` 的操作保证了线索被拆除，最终 Morris 遍历结束后，树的结构与初始保持一致。
+
+#### 例 2：「力扣」第 94 题：二叉树的中序遍历
+
+**代码实现**
+
+```java
+public class BinaryTreeInorderTraversal {
+    public List<Integer> inorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        TreeNode curr = root;
+        while (curr != null) {
+            if (curr.left == null) {
+                res.add(curr.val);
+                curr = curr.right;
+            } else {
+                TreeNode pre = curr.left;
+                while (pre.right != null && pre.right != curr) pre = pre.right;
+                if (pre.right == null) {
+                    pre.right = curr;
+                    curr = curr.left;
+                } else {
+                    pre.right = null;
+                    res.add(curr.val);
+                    curr = curr.right;
+                }
+            }
+        }
+        return res;
+    }
+}
+```
+
+**复杂度分析**
+
+时间复杂度： $\mathcal{O}(n)$，每个节点最多被遍历两次。\
+空间复杂度： $\mathcal{O}(1)$（忽略输出空间，仅指针改写，无额外栈或递归）。
 
 ---
 
