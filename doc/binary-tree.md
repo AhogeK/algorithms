@@ -52,6 +52,10 @@
       * [迭代实现（基于栈）](#迭代实现基于栈)
       * [Morris 遍历](#morris-遍历)
       * [例 2：「力扣」第 94 题：二叉树的中序遍历](#例-2力扣第-94-题二叉树的中序遍历)
+    * [二叉树的后续遍历](#二叉树的后续遍历)
+      * [遍历规则](#遍历规则)
+      * [递归实现](#递归实现-1)
+      * [迭代实现](#迭代实现)
 <!-- TOC -->
 
 # 二叉树
@@ -752,6 +756,110 @@ public class BinaryTreeInorderTraversal {
 
 时间复杂度： $\mathcal{O}(n)$，每个节点最多被遍历两次。\
 空间复杂度： $\mathcal{O}(1)$（忽略输出空间，仅指针改写，无额外栈或递归）。
+
+### 二叉树的后续遍历
+
+二叉树的后序遍历是一种深度优先遍历方式，先递归遍历左子树，然后遍历右子树，最后访问根节点，常用于计算表达式树或删除树节点等场景。
+
+#### 遍历规则
+
+后序遍历的顺序为：左 → 右 → 根。例如，对于一个简单的二叉树根节点为 $1$，左子节点为 $2$，右子节点为 $3$，遍历结果将是 $2, 3, 1$。
+
+![](img/1600918252-WWNUFi-11-02-03-postorder-traversal-use-stack.gif)
+
+#### 递归实现
+
+```java
+public class TreeNode {
+    int val;
+    TreeNode left;
+    TreeNode right;
+    TreeNode(int x) { val = x; }
+}
+
+public class PostorderTraversal {
+    public List<Integer> postorderTraversal(TreeNode root) {
+        List<Integer> result = new ArrayList<>();
+        postorder(root, result);
+        return result;
+    }
+
+    private void postorder(TreeNode node, List<Integer> result) {
+        if (node == null) return;
+        postorder(node.left, result);
+        postorder(node.right, result);
+        result.add(node.val);
+    }
+}
+```
+
+**时间复杂度**
+
+二叉树后序遍历递归实现的时间复杂度为 $\mathcal{O}(n)$，其中 $n$是节点数。\
+每个节点被访问一次，总操作线性于树规模，是最优的。
+
+**空间复杂度**
+
+空间复杂度平均为 $\mathcal{O}(h)$，其中 $h$是树高。\
+最坏情况下（如偏斜树）为 $\mathcal{O}(n)$，主要由递归栈引起。
+
+#### 迭代实现
+
+```java
+public class PostorderTraversalImproved {
+    public List<Integer> postorderTraversal(TreeNode root) {
+        List<Integer> result = new ArrayList<>();
+        if (root == null) return result;
+
+        Deque<TreeNode> stack = new ArrayDeque<>();
+        stack.push(root);
+
+        while (!stack.isEmpty()) {
+            TreeNode node = stack.pop();
+            result.add(node.val);
+
+            if (node.left != null) {
+                stack.push(node.left);
+            }
+            if (node.right != null) {
+                stack.push(node.right);
+            }
+        }
+
+        Collections.reverse(result);
+        return result;
+    }
+}
+```
+
+**时间复杂度**
+
+迭代实现的时间复杂度为 $\mathcal{O}(n)$，每个节点入栈出栈一次，反转操作线性。
+
+**空间复杂度**
+
+空间复杂度平均为 $\mathcal{O}(h)$（树高 $h$），最坏为 $\mathcal{O}(n)$（栈深度主导）。
+
+**后序遍历是非常重要的解决二叉树问题的思想**：后序遍历允许先处理子树信息，再汇总到根节点，适合计算依赖子树结果的问题，如树高或平衡检查。
+
+核心原因
+
+后序遍历的顺序（左-右-根）确保在访问根时，子树已完全处理完毕，便于自底向上构建解决方案：
+
+* 子树信息向上聚合：例如，计算树高时，先递归求左右子树高度，再取最大值加1。
+* 避免多次遍历：单次后序可高效解决复杂问题，而前序或中序可能需额外存储或多次扫描。
+
+典型应用示例
+
+* **计算树高**：伪代码中，先求子树高，再计算根高。
+
+$$\begin{aligned} &\textbf{Function} \text{ Height}(node) \\\ &\qquad \textbf{if } node = \text{null} \textbf{ then return } 0 \\\ &\qquad \text{leftH} \gets \text{Height}(node.left) \\\ &\qquad \text{rightH} \gets \text{Height}(node.right) \\\ &\qquad \textbf{return } \max(\text{leftH}, \text{rightH}) + 1 \end{aligned}$$
+
+* **检查平衡树**：后序计算高度差，判断是否平衡。
+* **树序列化**：后序序列易于重建树（如反序列化）。
+
+这种思想在动态规划式树问题中尤为高效，时间通常为 $\mathcal{O}(n)$，避免冗余计算。\
+与其他遍历比较，前序适合自顶向下（如复制树），但后序更擅长远景聚合。
 
 ---
 
