@@ -56,6 +56,7 @@
       * [遍历规则](#遍历规则)
       * [递归实现](#递归实现-1)
       * [迭代实现](#迭代实现)
+      * [例 3：「力扣」第 145 题：二叉树的后序遍历](#例-3力扣第-145-题二叉树的后序遍历)
 <!-- TOC -->
 
 # 二叉树
@@ -423,6 +424,7 @@ public class CongShangDaoXiaDaYinErChaShuLcof {
 * 若当前层是需要反转的层，则在将该层结果加入总表前，调用反转操作（或使用双端队列插入顺序控制兼容）。
 
 可选优化：
+
 * 利用 `LinkedList`，根据层数决定是**尾插**还是**头插**当前层值，从而省去反转时间。
 
 #### 知识点与技巧
@@ -607,7 +609,8 @@ public class BinaryTreePreorderTraversal {
 
 ### 二叉树的中序遍历
 
-二叉树中序遍历按“左子树 → 根节点 → 右子树”的顺序访问所有节点，常见实现有递归、基于栈的迭代和 Morris 遍历，三者的时间复杂度均为 $\mathcal{O}(n)$，空间复杂度分别为 $\mathcal{O}(h)$（递归/迭代）和 $\mathcal{O}(1)$（Morris）。
+二叉树中序遍历按“左子树 → 根节点 → 右子树”的顺序访问所有节点，常见实现有递归、基于栈的迭代和 Morris
+遍历，三者的时间复杂度均为 $\mathcal{O}(n)$，空间复杂度分别为 $\mathcal{O}(h)$（递归/迭代）和 $\mathcal{O}(1)$（Morris）。
 
 ![](img/1600841382-mXqJlI-11-02-01.gif)
 
@@ -763,7 +766,8 @@ public class BinaryTreeInorderTraversal {
 
 #### 遍历规则
 
-后序遍历的顺序为：左 → 右 → 根。例如，对于一个简单的二叉树根节点为 $1$，左子节点为 $2$，右子节点为 $3$，遍历结果将是 $2, 3, 1$。
+后序遍历的顺序为：左 → 右 → 根。例如，对于一个简单的二叉树根节点为 $1$，左子节点为 $2$，右子节点为 $3$
+，遍历结果将是 $2, 3, 1$。
 
 ![](img/1600918252-WWNUFi-11-02-03-postorder-traversal-use-stack.gif)
 
@@ -774,7 +778,10 @@ public class TreeNode {
     int val;
     TreeNode left;
     TreeNode right;
-    TreeNode(int x) { val = x; }
+
+    TreeNode(int x) {
+        val = x;
+    }
 }
 
 public class PostorderTraversal {
@@ -860,6 +867,33 @@ $$\begin{aligned} &\textbf{Function} \text{ Height}(node) \\\ &\qquad \textbf{if
 
 这种思想在动态规划式树问题中尤为高效，时间通常为 $\mathcal{O}(n)$，避免冗余计算。\
 与其他遍历比较，前序适合自顶向下（如复制树），但后序更擅长远景聚合。
+
+#### 例 3：「力扣」第 145 题：[二叉树的后序遍历](https://leetcode.cn/problems/binary-tree-postorder-traversal/description/)
+
+**代码实现**
+
+```java
+public class BinaryTreePostorderTraversal {
+    public List<Integer> postorderTraversal(TreeNode root) {
+        List<Integer> result = new ArrayList<>();
+        postorder(root, result);
+        return result;
+    }
+
+    private void postorder(TreeNode node, List<Integer> result) {
+        if (node == null) return;
+        postorder(node.left, result);
+        postorder(node.right, result);
+        result.add(node.val);
+    }
+}
+```
+
+**复杂度分析**
+
+时间复杂度： 算法通过递归访问每个节点一次（包括左子树、右子树和根的添加操作），总操作次数与节点数线性相关，最坏情况下遍历所有 $n$个节点，故为 $\mathcal{O}(n)$。
+
+空间复杂度： 结果列表`result`存储所有 $n$个节点值，占用 $\mathcal{O}(n)$空间；此外，递归栈深度最坏为 $\mathcal{O}(n)$（树退化为链），平均为 $\mathcal{O}(\log n)$（平衡树），总体空间为 $\mathcal{O}(n)$。
 
 ---
 
