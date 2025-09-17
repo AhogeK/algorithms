@@ -66,6 +66,11 @@
       * [算法思路](#算法思路-6)
       * [代码实现](#代码实现-6)
       * [复杂度分析](#复杂度分析-7)
+    * [完成「力扣」第 199 题：二叉树的右视图](#完成力扣第-199-题二叉树的右视图)
+      * [算法思路](#算法思路-7)
+      * [核心知识点技巧](#核心知识点技巧)
+      * [代码实现](#代码实现-7)
+      * [复杂度分析](#复杂度分析-8)
 <!-- TOC -->
 
 # 二叉树
@@ -994,6 +999,54 @@ public class SymmetricTree {
 
 * 空间复杂度：\
   最坏情况树退化为链表 → 递归深度 $\mathcal{O}(n)$，否则为平均树高 $\mathcal{O}(\log n)$
+
+### 完成「力扣」第 199 题：[二叉树的右视图](https://leetcode.cn/problems/binary-tree-right-side-view/description/)
+
+#### 算法思路
+
+**核心思路：层次遍历（BFS）**
+
+1. 使用队列进行**层次遍历**。
+2. 每一层遍历时，将该层所有节点依次出队，同时把左右孩子入队。
+3. 在处理完该层时，最后一个出队的节点就是该层的最右侧节点，记录下来。
+4. 遍历结束后，结果数组即为从上到下的右视图。
+
+#### 核心知识点技巧
+
+* **队列 BFS**：典型的层序遍历操作。
+* **层控制技巧**：通过队列长度（即当前层节点数）来划分层，确保能够在每层末尾找到那个最右节点。
+* **和 DFS 对比**：完全可以用 DFS（优先右子树）求解，但在竞赛中 BFS 写法更快且不易出错。
+
+#### 代码实现
+
+```java
+public class BinaryTreeRightSideView {
+    public List<Integer> rightSideView(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        if (root == null) return res;
+        Queue<TreeNode> q = new LinkedList<>();
+        q.offer(root);
+        while (!q.isEmpty()) {
+            int size = q.size();
+            for (int i = 0; i < size; i++) {
+                TreeNode node = q.poll();
+                if (i == size - 1) res.add(node.val);
+                if (node.left != null) q.offer(node.left);
+                if (node.right != null) q.offer(node.right);
+            }
+        }
+        return res;
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**：\
+  每个节点进队出队各一次，整体为 $\mathcal{O}(n)$，其中 $n$ 为节点总数。
+
+* **空间复杂度**：\
+  队列最大可能存放一层节点，最差为完全二叉树的最后一层，大小约为 $\mathcal{O}(n)$。
 
 ---
 
