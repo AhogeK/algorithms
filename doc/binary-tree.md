@@ -62,6 +62,10 @@
       * [核心知识与技巧](#核心知识与技巧-1)
       * [代码实现](#代码实现-5)
       * [复杂度分析](#复杂度分析-6)
+    * [完成「力扣」第 101 题：对称二叉树](#完成力扣第-101-题对称二叉树)
+      * [算法思路](#算法思路-6)
+      * [代码实现](#代码实现-6)
+      * [复杂度分析](#复杂度分析-7)
 <!-- TOC -->
 
 # 二叉树
@@ -943,6 +947,53 @@ public class SameTree {
 * **空间复杂度**：递归栈深度取决于树的高度 $h$。
     * 最好情况（平衡树）： $\mathcal{O}(\log n)$
     * 最坏情况（全链式树）： $\mathcal{O}(n)$
+
+### 完成「力扣」第 101 题：[对称二叉树](https://leetcode.cn/problems/symmetric-tree/description/)
+
+#### 算法思路
+
+**递归法（核心解法）**
+
+递归法是最直观且速度最快的思维方式。要判断树是否对称，就是递归判断根节点的左子树 `L` 与右子树 `R` 是否满足镜像。
+
+定义函数 `isMirror(TreeNode p, TreeNode q)`，语义是“判断两棵子树是否镜像”：
+
+1. **基线条件**：
+    * 若 `p == null && q == null` → 返回 `true`
+    * 若 `p == null || q == null` → 返回 `false`
+    * 若 `p.val != q.val` → 返回 `false`
+2. **递归调用**：\
+   检查 `p.left` 对应 `q.right`，以及 `p.right` 对应 `q.left`，都要成立。
+ 
+   $$\text{isMirror}(p, q) = \text{isMirror}(p.left, q.right) \land \text{isMirror}(p.right, q.left)$$
+
+这样写相当简洁直接，且时空复杂度最优（不需要额外数据结构）。
+
+#### 代码实现
+
+```java
+public class SymmetricTree {
+    public boolean isSymmetric(TreeNode root) {
+        if (root == null) return true;
+        return isMirror(root.left, root.right);
+    }
+
+    private boolean isMirror(TreeNode p, TreeNode q) {
+        if (p == null && q == null) return true;
+        if (p == null || q == null) return false;
+        if (p.val != q.val) return false;
+        return isMirror(p.left, q.right) && isMirror(p.right, q.left);
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度：\
+  每个节点最多访问一次 → $\mathcal{O}(n)$
+
+* 空间复杂度：\
+  最坏情况树退化为链表 → 递归深度 $\mathcal{O}(n)$，否则为平均树高 $\mathcal{O}(\log n)$
 
 ---
 
