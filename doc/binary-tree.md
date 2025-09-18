@@ -76,6 +76,10 @@
       * [核心知识点技巧](#核心知识点技巧-1)
       * [代码实现](#代码实现-8)
       * [复杂度分析](#复杂度分析-9)
+    * [完成「力扣」第 110 题：平衡二叉树](#完成力扣第-110-题平衡二叉树)
+      * [算法思路](#算法思路-9)
+      * [代码实现](#代码实现-9)
+      * [复杂度分析](#复杂度分析-10)
 <!-- TOC -->
 
 # 二叉树
@@ -1105,6 +1109,49 @@ public class InvertBinaryTree {
   故空间复杂度为\
   $\mathcal{O}(h)$\
   其中 $h$ 为树高。
+
+### 完成「力扣」第 110 题：[平衡二叉树](https://leetcode.cn/problems/balanced-binary-tree/description/)
+
+#### 算法思路
+
+**后续递归一次遍历**
+
+1. 使用 DFS 后序遍历：先算子树高度，再判断平衡性
+2. 在计算节点高度的同时，如果发现子树不平衡，立即返回特殊值（如 -1）剪枝终止
+3. 返回值约定：
+    * 若当前子树平衡，返回真实高度
+    * 若不平衡，直接返回 -1 上浮
+这样保证每个节点最多被访问一次，总体只需一次 DFS。
+
+#### 代码实现
+
+```java
+public class BalancedBinaryTree {
+    public boolean isBalanced(TreeNode root) {
+        if (root == null) return true;
+        return height(root) != -1;
+    }
+
+    private int height(TreeNode node) {
+        if (node == null) return 0;
+        int left = height(node.left);
+        if (left == -1) return -1;
+        int right = height(node.right);
+        if (right == -1) return -1;
+        if (Math.abs(left - right) > 1) return -1;
+        return Math.max(left, right) + 1;
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**：\
+  每个节点访问一次，时间为\
+  $\mathcal{O}(n)$
+
+* **空间复杂度**：\
+  递归栈深度为树高 $h$，最坏情况下链式树 $\mathcal{O}(n)$，最优完全平衡树 $\mathcal{O}(\log n)$。
 
 ---
 
