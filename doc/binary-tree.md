@@ -100,6 +100,10 @@
     * [完成「力扣」第 222 题：完全二叉树的节点个数](#完成力扣第-222-题完全二叉树的节点个数)
       * [算法思路](#算法思路-14)
       * [复杂度分析](#复杂度分析-16)
+    * [完成「力扣」第 124 题：二叉树中的最大路径和](#完成力扣第-124-题二叉树中的最大路径和)
+      * [算法思路](#算法思路-15)
+      * [代码实现](#代码实现-13)
+      * [复杂度分析](#复杂度分析-17)
 <!-- TOC -->
 
 # 二叉树
@@ -1372,6 +1376,53 @@ public class CountCompleteTreeNodes {
 
 * **空间复杂度**：\
   递归栈空间取决于树高，约为 $\mathcal{O}(\log n)$。
+
+### 完成「力扣」第 124 题：[二叉树中的最大路径和](https://leetcode.cn/problems/binary-tree-maximum-path-sum/description/)
+
+#### 算法思路
+
+采用**后序遍历 + 递归动态规划**思想：
+
+1. **定义递归函数**返回某节点为终点路径的最大贡献值，贡献值定义为：
+    * 节点值加上左右子树中最大贡献路径（若为负数则不接）。
+2. **全局变量**跟踪迄今遇到的最大路径和。
+3. 递归过程中计算当前节点路径和包括三种情况：
+    * 仅当前节点
+    * 当前节点 + 左子树最大贡献
+    * 当前节点 + 右子树最大贡献
+    * 当前节点 + 左子树最大贡献 + 右子树最大贡献（形成以当前节点为“拐点”的路径）\
+      全局最大值更新为四者最大值之一。
+4. 递归返回值应为当前节点值加上左、右子树贡献中较大的一个，代表路径持续向上贡献最大值（只可选择一个分支）。
+
+#### 代码实现
+
+```java
+public class BinaryTreeMaximumPathSum {
+    private int maxSum = Integer.MIN_VALUE;
+
+    public int maxPathSum(TreeNode root) {
+        dfs(root);
+        return maxSum;
+    }
+
+    private int dfs(TreeNode node) {
+        if (node == null) return 0;
+        int leftGain = Math.max(dfs(node.left), 0);
+        int rightGain = Math.max(dfs(node.right), 0);
+        int currentMaxPath = node.val + leftGain + rightGain;
+        maxSum = Math.max(maxSum, currentMaxPath);
+        return node.val + Math.max(leftGain, rightGain);
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**：\
+  每个节点访问且递归计算一次，整体为 $\mathcal{O}(n)$，其中 $n$ 是节点数。
+
+* **空间复杂度**：\
+  递归深度取决于树高度，最坏情况下为 $\mathcal{O}(n)$，平均为 $\mathcal{O}(\log n)$。
 
 ---
 
