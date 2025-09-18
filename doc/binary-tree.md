@@ -93,6 +93,10 @@
       * [算法思路](#算法思路-12)
       * [代码实现](#代码实现-11)
       * [复杂度分析](#复杂度分析-14)
+    * [完成「力扣」第 129 题：求根到叶子节点数字之和](#完成力扣第-129-题求根到叶子节点数字之和)
+      * [算法思路](#算法思路-13)
+      * [代码实现](#代码实现-12)
+      * [复杂度分析](#复杂度分析-15)
 <!-- TOC -->
 
 # 二叉树
@@ -1282,6 +1286,41 @@ public class PathSum {
   每个节点访问一次，最多遍历整棵树。
 * **空间复杂度**： $\mathcal{O}(h)$\
   递归栈深度与树高相关。最坏情况（链状树） $h = n$，平均情况下 $h=\log n$。
+
+### 完成「力扣」第 129 题：[求根到叶子节点数字之和](https://leetcode.cn/problems/sum-root-to-leaf-numbers/description/)
+
+#### 算法思路
+
+采用深度优先搜索（DFS）通过递归实现遍历：
+
+1. **递归参数设计**：每次递归带上当前路径数字 `curSum`，初始为 0。
+2. **路径数字更新**：遍历到当前节点时，计算 `curSum = curSum * 10 + node.val`，因为每往下一层，数字向左移一位再加新节点。
+3. **叶节点判断**：到达叶节点时，累加当前路径数字到结果。
+4. **递归返回**：递归遍历左右子节点，最后返回全部路径的和。
+
+此方法无需额外数据结构，空间使用由递归栈决定。
+
+#### 代码实现
+
+```java
+public class SumRootToLeafNumbers {
+    public int sumNumbers(TreeNode root) {
+        return dfs(root, 0);
+    }
+
+    private int dfs(TreeNode node, int curSum) {
+        if (node == null) return 0;
+        curSum = curSum * 10 + node.val;
+        if (node.left == null && node.right == null) return curSum;
+        return dfs(node.left, curSum) + dfs(node.right, curSum);
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**：遍历所有节点，故为 $\mathcal{O}(n)$，其中 $n$ 是节点数。
+* **空间复杂度**：递归栈深度最大为树深度 $d$，所以为 $\mathcal{O}(d)$，最坏情况下为 $\mathcal{O}(n)$（极端退化为链表）。
 
 ---
 
