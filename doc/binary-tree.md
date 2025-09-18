@@ -84,6 +84,11 @@
       * [算法思路](#算法思路-10)
       * [复杂度分析](#复杂度分析-11)
   * [复杂度分析](#复杂度分析-12)
+    * [完成「力扣」第 111 题：二叉树的最小深度](#完成力扣第-111-题二叉树的最小深度)
+      * [算法思路](#算法思路-11)
+      * [正确解法：后序递归 DFS](#正确解法后序递归-dfs)
+      * [代码实现](#代码实现-10)
+      * [复杂度分析](#复杂度分析-13)
 <!-- TOC -->
 
 # 二叉树
@@ -1192,6 +1197,50 @@ public class MaximumDepthOfBinaryTree {
 * **空间复杂度**：
     * DFS 递归栈深度 $\mathcal{O}(h)$ （h 为树高，最坏 $\mathcal{O}(n)$）
     * BFS 队列存储一层的节点，最坏 $\mathcal{O}(n)$
+
+### 完成「力扣」第 111 题：[二叉树的最小深度](https://leetcode.cn/problems/minimum-depth-of-binary-tree/description/)
+
+#### 算法思路
+
+**常见错误**
+
+很多人会写成：
+
+```java
+return Math.min(minDepth(root.left), minDepth(root.right)) + 1;
+```
+
+这样的错误在于：如果一边为空，这一边深度为 0，会导致结果错误。
+
+#### 正确解法：后序递归 DFS
+
+1. 若根节点为空，返回 0；
+
+2. 若其中一个子树为空，必须返回非空子树的深度 + 1；
+
+3. 若左右子树都非空，返回最小值 + 1。
+
+公式：
+
+$$\text{minDepth(root)} = \begin{cases} 0, & \text{root == null} \\\ 1, & \text{root 为叶子} \\\ \min(\text{minDepth(root.left)}, \ \text{minDepth(root.right)}) + 1, & \text{左右非空} \\\ \max(\text{minDepth(root.left)}, \ \text{minDepth(root.right)}) + 1, & \text{一边为空} \end{cases}$$
+
+#### 代码实现
+
+```java
+public class MinimumDepthOfBinaryTree {
+    public int minDepth(TreeNode root) {
+        if (root == null) return 0;
+        if (root.left == null) return minDepth(root.right) + 1;
+        if (root.right == null) return minDepth(root.left) + 1;
+        return Math.min(minDepth(root.left), minDepth(root.right)) + 1;
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**：每个节点访问一次 → $\mathcal{O}(n)$
+* **空间复杂度**：递归栈深度依赖树高 $h$，最坏链式树 → $\mathcal{O}(n)$，平衡树 → $\mathcal{O}(\log n)$
 
 ---
 
