@@ -89,6 +89,10 @@
       * [正确解法：后序递归 DFS](#正确解法后序递归-dfs)
       * [代码实现](#代码实现-10)
       * [复杂度分析](#复杂度分析-13)
+    * [完成「力扣」第 112 题：路径总和](#完成力扣第-112-题路径总和)
+      * [算法思路](#算法思路-12)
+      * [代码实现](#代码实现-11)
+      * [复杂度分析](#复杂度分析-14)
 <!-- TOC -->
 
 # 二叉树
@@ -1241,6 +1245,43 @@ public class MinimumDepthOfBinaryTree {
 
 * **时间复杂度**：每个节点访问一次 → $\mathcal{O}(n)$
 * **空间复杂度**：递归栈深度依赖树高 $h$，最坏链式树 → $\mathcal{O}(n)$，平衡树 → $\mathcal{O}(\log n)$
+
+### 完成「力扣」第 112 题：[路径总和](https://leetcode.cn/problems/path-sum/description/)
+
+#### 算法思路
+
+**深度优先搜索 (DFS)**
+
+* 从根节点开始，不断向左右子树递归。
+* 每访问一个节点，把 `targetSum` 减去该节点的值。
+* 当走到叶子节点时，若此时剩余的 `targetSum` 恰好等于叶子节点的值，则路径成立。
+* 一旦找到一条合法路径，直接返回 `true`。
+
+**算法核心逻辑**
+
+* 如果当前节点为空，直接返回 `false`。
+* 如果当前节点是叶子节点，检查是否满足 `剩余目标和 == 当前节点值`。
+* 否则，将 `targetSum - 当前节点值`，然后继续递归左右子树。
+
+#### 代码实现
+
+```java
+public class PathSum {
+    public boolean hasPathSum(TreeNode root, int targetSum) {
+        if (root == null) return false;
+        if (root.left == null && root.right == null) return targetSum == root.val;
+        int remain = targetSum - root.val;
+        return hasPathSum(root.left, remain) || hasPathSum(root.right, remain);
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}(n)$\
+  每个节点访问一次，最多遍历整棵树。
+* **空间复杂度**： $\mathcal{O}(h)$\
+  递归栈深度与树高相关。最坏情况（链状树） $h = n$，平均情况下 $h=\log n$。
 
 ---
 
