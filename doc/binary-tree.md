@@ -80,6 +80,10 @@
       * [算法思路](#算法思路-9)
       * [代码实现](#代码实现-9)
       * [复杂度分析](#复杂度分析-10)
+    * [完成「力扣」第 104 题：二叉树的最大深度](#完成力扣第-104-题二叉树的最大深度)
+      * [算法思路](#算法思路-10)
+      * [复杂度分析](#复杂度分析-11)
+  * [复杂度分析](#复杂度分析-12)
 <!-- TOC -->
 
 # 二叉树
@@ -914,9 +918,12 @@ public class BinaryTreePostorderTraversal {
 
 **复杂度分析**
 
-时间复杂度： 算法通过递归访问每个节点一次（包括左子树、右子树和根的添加操作），总操作次数与节点数线性相关，最坏情况下遍历所有 $n$个节点，故为 $\mathcal{O}(n)$。
+时间复杂度：
+算法通过递归访问每个节点一次（包括左子树、右子树和根的添加操作），总操作次数与节点数线性相关，最坏情况下遍历所有 $n$
+个节点，故为 $\mathcal{O}(n)$。
 
-空间复杂度： 结果列表`result`存储所有 $n$个节点值，占用 $\mathcal{O}(n)$空间；此外，递归栈深度最坏为 $\mathcal{O}(n)$（树退化为链），平均为 $\mathcal{O}(\log n)$（平衡树），总体空间为 $\mathcal{O}(n)$。
+空间复杂度： 结果列表`result`存储所有 $n$个节点值，占用 $\mathcal{O}(n)$空间；此外，递归栈深度最坏为 $\mathcal{O}(n)$
+（树退化为链），平均为 $\mathcal{O}(\log n)$（平衡树），总体空间为 $\mathcal{O}(n)$。
 
 ### 完成「力扣」第 100 题：[相同的树](https://leetcode.cn/problems/same-tree/description/)
 
@@ -978,7 +985,7 @@ public class SameTree {
     * 若 `p.val != q.val` → 返回 `false`
 2. **递归调用**：\
    检查 `p.left` 对应 `q.right`，以及 `p.right` 对应 `q.left`，都要成立。
- 
+
    $$\text{isMirror}(p, q) = \text{isMirror}(p.left, q.right) \land \text{isMirror}(p.right, q.left)$$
 
 这样写相当简洁直接，且时空复杂度最优（不需要额外数据结构）。
@@ -1121,7 +1128,7 @@ public class InvertBinaryTree {
 3. 返回值约定：
     * 若当前子树平衡，返回真实高度
     * 若不平衡，直接返回 -1 上浮
-这样保证每个节点最多被访问一次，总体只需一次 DFS。
+      这样保证每个节点最多被访问一次，总体只需一次 DFS。
 
 #### 代码实现
 
@@ -1152,6 +1159,39 @@ public class BalancedBinaryTree {
 
 * **空间复杂度**：\
   递归栈深度为树高 $h$，最坏情况下链式树 $\mathcal{O}(n)$，最优完全平衡树 $\mathcal{O}(\log n)$。
+
+### 完成「力扣」第 104 题：[二叉树的最大深度](https://leetcode.cn/problems/maximum-depth-of-binary-tree/description/)
+
+#### 算法思路
+
+**思路核心**
+
+根节点的最大深度 = **左右子树最大深度的较大值 + 1**。\
+因此典型递归公式为：
+
+$$\text{maxDepth(root)} = \max(\text{maxDepth(root.left)}, \text{maxDepth(root.right)}) + 1$$
+
+可用后序遍历(DFS)进行递归计算,速度最快。
+
+```java
+public class MaximumDepthOfBinaryTree {
+    public int maxDepth(TreeNode root) {
+        if (root == null) return 0;
+        int left = maxDepth(root.left);
+        int right = maxDepth(root.right);
+        return Math.max(left, right) + 1;
+    }
+}
+```
+
+#### 复杂度分析
+
+## 复杂度分析
+
+* **时间复杂度**：每个节点访问一次 $\mathcal{O}(n)$
+* **空间复杂度**：
+    * DFS 递归栈深度 $\mathcal{O}(h)$ （h 为树高，最坏 $\mathcal{O}(n)$）
+    * BFS 队列存储一层的节点，最坏 $\mathcal{O}(n)$
 
 ---
 
