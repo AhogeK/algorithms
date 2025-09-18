@@ -97,6 +97,9 @@
       * [算法思路](#算法思路-13)
       * [代码实现](#代码实现-12)
       * [复杂度分析](#复杂度分析-15)
+    * [完成「力扣」第 222 题：完全二叉树的节点个数](#完成力扣第-222-题完全二叉树的节点个数)
+      * [算法思路](#算法思路-14)
+      * [复杂度分析](#复杂度分析-16)
 <!-- TOC -->
 
 # 二叉树
@@ -1321,6 +1324,54 @@ public class SumRootToLeafNumbers {
 
 * **时间复杂度**：遍历所有节点，故为 $\mathcal{O}(n)$，其中 $n$ 是节点数。
 * **空间复杂度**：递归栈深度最大为树深度 $d$，所以为 $\mathcal{O}(d)$，最坏情况下为 $\mathcal{O}(n)$（极端退化为链表）。
+
+### 完成「力扣」第 222 题：[完全二叉树的节点个数](https://leetcode.cn/problems/count-complete-tree-nodes/description/)
+
+#### 算法思路
+
+直接遍历树统计节点是 $\mathcal{O}(n)$ 复杂度，对于节点数可达 $5 \times 10^4$ 的规模效率尚可，但不符合进阶要求。
+
+利用完全二叉树性质进行优化：
+
+1. **高度计算**：
+    * 计算树的左子树的最大深度 `leftDepth`（一直往左走直到空节点算深度）。
+    * 计算树的右子树的最大深度 `rightDepth`。
+2. **比较深度**：
+    * 如果 `leftDepth == rightDepth`，说明左子树是完全二叉树且满的，节点数为 $2^{leftDepth} - 1$，加上根节点，再加右子树递归结果，直接计算无需递归左子树。
+    * 如果 `leftDepth != rightDepth`，说明右子树是完全二叉树且满的，节点数为 $2^{rightDepth} - 1$，加上根节点，再加左子树递归结果。
+     
+该思路每次递归高度计算最多 $\log n$ 层，总复杂度约为 $\mathcal{O}((\log n)^2)$。
+
+```java
+public class CountCompleteTreeNodes {
+    public int countNodes(TreeNode root) {
+        if (root == null) return 0;
+        int leftDepth = getDepth(root.left);
+        int rightDepth = getDepth(root.right);
+        if (leftDepth == rightDepth) return (1 << leftDepth) + countNodes(root.right);
+        else return (1 << rightDepth) + countNodes(root.left);
+    }
+
+    private int getDepth(TreeNode node) {
+        int depth = 0;
+        while (node != null) {
+            node = node.left;
+            depth++;
+        }
+        return depth;
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**：\
+  每层递归调用时，`getDepth` 需要最坏 $\mathcal{O}(\log n)$（计算深度的路径长度）。\
+  递归层数最多为 $\mathcal{O}(\log n)$。\
+  故总体复杂度为 $\mathcal{O}((\log n)^2)$。
+
+* **空间复杂度**：\
+  递归栈空间取决于树高，约为 $\mathcal{O}(\log n)$。
 
 ---
 
