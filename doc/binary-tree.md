@@ -107,6 +107,9 @@
   * [典型问题 1：从前、中序遍历序列构造二叉树](#典型问题-1从前中序遍历序列构造二叉树)
     * [「力扣」第 105 题：从前序与中序遍历序列构造二叉树](#力扣第-105-题从前序与中序遍历序列构造二叉树)
       * [复杂度分析](#复杂度分析-18)
+    * [完成「力扣」第 589 题：N 叉树的前序遍历](#完成力扣第-589-题n-叉树的前序遍历)
+      * [代码实现](#代码实现-14)
+      * [复杂度分析](#复杂度分析-19)
 <!-- TOC -->
 
 # 二叉树
@@ -1467,6 +1470,35 @@ public class ConstructBinaryTreeFromPreorderAndInorderTraversal {
 * **空间复杂度**：
     * 递归栈深度最坏 $\mathcal{O}(n)$（退化链）。
     * HashMap空间 $\mathcal{O}(n)$。
+
+### 完成「力扣」第 589 题：[N 叉树的前序遍历](https://leetcode.cn/problems/n-ary-tree-preorder-traversal/description/)
+
+#### 代码实现
+
+```java
+public class NAryTreePreOrderTraversal {
+    public List<Integer> preorder(Node root) {
+        List<Integer> res = new ArrayList<>();
+        dfs(root, res);
+        return res;
+    }
+
+    private void dfs(Node node, List<Integer> res) {
+        if (node == null) return;
+        res.add(node.val);
+        if (node.children != null)
+            for (Node child : node.children)
+                dfs(child, res);
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**：\
+  遍历所有节点一次，访问时间为 $\mathcal{O}(n)$。
+* **空间复杂度**：\
+  递归栈最大大小为树最大深度，最坏情况下为 $\mathcal{O}(n)$。结果存储空间为 $\mathcal{O}(n)$。
 
 ---
 
