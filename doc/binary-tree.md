@@ -110,6 +110,9 @@
     * [完成「力扣」第 589 题：N 叉树的前序遍历](#完成力扣第-589-题n-叉树的前序遍历)
       * [代码实现](#代码实现-14)
       * [复杂度分析](#复杂度分析-19)
+    * [完成「力扣」第 590 题：N 叉树的后序遍历](#完成力扣第-590-题n-叉树的后序遍历)
+      * [代码实现](#代码实现-15)
+      * [复杂度分析](#复杂度分析-20)
 <!-- TOC -->
 
 # 二叉树
@@ -1489,6 +1492,36 @@ public class NAryTreePreOrderTraversal {
         if (node.children != null)
             for (Node child : node.children)
                 dfs(child, res);
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**：\
+  遍历所有节点一次，访问时间为 $\mathcal{O}(n)$。
+* **空间复杂度**：\
+  递归栈最大大小为树最大深度，最坏情况下为 $\mathcal{O}(n)$。结果存储空间为 $\mathcal{O}(n)$。
+
+### 完成「力扣」第 590 题：[N 叉树的后序遍历](https://leetcode.cn/problems/n-ary-tree-postorder-traversal/description/)
+
+#### 代码实现
+
+```java
+public class NAryTreePostorderTraversal {
+    public List<Integer> postorder(Node root) {
+        List<Integer> res = new ArrayList<>();
+        if (root == null) return res;
+        dfs(root, res);
+        return res;
+    }
+
+    private void dfs(Node node, List<Integer> res) {
+        if (node == null) return;
+        if (node.children != null)
+            for (Node child : node.children)
+                dfs(child, res);
+        res.add(node.val);
     }
 }
 ```
