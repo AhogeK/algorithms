@@ -104,6 +104,9 @@
       * [算法思路](#算法思路-15)
       * [代码实现](#代码实现-13)
       * [复杂度分析](#复杂度分析-17)
+  * [典型问题 1：从前、中序遍历序列构造二叉树](#典型问题-1从前中序遍历序列构造二叉树)
+    * [「力扣」第 105 题：从前序与中序遍历序列构造二叉树](#力扣第-105-题从前序与中序遍历序列构造二叉树)
+      * [复杂度分析](#复杂度分析-18)
 <!-- TOC -->
 
 # 二叉树
@@ -1423,6 +1426,47 @@ public class BinaryTreeMaximumPathSum {
 
 * **空间复杂度**：\
   递归深度取决于树高度，最坏情况下为 $\mathcal{O}(n)$，平均为 $\mathcal{O}(\log n)$。
+
+## 典型问题 1：从前、中序遍历序列构造二叉树
+
+### 「力扣」第 105 题：[从前序与中序遍历序列构造二叉树](https://leetcode.cn/problems/construct-binary-tree-from-preorder-and-inorder-traversal/description/)
+
+```java
+public class ConstructBinaryTreeFromPreorderAndInorderTraversal {
+    private int[] preorder;
+    private Map<Integer, Integer> inorderIndexMap;
+
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        this.preorder = preorder;
+        int n = preorder.length;
+        inorderIndexMap = HashMap.newHashMap(n);
+        for (int i = 0; i < n; i++)
+            inorderIndexMap.put(inorder[i], i);
+        return buildSubtree(0, n - 1, 0, n - 1);
+    }
+
+    private TreeNode buildSubtree(int preStart, int preEnd, int inStart, int inEnd) {
+        if (preStart > preEnd || inStart > inEnd) return null;
+        int rootVal = preorder[preStart];
+        TreeNode root = new TreeNode(rootVal);
+        int inRootIndex = inorderIndexMap.get(rootVal);
+        int leftTreeSize = inRootIndex - inStart;
+        root.left = buildSubtree(preStart + 1, preStart + leftTreeSize, inStart, inRootIndex - 1);
+        root.right = buildSubtree(preStart + leftTreeSize + 1, preEnd, inRootIndex + 1, inEnd);
+        return root;
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**：
+    * 建索引Map耗费 $\mathcal{O}(n)$。
+    * 每个节点递归处理一次，查索引为常数。
+    * 整体为 $\mathcal{O}(n)$。
+* **空间复杂度**：
+    * 递归栈深度最坏 $\mathcal{O}(n)$（退化链）。
+    * HashMap空间 $\mathcal{O}(n)$。
 
 ---
 
