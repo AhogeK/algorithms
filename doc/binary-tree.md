@@ -113,6 +113,9 @@
     * [完成「力扣」第 590 题：N 叉树的后序遍历](#完成力扣第-590-题n-叉树的后序遍历)
       * [代码实现](#代码实现-15)
       * [复杂度分析](#复杂度分析-20)
+    * [完成「力扣」第 429 题：N 叉树的层序遍历](#完成力扣第-429-题n-叉树的层序遍历)
+      * [代码实现](#代码实现-16)
+      * [复杂度分析](#复杂度分析-21)
 <!-- TOC -->
 
 # 二叉树
@@ -1532,6 +1535,42 @@ public class NAryTreePostorderTraversal {
   遍历所有节点一次，访问时间为 $\mathcal{O}(n)$。
 * **空间复杂度**：\
   递归栈最大大小为树最大深度，最坏情况下为 $\mathcal{O}(n)$。结果存储空间为 $\mathcal{O}(n)$。
+
+### 完成「力扣」第 429 题：[N 叉树的层序遍历](https://leetcode.cn/problems/n-ary-tree-level-order-traversal/description/)
+
+#### 代码实现
+
+```java
+public class NAryTreeLevelOrderTraversal {
+    public List<List<Integer>> levelOrder(Node root) {
+        List<List<Integer>> res = new ArrayList<>();
+        if (root == null) return res;
+        Queue<Node> queue = new ArrayDeque<>();
+        queue.offer(root);
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            List<Integer> layer = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                Node curr = queue.poll();
+                layer.add(curr.val);
+                if (curr.children != null)
+                    for (Node child : curr.children)
+                        queue.offer(child);
+            }
+            res.add(layer);
+        }
+        return res;
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**：\
+  访问每个节点一次，整体为 $\mathcal{O}(n)$，其中 $n$ 是节点总数。
+
+* **空间复杂度**：\
+  队列最多存储一层节点，最坏为最大宽度 $\mathcal{O}(n)$，结果存储同样 $\mathcal{O}(n)$。
 
 ---
 
