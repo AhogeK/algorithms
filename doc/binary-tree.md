@@ -120,6 +120,9 @@
     * [「力扣」第 236 题：二叉树的最近公共祖先](#力扣第-236-题二叉树的最近公共祖先)
       * [代码实现](#代码实现-17)
       * [复杂度分析](#复杂度分析-22)
+    * [完成 「力扣」第 297 题：二叉树的序列化与反序列化](#完成-力扣第-297-题二叉树的序列化与反序列化)
+      * [代码实现](#代码实现-18)
+      * [复杂度分析](#复杂度分析-23)
 <!-- TOC -->
 
 # 二叉树
@@ -1598,6 +1601,59 @@ public class LowestCommonAncestorOfABinaryTree {
 
 * 时间复杂度： $\mathcal{O}(n)$，每个节点至多访问一次。
 * 空间复杂度：由递归栈决定，最坏情况下树退化深度为 $n$，则为 $\mathcal{O}(n)$；平衡树时深度约为 $\log n$，则为 $\mathcal{O}(\log n)$。
+
+### 完成 「力扣」第 297 题：[二叉树的序列化与反序列化](https://leetcode.cn/problems/serialize-and-deserialize-binary-tree/description/)
+
+#### 代码实现
+
+```java
+public class Codec {
+
+    // Encodes a tree to a single string.
+    public String serialize(TreeNode root) {
+        StringBuilder sb = new StringBuilder();
+        serializeHelper(root, sb);
+        return sb.toString();
+    }
+
+    private void serializeHelper(TreeNode root, StringBuilder sb) {
+        if (root == null) {
+            sb.append("#,");
+            return;
+        }
+        sb.append(root.val).append(",");
+        serializeHelper(root.left, sb);
+        serializeHelper(root.right, sb);
+    }
+
+    // Decodes your encoded data to tree.
+    public TreeNode deserialize(String data) {
+        if (data == null || data.isEmpty()) return null;
+        String[] nodes = data.split(",");
+        Queue<String> queue = new LinkedList<>();
+        Collections.addAll(queue, nodes);
+        return deserializeHelper(queue);
+    }
+
+    private TreeNode deserializeHelper(Queue<String> queue) {
+        String val = queue.poll();
+        if ("#".equals(val)) return null;
+        TreeNode root = new TreeNode(Integer.parseInt(val));
+        root.left = deserializeHelper(queue);
+        root.right = deserializeHelper(queue);
+        return root;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度：
+    * 序列化：访问每个节点一次，递归遍历全树，复杂度为 $\mathcal{O}(n)$。
+    * 反序列化：同理遍历每个节点字符串一次，复杂度 $\mathcal{O}(n)$。
+* 空间复杂度：
+    * 序列化所用额外空间主要为字符串缓存，大小 $\mathcal{O}(n)$。
+    * 反序列化用递归栈空间为树高度，平均 $\mathcal{O}(\log n)$，最坏为 $\mathcal{O}(n)$。
 
 ---
 
