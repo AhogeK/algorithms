@@ -123,6 +123,9 @@
     * [完成 「力扣」第 297 题：二叉树的序列化与反序列化](#完成-力扣第-297-题二叉树的序列化与反序列化)
       * [代码实现](#代码实现-18)
       * [复杂度分析](#复杂度分析-23)
+    * [完成 「力扣」第 543 题：二叉树的直径](#完成-力扣第-543-题二叉树的直径)
+      * [代码实现](#代码实现-19)
+      * [复杂度分析](#复杂度分析-24)
 <!-- TOC -->
 
 # 二叉树
@@ -1655,6 +1658,36 @@ public class Codec {
     * 序列化所用额外空间主要为字符串缓存，大小 $\mathcal{O}(n)$。
     * 反序列化用递归栈空间为树高度，平均 $\mathcal{O}(\log n)$，最坏为 $\mathcal{O}(n)$。
 
+### 完成 「力扣」第 543 题：[二叉树的直径](https://leetcode.cn/problems/diameter-of-binary-tree/description/)
+
+#### 代码实现
+
+```java
+public class DiameterOfBinaryTree {
+    class Solution {
+        private int maxDiameter = 0;
+
+        public int diameterOfBinaryTree(TreeNode root) {
+            depth(root);
+            return maxDiameter;
+        }
+
+        private int depth(TreeNode node) {
+            if (node == null) return 0;
+            int leftDepth = depth(node.left);
+            int rightDepth = depth(node.right);
+            maxDiameter = Math.max(maxDiameter, leftDepth + rightDepth);
+            return Math.max(leftDepth, rightDepth) + 1;
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度： $\mathcal{O}(n)$ 每个节点访问一次递归。
+* 空间复杂度： $\mathcal{O}(h)$ 递归调用栈， $h$ 为树高度，最坏为 $n$。
+ 
 ---
 
 **[返回](../README.md)**
