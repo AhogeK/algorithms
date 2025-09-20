@@ -126,6 +126,9 @@
     * [完成 「力扣」第 543 题：二叉树的直径](#完成-力扣第-543-题二叉树的直径)
       * [代码实现](#代码实现-19)
       * [复杂度分析](#复杂度分析-24)
+    * [完成 「力扣」第 1443 题：收集树上所有苹果的最少时间](#完成-力扣第-1443-题收集树上所有苹果的最少时间)
+      * [代码实现](#代码实现-20)
+      * [复杂度分析](#复杂度分析-25)
 <!-- TOC -->
 
 # 二叉树
@@ -1244,7 +1247,7 @@ public class MaximumDepthOfBinaryTree {
 很多人会写成：
 
 ```java
-return Math.min(minDepth(root.left), minDepth(root.right)) + 1;
+return Math.min(minDepth(root.left),minDepth(root.right))+1;
 ```
 
 这样的错误在于：如果一边为空，这一边深度为 0，会导致结果错误。
@@ -1363,9 +1366,10 @@ public class SumRootToLeafNumbers {
     * 计算树的左子树的最大深度 `leftDepth`（一直往左走直到空节点算深度）。
     * 计算树的右子树的最大深度 `rightDepth`。
 2. **比较深度**：
-    * 如果 `leftDepth == rightDepth`，说明左子树是完全二叉树且满的，节点数为 $2^{leftDepth} - 1$，加上根节点，再加右子树递归结果，直接计算无需递归左子树。
+    * 如果 `leftDepth == rightDepth`，说明左子树是完全二叉树且满的，节点数为 $2^{leftDepth} - 1$
+      ，加上根节点，再加右子树递归结果，直接计算无需递归左子树。
     * 如果 `leftDepth != rightDepth`，说明右子树是完全二叉树且满的，节点数为 $2^{rightDepth} - 1$，加上根节点，再加左子树递归结果。
-     
+
 该思路每次递归高度计算最多 $\log n$ 层，总复杂度约为 $\mathcal{O}((\log n)^2)$。
 
 ```java
@@ -1603,7 +1607,8 @@ public class LowestCommonAncestorOfABinaryTree {
 #### 复杂度分析
 
 * 时间复杂度： $\mathcal{O}(n)$，每个节点至多访问一次。
-* 空间复杂度：由递归栈决定，最坏情况下树退化深度为 $n$，则为 $\mathcal{O}(n)$；平衡树时深度约为 $\log n$，则为 $\mathcal{O}(\log n)$。
+* 空间复杂度：由递归栈决定，最坏情况下树退化深度为 $n$，则为 $\mathcal{O}(n)$；平衡树时深度约为 $\log n$
+  ，则为 $\mathcal{O}(\log n)$。
 
 ### 完成 「力扣」第 297 题：[二叉树的序列化与反序列化](https://leetcode.cn/problems/serialize-and-deserialize-binary-tree/description/)
 
@@ -1687,7 +1692,49 @@ public class DiameterOfBinaryTree {
 
 * 时间复杂度： $\mathcal{O}(n)$ 每个节点访问一次递归。
 * 空间复杂度： $\mathcal{O}(h)$ 递归调用栈， $h$ 为树高度，最坏为 $n$。
- 
+
+### 完成 「力扣」第 1443 题：[收集树上所有苹果的最少时间](https://leetcode.cn/problems/minimum-time-to-collect-all-apples-in-a-tree/description/)
+
+#### 代码实现
+
+```java
+public class MinimumTimeToCollectAllApplesInATree {
+    class Solution {
+        List<List<Integer>> graph;
+        boolean[] visited;
+
+        public int minTime(int n, int[][] edges, List<Boolean> hasApple) {
+            graph = new ArrayList<>();
+            for (int i = 0; i < n; i++) graph.add(new ArrayList<>());
+            for (int[] edge : edges) {
+                graph.get(edge[0]).add(edge[1]);
+                graph.get(edge[1]).add(edge[0]);
+            }
+            visited = new boolean[n];
+            return dfs(0, hasApple);
+        }
+
+        private int dfs(int node, List<Boolean> hasApple) {
+            visited[node] = true;
+            int cost = 0;
+            for (int next : graph.get(node)) {
+                if (visited[next]) continue;
+                int subCost = dfs(next, hasApple);
+                if (subCost > 0 || hasApple.get(next)) cost += subCost + 2;
+            }
+            return cost;
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+| 项目    | 复杂度                          |
+|-------|------------------------------|
+| 时间复杂度 | $\mathcal{O}(n)$ 遍历每条边一次     |
+| 空间复杂度 | $\mathcal{O}(n)$ 邻接表 + 递归栈空间 |
+
 ---
 
 **[返回](../README.md)**
