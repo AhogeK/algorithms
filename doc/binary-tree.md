@@ -116,6 +116,10 @@
     * [完成「力扣」第 429 题：N 叉树的层序遍历](#完成力扣第-429-题n-叉树的层序遍历)
       * [代码实现](#代码实现-16)
       * [复杂度分析](#复杂度分析-21)
+  * [典型问题 2：二叉树的最近公共祖先](#典型问题-2二叉树的最近公共祖先)
+    * [「力扣」第 236 题：二叉树的最近公共祖先](#力扣第-236-题二叉树的最近公共祖先)
+      * [代码实现](#代码实现-17)
+      * [复杂度分析](#复杂度分析-22)
 <!-- TOC -->
 
 # 二叉树
@@ -1571,6 +1575,29 @@ public class NAryTreeLevelOrderTraversal {
 
 * **空间复杂度**：\
   队列最多存储一层节点，最坏为最大宽度 $\mathcal{O}(n)$，结果存储同样 $\mathcal{O}(n)$。
+
+## 典型问题 2：二叉树的最近公共祖先
+
+### 「力扣」第 236 题：[二叉树的最近公共祖先](https://leetcode.cn/problems/lowest-common-ancestor-of-a-binary-tree/)
+
+#### 代码实现
+
+```java
+public class LowestCommonAncestorOfABinaryTree {
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if (root == null || root == p || root == q) return root;
+        TreeNode left = lowestCommonAncestor(root.left, p, q);
+        TreeNode right = lowestCommonAncestor(root.right, p, q);
+        if (left != null && right != null) return root;
+        return left != null ? left : right;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度： $\mathcal{O}(n)$，每个节点至多访问一次。
+* 空间复杂度：由递归栈决定，最坏情况下树退化深度为 $n$，则为 $\mathcal{O}(n)$；平衡树时深度约为 $\log n$，则为 $\mathcal{O}(\log n)$。
 
 ---
 
