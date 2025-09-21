@@ -155,6 +155,13 @@
       * [Splay树](#splay树)
       * [Treap（树堆）](#treap树堆)
       * [augmented BST（增强型二叉搜索树）](#augmented-bst增强型二叉搜索树)
+    * [「力扣」450.删除二叉搜索树中的节点](#力扣450删除二叉搜索树中的节点)
+      * [算法思路](#算法思路-16)
+      * [代码实现](#代码实现-21)
+      * [复杂度分析](#复杂度分析-26)
+    * [完成「力扣」第 700 题：二叉搜索树中的搜索](#完成力扣第-700-题二叉搜索树中的搜索)
+      * [代码实现](#代码实现-22)
+      * [复杂度分析](#复杂度分析-27)
 <!-- TOC -->
 
 # 二叉树
@@ -1990,6 +1997,27 @@ public class DeleteNodeInABST {
 
 * 时间复杂度：删除操作符合查找复杂度 $\mathcal{O}(h)$， $h$ 是树的高度。平衡BST时为 $\mathcal{O}(\log n)$，最坏退化链表时为 $\mathcal{O}(n)$。
 * 空间复杂度：递归调用栈深度为 $h$，即 $\mathcal{O}(h)$。
+
+### 完成「力扣」第 700 题：[二叉搜索树中的搜索](https://leetcode.cn/problems/search-in-a-binary-search-tree/)
+
+#### 代码实现
+
+```java
+public class SearchInABinarySearchTree {
+    class Solution {
+        public TreeNode searchBST(TreeNode root, int val) {
+            if (root == null) return null;
+            if (root.val == val) return root;
+            return val < root.val ? searchBST(root.left, val) : searchBST(root.right, val);
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度：每次根据比较选择左或右子树，搜索深度最多为树高，因此为 $\mathcal{O}(h)$，平衡树为 $\mathcal{O}(\log n)$，最坏退化为链表时 $\mathcal{O}(n)$。
+* 空间复杂度：递归栈深度为 $h$，即 $\mathcal{O}(h)$。
 
 ---
 
