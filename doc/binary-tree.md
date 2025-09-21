@@ -1939,7 +1939,58 @@ public class MinimumTimeToCollectAllApplesInATree {
 * **特点**：在普通BST节点上增加更多辅助信息，如子树大小、区间覆盖信息等。
 * **优势**：支持更多高级操作，比如 `rank`、`select`、区间查询等。
 * **应用**：统计信息维护、区间查询、动态序列操作。
+
+### 「力扣」450.[删除二叉搜索树中的节点](https://leetcode.cn/problems/delete-node-in-a-bst/description/)
+
+#### 算法思路
+
+* **递归思想**：\
+  利用 BST 的性质确定查找路径，如果 $key < root.val$，递归到左子树；如果 $key > root.val$，递归到右子树；如果相等，执行删除。
+* **删除节点处理**：
+    * 如果节点没有左子树，则用右子树代替。
+    * 如果节点没有右子树，则用左子树代替。
+    * 如果节点左右子树均存在，用中序后继（右子树的最左节点）替换当前节点的值，再递归删除该后继节点。
+* **寻找中序后继**：\
+  右子树中一路向左找到最小节点。
+* **递归结构**：\
+  删除操作的返回值是新子树根节点，递归函数每一步返回新连接保证树结构正确。
+
+#### 代码实现
  
+```java
+public class DeleteNodeInABST {
+    class Solution {
+        public TreeNode deleteNode(TreeNode root, int key) {
+            if (root == null) return null;
+            if (key < root.val) {
+                root.left = deleteNode(root.left, key);
+            } else if (key > root.val) {
+                root.right = deleteNode(root.right, key);
+            } else {
+                if (root.left == null) return root.right;
+                else if (root.right == null) return root.left;
+                else {
+                    TreeNode successor = findMin(root.right);
+                    root.val = successor.val;
+                    root.right = deleteNode(root.right, successor.val);
+                }
+            }
+            return root;
+        }
+
+        private TreeNode findMin(TreeNode node) {
+            while (node.left != null) node = node.left;
+            return node;
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度：删除操作符合查找复杂度 $\mathcal{O}(h)$， $h$ 是树的高度。平衡BST时为 $\mathcal{O}(\log n)$，最坏退化链表时为 $\mathcal{O}(n)$。
+* 空间复杂度：递归调用栈深度为 $h$，即 $\mathcal{O}(h)$。
+
 ---
 
 **[返回](../README.md)**
