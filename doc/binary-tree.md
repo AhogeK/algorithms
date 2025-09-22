@@ -162,6 +162,10 @@
     * [完成「力扣」第 700 题：二叉搜索树中的搜索](#完成力扣第-700-题二叉搜索树中的搜索)
       * [代码实现](#代码实现-22)
       * [复杂度分析](#复杂度分析-27)
+    * [完成「力扣」第 701 题：二叉搜索树中的插入操作](#完成力扣第-701-题二叉搜索树中的插入操作)
+      * [算法思路](#算法思路-17)
+      * [代码实现](#代码实现-23)
+      * [复杂度分析](#复杂度分析-28)
 <!-- TOC -->
 
 # 二叉树
@@ -1798,7 +1802,8 @@ public class MinimumTimeToCollectAllApplesInATree {
 * **节点结构**：每个节点包含键（key）、存储的数据（value）、左子节点指针和右子节点指针。
 * **有序性**：左子树的所有键值 < 当前节点键值 < 右子树的所有键值。
 * **查找操作**：从根节点开始，比较查找的键值与当前节点键值，若相等则找到；若查找键值更小，则进入左子树；若更大，则进入右子树，重复此过程直到找到或到达空节点（查找失败）。
-* **时间复杂度**：理想情况下树高为 $\log n$，查找操作的平均时间复杂度为 $\mathcal{O}(\log n)$；但在最坏情况下（如树退化成链表），时间复杂度退化为 $\mathcal{O}(n)$。
+* **时间复杂度**：理想情况下树高为 $\log n$，查找操作的平均时间复杂度为 $\mathcal{O}(\log n)$
+  ；但在最坏情况下（如树退化成链表），时间复杂度退化为 $\mathcal{O}(n)$。
 
 #### 查找示例过程
 
@@ -1907,7 +1912,8 @@ public class MinimumTimeToCollectAllApplesInATree {
 
 ### 二叉搜索树的升级版
 
-二叉搜索树（BST）的升级版主要是为了改进普通BST在最坏情况下退化成链表导致效率降低的问题，提升操作的稳定性和效率。这些升级版数据结构通过增加平衡机制或调整树的结构，使得树高度保持在 $\mathcal{O}(\log n)$ 级别，从而保证查找、插入和删除的时间复杂度稳定。
+二叉搜索树（BST）的升级版主要是为了改进普通BST在最坏情况下退化成链表导致效率降低的问题，提升操作的稳定性和效率。这些升级版数据结构通过增加平衡机制或调整树的结构，使得树高度保持在 $\mathcal{O}(\log n)$
+级别，从而保证查找、插入和删除的时间复杂度稳定。
 
 #### 常见的二叉搜索树升级版
 
@@ -1963,7 +1969,7 @@ public class MinimumTimeToCollectAllApplesInATree {
   删除操作的返回值是新子树根节点，递归函数每一步返回新连接保证树结构正确。
 
 #### 代码实现
- 
+
 ```java
 public class DeleteNodeInABST {
     class Solution {
@@ -1995,7 +2001,8 @@ public class DeleteNodeInABST {
 
 #### 复杂度分析
 
-* 时间复杂度：删除操作符合查找复杂度 $\mathcal{O}(h)$， $h$ 是树的高度。平衡BST时为 $\mathcal{O}(\log n)$，最坏退化链表时为 $\mathcal{O}(n)$。
+* 时间复杂度：删除操作符合查找复杂度 $\mathcal{O}(h)$， $h$ 是树的高度。平衡BST时为 $\mathcal{O}(\log n)$
+  ，最坏退化链表时为 $\mathcal{O}(n)$。
 * 空间复杂度：递归调用栈深度为 $h$，即 $\mathcal{O}(h)$。
 
 ### 完成「力扣」第 700 题：[二叉搜索树中的搜索](https://leetcode.cn/problems/search-in-a-binary-search-tree/)
@@ -2016,8 +2023,37 @@ public class SearchInABinarySearchTree {
 
 #### 复杂度分析
 
-* 时间复杂度：每次根据比较选择左或右子树，搜索深度最多为树高，因此为 $\mathcal{O}(h)$，平衡树为 $\mathcal{O}(\log n)$，最坏退化为链表时 $\mathcal{O}(n)$。
+* 时间复杂度：每次根据比较选择左或右子树，搜索深度最多为树高，因此为 $\mathcal{O}(h)$，平衡树为 $\mathcal{O}(\log n)$
+  ，最坏退化为链表时 $\mathcal{O}(n)$。
 * 空间复杂度：递归栈深度为 $h$，即 $\mathcal{O}(h)$。
+
+### 完成「力扣」第 701 题：[二叉搜索树中的插入操作](https://leetcode.cn/problems/insert-into-a-binary-search-tree/description/)
+
+#### 算法思路
+
+利用BST的有序性，将待插入值与当前节点比较，若更小则递归/迭代进入左子树，否则进入右子树。\
+当遍历到空节点时，新建值节点并将其挂到父节点相应指针上完成插入。
+
+#### 代码实现
+
+```java
+public class InsertIntoABinarySearchTree {
+    class Solution {
+        public TreeNode insertIntoBST(TreeNode root, int val) {
+            if (root == null) return new TreeNode(val);
+            if (val < root.val) root.left = insertIntoBST(root.left, val);
+            else root.right = insertIntoBST(root.right, val);
+            return root;
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度：每次比较消耗常数，最多遍历树高层数，故为 $\mathcal{O}(h)$；平均情况下 $h\approx\log n$
+  ，最坏情形退化为 $\mathcal{O}(n)$。
+* 空间复杂度：递归深度为树高，空间为 $\mathcal{O}(h)$；迭代实现只需常数额外空间，为 $\mathcal{O}(1)$。
 
 ---
 
