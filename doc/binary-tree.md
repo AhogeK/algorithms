@@ -166,6 +166,10 @@
       * [算法思路](#算法思路-17)
       * [代码实现](#代码实现-23)
       * [复杂度分析](#复杂度分析-28)
+    * [完成「力扣」第 173 题：二叉搜索树迭代器](#完成力扣第-173-题二叉搜索树迭代器)
+      * [算法思路](#算法思路-18)
+      * [代码实现](#代码实现-24)
+      * [复杂度分析](#复杂度分析-29)
 <!-- TOC -->
 
 # 二叉树
@@ -2054,6 +2058,53 @@ public class InsertIntoABinarySearchTree {
 * 时间复杂度：每次比较消耗常数，最多遍历树高层数，故为 $\mathcal{O}(h)$；平均情况下 $h\approx\log n$
   ，最坏情形退化为 $\mathcal{O}(n)$。
 * 空间复杂度：递归深度为树高，空间为 $\mathcal{O}(h)$；迭代实现只需常数额外空间，为 $\mathcal{O}(1)$。
+
+### 完成「力扣」第 173 题：[二叉搜索树迭代器](https://leetcode.cn/problems/binary-search-tree-iterator/description/)
+
+#### 算法思路
+
+构造时，将从根节点开始一路向左的所有节点压入栈；
+
+* `hasNext()`：判断栈是否为空；
+* `next()`：弹出栈顶节点 cur，
+    1. 返回 `cur.val`；
+    2. 若 `cur.right` 不为空，则将其右子树从该右节点开始一路左推到底的所有节点再次压栈，保证栈顶始终是下一个最小节点。
+
+#### 代码实现
+
+```java
+public class BinarySearchTreeIterator {
+    class BSTIterator {
+        private Deque<TreeNode> stack = new ArrayDeque<>();
+
+        public BSTIterator(TreeNode root) {
+            pushLeft(root);
+        }
+
+        private void pushLeft(TreeNode node) {
+            while (node != null) {
+                stack.push(node);
+                node = node.left;
+            }
+        }
+
+        public int next() {
+            TreeNode cur = stack.pop();
+            if (cur.right != null) pushLeft(cur.right);
+            return cur.val;
+        }
+
+        public boolean hasNext() {
+            return !stack.isEmpty();
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度：摊销 $\mathcal{O}(1)$，每个节点仅一次入栈、一次出栈；
+* 空间复杂度： $\mathcal{O}(h)$，其中 $h$ 为树高，栈最多存储一条根→叶路径。
 
 ---
 
