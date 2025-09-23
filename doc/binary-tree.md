@@ -170,6 +170,10 @@
       * [算法思路](#算法思路-18)
       * [代码实现](#代码实现-24)
       * [复杂度分析](#复杂度分析-29)
+    * [完成「力扣」第 449 题：序列化和反序列化二叉搜索树](#完成力扣第-449-题序列化和反序列化二叉搜索树)
+      * [算法思路](#算法思路-19)
+      * [代码实现](#代码实现-25)
+      * [复杂度分析](#复杂度分析-30)
 <!-- TOC -->
 
 # 二叉树
@@ -2105,6 +2109,75 @@ public class BinarySearchTreeIterator {
 
 * 时间复杂度：摊销 $\mathcal{O}(1)$，每个节点仅一次入栈、一次出栈；
 * 空间复杂度： $\mathcal{O}(h)$，其中 $h$ 为树高，栈最多存储一条根→叶路径。
+
+### 完成「力扣」第 449 题：[序列化和反序列化二叉搜索树](https://leetcode.cn/problems/serialize-and-deserialize-bst/)
+
+#### 算法思路
+
+1. 序列化（serialize）
+    * 对根节点做先序遍历，遇到非空节点就将其值和一个分隔符（如英文逗号）追加到 `StringBuilder`；
+    * 遍历完成后去掉末尾多余的分隔符，返回字符串。
+2. 反序列化（deserialize）
+    * 将序列化字符串按逗号拆分为整型数组 `vals`；
+    * 用一个全局索引 `idx` 从头处理 `vals`，递归函数 `build(lower, upper)`：
+        * 若 `idx` 越界或当前值不在 `(lower, upper)` 范围内，返回 `null`；
+        * 否则以当前值构造节点，`idx++`，再分别构建左子树 (`(lower, val)`) 和右子树 (`(val, upper)`)。
+
+#### 代码实现
+
+```java
+public class SerializeAndDeserializeBst {
+    public class Codec {
+
+        // Encodes a tree to a single string.
+        public String serialize(TreeNode root) {
+            StringBuilder sb = new StringBuilder();
+            preOrder(root, sb);
+            if (!sb.isEmpty()) sb.setLength(sb.length() - 1);
+            return sb.toString();
+        }
+
+        private void preOrder(TreeNode node, StringBuilder sb) {
+            if (node == null) return;
+            sb.append(node.val).append(",");
+            preOrder(node.left, sb);
+            preOrder(node.right, sb);
+        }
+
+        private int idx;
+
+        // Decodes your encoded data to tree.
+        public TreeNode deserialize(String data) {
+            if (data == null || data.isEmpty()) return null;
+            String[] arr = data.split(",");
+            int n = arr.length;
+            int[] vals = new int[n];
+            for (int i = 0; i < n; i++)
+                vals[i] = Integer.parseInt(arr[i]);
+            idx = 0;
+            return build(vals, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        }
+
+        private TreeNode build(int[] vals, int lower, int upper) {
+            if (idx == vals.length) return null;
+            int v = vals[idx];
+            if (v < lower || v > upper) return null;
+            idx++;
+            TreeNode node = new TreeNode(v);
+            node.left = build(vals, lower, v);
+            node.right = build(vals, v, upper);
+            return node;
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度：序列化和反序列化各为 $\mathcal{O}(n)$，其中 $n$ 是节点数，先序遍历和线性扫描各访问一次。
+* 空间复杂度：
+    * 序列化： $\mathcal{O}(n)$ 用于结果字符串；
+    * 反序列化： $\mathcal{O}(n)$ 用于数组和递归栈（最坏 $\mathcal{O}(n)$，平均 $\mathcal{O}(h)$）。
 
 ---
 
