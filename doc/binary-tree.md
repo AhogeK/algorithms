@@ -182,6 +182,10 @@
       * [算法思路](#算法思路-21)
       * [代码实现](#代码实现-27)
       * [复杂度分析](#复杂度分析-32)
+    * [完成「力扣」第 235 题：二叉搜索树的最近公共祖先](#完成力扣第-235-题二叉搜索树的最近公共祖先)
+      * [算法思路](#算法思路-22)
+      * [代码实现](#代码实现-28)
+      * [复杂度分析](#复杂度分析-33)
 <!-- TOC -->
 
 # 二叉树
@@ -2268,6 +2272,39 @@ public class ConvertSortedListToBinarySearchTree {
 
 * 时间复杂度： $\mathcal{O}(n)$ ，每个节点只访问一次。
 * 空间复杂度： $\mathcal{O}(\log n)$ ，递归调用栈深度。
+
+### 完成「力扣」第 235 题：[二叉搜索树的最近公共祖先](https://leetcode.cn/problems/lowest-common-ancestor-of-a-binary-search-tree/description/)
+
+#### 算法思路
+
+* 从根节点开始，比较 `p` 和 `q` 的值与当前节点 `root`。
+* 如果 `p.val` 和 `q.val` 都小于 `root.val`，说明公共祖先在左子树，递归左子树；
+* 如果都大于 `root.val`，说明公共祖先在右子树，递归右子树；
+* 否则当前节点正是分叉点（或其中一个节点本身），即为最近公共祖先。
+
+#### 代码实现
+
+```java
+public class LowestCommonAncestorOfABinarySearchTree {
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        int pVal = p.val;
+        int qVal = q.val;
+        TreeNode node = root;
+        while (node != null) {
+            int currVal = node.val;
+            if (pVal > currVal && qVal > currVal) node = node.right;
+            else if (pVal < currVal && qVal < currVal) node = node.left;
+            else return node;
+        }
+        return null;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度： $\mathcal{O}(h)$，其中 $h$ 是树高度，平均 $\log n$。
+* 空间复杂度： $\mathcal{O}(1)$，迭代版无递归栈。
 
 ---
 
