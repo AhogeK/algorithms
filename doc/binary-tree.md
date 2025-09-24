@@ -178,6 +178,10 @@
       * [算法思路](#算法思路-20)
       * [代码实现](#代码实现-26)
       * [复杂度分析](#复杂度分析-31)
+    * [完成「力扣」第 109 题：有序链表转换二叉搜索树](#完成力扣第-109-题有序链表转换二叉搜索树)
+      * [算法思路](#算法思路-21)
+      * [代码实现](#代码实现-27)
+      * [复杂度分析](#复杂度分析-32)
 <!-- TOC -->
 
 # 二叉树
@@ -2217,6 +2221,53 @@ public class ConvertSortedArrayToBinarySearchTree {
 
 * 时间复杂度： $\mathcal{O}(n)$，每个元素构建一次节点。
 * 空间复杂度： $\mathcal{O}(\log n)$ 递归栈深，平衡树高度为 $\log n$。
+
+### 完成「力扣」第 109 题：[有序链表转换二叉搜索树](https://leetcode.cn/problems/convert-sorted-list-to-binary-search-tree/description/)
+
+#### 算法思路
+
+1. 先计算链表长度，令 $n$ 为节点数。
+2. 按BST的中序遍历构造二叉树：
+    * 递归构造左子树长度为 $mid = \frac{n}{2}$ 的节点数量。
+    * 当前链表头节点即为根节点，替换为当前节点，链表指针后移。
+    * 递归构造右子树剩余长度的节点。
+
+#### 代码实现
+
+```java
+public class ConvertSortedListToBinarySearchTree {
+    private ListNode current;
+
+    public TreeNode sortedListToBST(ListNode head) {
+        if (head == null) return null;
+        int length = 0;
+        ListNode ptr = head;
+        while (ptr != null) {
+            length++;
+            ptr = ptr.next;
+        }
+        current = head;
+        return build(0, length - 1);
+    }
+
+    private TreeNode build(int left, int right) {
+        if (left > right) return null;
+        int mid = left + (right - left) / 2;
+        TreeNode leftChild = build(left, mid - 1);
+        TreeNode root = new TreeNode(current.val);
+        current = current.next;
+        TreeNode rightChild = build(mid + 1, right);
+        root.left = leftChild;
+        root.right = rightChild;
+        return root;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度： $\mathcal{O}(n)$ ，每个节点只访问一次。
+* 空间复杂度： $\mathcal{O}(\log n)$ ，递归调用栈深度。
 
 ---
 
