@@ -174,6 +174,10 @@
       * [算法思路](#算法思路-19)
       * [代码实现](#代码实现-25)
       * [复杂度分析](#复杂度分析-30)
+    * [完成「力扣」第 108 题：将有序数组转换为二叉搜索树](#完成力扣第-108-题将有序数组转换为二叉搜索树)
+      * [算法思路](#算法思路-20)
+      * [代码实现](#代码实现-26)
+      * [复杂度分析](#复杂度分析-31)
 <!-- TOC -->
 
 # 二叉树
@@ -2178,6 +2182,41 @@ public class SerializeAndDeserializeBst {
 * 空间复杂度：
     * 序列化： $\mathcal{O}(n)$ 用于结果字符串；
     * 反序列化： $\mathcal{O}(n)$ 用于数组和递归栈（最坏 $\mathcal{O}(n)$，平均 $\mathcal{O}(h)$）。
+
+### 完成「力扣」第 108 题：[将有序数组转换为二叉搜索树](https://leetcode.cn/problems/convert-sorted-array-to-binary-search-tree/description/)
+
+#### 算法思路
+
+1. 选取当前数组区间的中间元素作为当前子树的根节点。
+2. 递归对中间元素左侧子数组构建左子树。
+3. 递归对中间元素右侧子数组构建右子树。
+4. 递归终止条件为子数组为空时返回 `null`。
+
+这种方式保证了每次选择的根节点是子数组的中间元素，使得树节点左右分布均匀，满足平衡二叉搜索树的要求。
+
+#### 代码实现
+
+```java
+public class ConvertSortedArrayToBinarySearchTree {
+    public TreeNode sortedArrayToBST(int[] nums) {
+        return build(nums, 0, nums.length - 1);
+    }
+
+    private TreeNode build(int[] nums, int left, int right) {
+        if (left > right) return null;
+        int mid = left + (right - left) / 2;
+        TreeNode root = new TreeNode(nums[mid]);
+        root.left = build(nums, left, mid - 1);
+        root.right = build(nums, mid + 1, right);
+        return root;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度： $\mathcal{O}(n)$，每个元素构建一次节点。
+* 空间复杂度： $\mathcal{O}(\log n)$ 递归栈深，平衡树高度为 $\log n$。
 
 ---
 
