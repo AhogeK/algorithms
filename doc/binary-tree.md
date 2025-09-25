@@ -190,6 +190,10 @@
       * [算法思路](#算法思路-23)
       * [代码实现](#代码实现-29)
       * [复杂度分析](#复杂度分析-34)
+    * [完成「力扣」第 653 题：两数之和 IV - 输入 BST](#完成力扣第-653-题两数之和-iv---输入-bst)
+      * [算法思路](#算法思路-24)
+      * [代码实现](#代码实现-30)
+      * [复杂度分析](#复杂度分析-35)
 <!-- TOC -->
 
 # 二叉树
@@ -2347,6 +2351,78 @@ public class ConvertBSTToGreaterTree {
 
 * 时间复杂度： $\mathcal{O}(n)$ ，n为节点数，遍历每个节点一次。
 * 空间复杂度： $\mathcal{O}(h)$ ，h为树的高度（递归栈空间），最坏情况退化为链表为 $\mathcal{O}(n)$。
+
+### 完成「力扣」第 653 题：[两数之和 IV - 输入 BST](https://leetcode.cn/problems/two-sum-iv-input-is-a-bst/description/)
+
+#### 算法思路
+
+**中序遍历+双指针法**
+
+* 由于BST的中序遍历产生升序序列，可以先中序遍历把节点值存入数组（有序）。
+* 然后用双指针(头尾指针)在数组内寻找两个数和为k。
+* 时间复杂度 $O(n)$ ，空间复杂度 $O(n)$。
+
+#### 代码实现
+
+```java
+public class TwoSumIVInputIsABST {
+    private final Deque<TreeNode> stackLeft = new ArrayDeque<>();
+    private final Deque<TreeNode> stackRight = new ArrayDeque<>();
+
+    public boolean findTarget(TreeNode root, int k) {
+        if (root == null) return false;
+        pushLeft(root);
+        pushRight(root);
+        int leftVal = nextLeft();
+        int rightVal = nextRight();
+        while (leftVal < rightVal) {
+            int sum = leftVal + rightVal;
+            if (sum == k) return true;
+            if (sum < k) {
+                if (stackLeft.isEmpty()) break;
+                leftVal = nextLeft();
+            } else {
+                if (stackRight.isEmpty()) break;
+                rightVal = nextRight();
+            }
+        }
+        return false;
+    }
+
+    private int nextRight() {
+        TreeNode node = stackRight.pop();
+        int val = node.val;
+        pushRight(node.left);
+        return val;
+    }
+
+    private int nextLeft() {
+        TreeNode node = stackLeft.pop();
+        int val = node.val;
+        pushLeft(node.right);
+        return val;
+    }
+
+    private void pushRight(TreeNode root) {
+        while (root != null) {
+            stackRight.push(root);
+            root = root.right;
+        }
+    }
+
+    private void pushLeft(TreeNode root) {
+        while (root != null) {
+            stackLeft.push(root);
+            root = root.left;
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度： $\mathcal{O}(n)$，遍历树节点两次（每个节点最多入栈出栈一次）。
+* 空间复杂度： $\mathcal{O}(h)$，存储栈空间为树高度。
 
 ---
 
