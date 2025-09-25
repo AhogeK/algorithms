@@ -186,6 +186,10 @@
       * [算法思路](#算法思路-22)
       * [代码实现](#代码实现-28)
       * [复杂度分析](#复杂度分析-33)
+    * [完成「力扣」第 538 题：把二叉搜索树转换为累加树](#完成力扣第-538-题把二叉搜索树转换为累加树)
+      * [算法思路](#算法思路-23)
+      * [代码实现](#代码实现-29)
+      * [复杂度分析](#复杂度分析-34)
 <!-- TOC -->
 
 # 二叉树
@@ -2305,6 +2309,44 @@ public class LowestCommonAncestorOfABinarySearchTree {
 
 * 时间复杂度： $\mathcal{O}(h)$，其中 $h$ 是树高度，平均 $\log n$。
 * 空间复杂度： $\mathcal{O}(1)$，迭代版无递归栈。
+
+### 完成「力扣」第 538 题：[把二叉搜索树转换为累加树](https://leetcode.cn/problems/convert-bst-to-greater-tree/description/)
+
+#### 算法思路
+
+* **BST的性质** 表明中序遍历是递增序列。
+* 要得到每个节点的大于等于该值的累加值，可以利用**逆序中序遍历**（右-根-左），从最大值开始累加。
+* 具体做法：
+    * 维持一个累加器 `sum` 初始为0。
+    * 逆序中序遍历节点，每访问一个节点，先遍历右子树（较大值），更新该节点值为 `node.val += sum`，再更新 `sum = node.val`
+      ，最后遍历左子树（较小值）。
+* 这样保证每个节点被更新时，`sum` 会包含所有大于当前节点值的节点和。
+
+#### 代码实现
+
+```java
+public class ConvertBSTToGreaterTree {
+    private int sum = 0;
+
+    public TreeNode convertBST(TreeNode root) {
+        traverse(root);
+        return root;
+    }
+
+    private void traverse(TreeNode node) {
+        if (node == null) return;
+        traverse(node.right);
+        node.val += sum;
+        sum = node.val;
+        traverse(node.left);
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度： $\mathcal{O}(n)$ ，n为节点数，遍历每个节点一次。
+* 空间复杂度： $\mathcal{O}(h)$ ，h为树的高度（递归栈空间），最坏情况退化为链表为 $\mathcal{O}(n)$。
 
 ---
 
