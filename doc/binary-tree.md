@@ -197,7 +197,7 @@
     * [AVL 树](#avl-树)
       * [AVL树如何定义“平衡”（“平衡因子”概念）](#avl树如何定义平衡平衡因子概念)
       * [AVL树旋转(Rotation)](#avl树旋转rotation)
-      * [情况四：右-左 (Right-Left, 简称 RL)](#情况四右-左-right-left-简称-rl)
+      * [完整可运行的 AVL 树 Java 代码](#完整可运行的-avl-树-java-代码)
 <!-- TOC -->
 
 # 二叉树
@@ -2777,7 +2777,7 @@ if (balance < -1 && key > node.left.key) {
 }
 ```
 
-#### 情况四：右-左 (Right-Left, 简称 RL)
+**情况四：右-左 (Right-Left, 简称 RL)**
 
 1. 如何造成 RL 失衡？
  
@@ -2859,6 +2859,184 @@ if (balance > 1 && key < node.right.key) {
 | **RR** (右-右) | `\` | `左旋转` (一次)               |
 | **LR** (左-右) | `<` | `先左旋 (子)` `再右旋 (父)` (两次) |
 | **RL** (右-左) | `>` | `先右旋 (子)` `再左旋 (父)` (两次) |
+
+#### 完整可运行的 AVL 树 Java 代码
+
+```java
+/**
+ * 一个标准的 AVL 树实现 (包含插入与删除)
+ */
+public class AVLTree {
+
+    /**
+     * 1. 节点类定义
+     */
+    static class Node {
+        int key;      // 节点的键值
+        int height;   // 节点的高度
+        Node left;    // 左子节点
+        Node right;   // 右子节点
+
+        Node(int key) {
+            this.key = key;
+            this.height = 1; // 新插入的节点默认为叶子节点，高度为1
+        }
+    }
+
+    private Node root; // 树的根节点
+
+    /**
+     * 2. 辅助函数
+     */
+    // 获取节点的高度
+    private int height(Node node) {
+        if (node == null)
+            return 0;
+        return node.height;
+    }
+
+    // 获取节点的平衡因子 (右子树高度 - 左子树高度)
+    private int getBalance(Node node) {
+        if (node == null)
+            return 0;
+        return height(node.right) - height(node.left);
+    }
+
+    /**
+     * 3. 旋转操作 (与之前相同)
+     */
+    private Node rightRotate(Node y) {
+        Node x = y.left;
+        Node T2 = x.right;
+        x.right = y;
+        y.left = T2;
+        y.height = Math.max(height(y.left), height(y.right)) + 1;
+        x.height = Math.max(height(x.left), height(x.right)) + 1;
+        return x;
+    }
+
+    private Node leftRotate(Node x) {
+        Node y = x.right;
+        Node T2 = y.left;
+        y.left = x;
+        x.right = T2;
+        x.height = Math.max(height(x.left), height(x.right)) + 1;
+        y.height = Math.max(height(y.left), height(y.right)) + 1;
+        return y;
+    }
+
+    /**
+     * 4. 插入操作 (与之前相同)
+     */
+    public void insert(int key) {
+        root = insertRec(root, key);
+    }
+
+    private Node insertRec(Node node, int key) {
+        if (node == null) return (new Node(key));
+        if (key < node.key) node.left = insertRec(node.left, key);
+        else if (key > node.key) node.right = insertRec(node.right, key);
+        else return node;
+
+        node.height = 1 + Math.max(height(node.left), height(node.right));
+        int balance = getBalance(node);
+
+        if (balance < -1 && key < node.left.key) return rightRotate(node);
+        if (balance > 1 && key > node.right.key) return leftRotate(node);
+        if (balance < -1 && key > node.left.key) {
+            node.left = leftRotate(node.left);
+            return rightRotate(node);
+        }
+        if (balance > 1 && key < node.right.key) {
+            node.right = rightRotate(node.right);
+            return leftRotate(node);
+        }
+        return node;
+    }
+
+    /**
+     * 5. 删除操作
+     */
+    // 公开的删除接口
+    public void delete(int key) {
+        root = deleteRec(root, key);
+    }
+
+    // 递归实现的删除方法
+    private Node deleteRec(Node node, int key) {
+        // 步骤 1: 执行标准的二叉搜索树 (BST) 删除
+        if (node == null) return node;
+
+        if (key < node.key) {
+            node.left = deleteRec(node.left, key);
+        } else if (key > node.key) {
+            node.right = deleteRec(node.right, key);
+        } else {
+            // 找到要删除的节点
+            // 情况 1 & 2: 节点有一个或零个子节点
+            if ((node.left == null) || (node.right == null)) {
+                Node temp = (node.left != null) ? node.left : node.right;
+                if (temp == null) { // 零个子节点
+                    node = null;
+                } else { // 一个子节点
+                    node = temp; // 用子节点替换当前节点
+                }
+            } else {
+                // 情况 3: 节点有两个子节点
+                // 找到右子树中的最小节点 (中序后继)
+                Node temp = minValueNode(node.right);
+                // 将后继节点的值复制到当前节点
+                node.key = temp.key;
+                // 从右子树中删除那个后继节点
+                node.right = deleteRec(node.right, temp.key);
+            }
+        }
+
+        // 如果树在删除后变为空 (例如，只有一个节点时)
+        if (node == null) return node;
+
+        // 步骤 2: 更新当前节点的高度
+        node.height = Math.max(height(node.left), height(node.right)) + 1;
+
+        // 步骤 3: 获取平衡因子并检查是否失衡
+        int balance = getBalance(node);
+
+        // 步骤 4: 如果失衡，处理四种情况
+        // 左-左 (LL) 型
+        if (balance < -1 && getBalance(node.left) <= 0) {
+            return rightRotate(node);
+        }
+
+        // 左-右 (LR) 型
+        if (balance < -1 && getBalance(node.left) > 0) {
+            node.left = leftRotate(node.left);
+            return rightRotate(node);
+        }
+
+        // 右-右 (RR) 型
+        if (balance > 1 && getBalance(node.right) >= 0) {
+            return leftRotate(node);
+        }
+
+        // 右-左 (RL) 型
+        if (balance > 1 && getBalance(node.right) < 0) {
+            node.right = rightRotate(node.right);
+            return leftRotate(node);
+        }
+
+        return node;
+    }
+
+    // 查找子树中最小值的辅助函数
+    private Node minValueNode(Node node) {
+        Node current = node;
+        while (current.left != null) {
+            current = current.left;
+        }
+        return current;
+    }
+}
+```
 
 ---
 
