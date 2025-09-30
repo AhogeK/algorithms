@@ -3038,6 +3038,124 @@ public class AVLTree {
 }
 ```
 
+可以注意到结构代码中有个删除操作，删除和插入的思路很相似：首先执行一个基本操作，然后检查并修复可能出现的失衡。
+
+具体来说，删除操作包括：
+
+1. **执行标准的二叉搜索树 (BST) 删除**。
+2. 从删除点的父节点开始，**一路回溯到根节点，检查路径上每个节点的平衡性，并在必要时进行旋转**。
+
+**标准BST删除的回顾**
+
+```java
+// 递归实现的删除方法
+private Node deleteRec(Node node, int key) {
+    // 基础情况：如果树为空，直接返回
+    if (node == null) {
+        return node;
+    }
+
+    // 1. 寻找要删除的节点
+    if (key < node.key) {
+        node.left = deleteRec(node.left, key);
+    } else if (key > node.key) {
+        node.right = deleteRec(node.right, key);
+    } 
+    // 2. 找到了要删除的节点 (key == node.key)
+    else {
+        // 情况 1 & 2: 节点有一个或零个子节点
+        // 这段代码巧妙地同时处理了这两种情况
+        if (node.left == null) {
+            return node.right; // 如果左子节点为空，则用右子节点替换
+        } else if (node.right == null) {
+            return node.left;  // 如果右子节点为空，则用左子节点替换
+        }
+
+        // 情况 3: 节点有两个子节点
+        // a. 找到右子树中的最小节点 (中序后继)
+        Node successor = minValueNode(node.right);
+        
+        // b. 将后继节点的值复制到当前节点
+        node.key = successor.key;
+        
+        // c. 从右子树中递归地删除那个后继节点
+        node.right = deleteRec(node.right, successor.key);
+    }
+
+    return node;
+}
+
+// 查找子树中最小值的辅助函数 (即中序后继)
+private Node minValueNode(Node node) {
+    Node current = node;
+    // 循环找到最左边的叶子节点
+    while (current.left != null) {
+        current = current.left;
+    }
+    return current;
+}
+```
+
+现在来看 AVL 删除中最关键的一步：**自我修复**。
+
+和插入一样，我们在 `deleteRec` 方法执行完标准的 BST 删除后，会在递归返回的路径上，由下至上地检查每个节点的平衡性。
+
+修复的旋转操作（左旋、右旋）是完全一样的。但关键的区别在于**如何判断失衡的类型**。
+
+* 在**插入**时，我们可以根据新插入 `key` 的位置来判断是 LL 还是 LR。
+* 但在**删除**时，一个节点没了，我们没有这个 `key` 作为参考。所以，我们必须用一种新方法：**检查更高那棵子树的根节点的平衡因子**。
+
+我们来看第一种失衡场景： 假设我们删除了一个节点后，回溯到一个节点 `P`，发现它的平衡因子变成了 **-2**。这意味着它的左子树比右子树高了。
+
+现在有两种可能，是 LL 型还是 LR 型？
+
+* **判断方法：** 我们去看 `P` 的左孩子 `L` 的平衡因子。
+    * 如果 `L` 的平衡因子是 **-1 或 0**，这说明“重量”在左侧，这是一个 **LL 型**失衡。我们只需对 `P` 进行一次**右旋转**即可修复。
+    * 如果 `L` 的平衡因子是 **+1**，这说明“重量”在内侧，形成了一个“之”字形，这是一个 **LR 型**失衡。我们需要先对 `L` **左旋**，再对 `P` **右旋**来修复。
+
+我们把刚才的理论补充到代码里，就构成了完整的 `deleteRec` 方法：
+
+```java
+private Node deleteRec(Node node, int key) {
+    // ... (标准的 BST 删除部分，同上)
+    
+    // 如果树在删除后变为空
+    if (node == null) return node;
+
+    // 步骤 2: 更新当前节点的高度
+    node.height = Math.max(height(node.left), height(node.right)) + 1;
+
+    // 步骤 3: 获取平衡因子并检查是否失衡
+    int balance = getBalance(node);
+
+    // 步骤 4: 如果失衡，处理四种情况
+    
+    // --- 左子树过高 (balance < -1) ---
+    // LL 型
+    if (balance < -1 && getBalance(node.left) <= 0) {
+        return rightRotate(node);
+    }
+    // LR 型
+    if (balance < -1 && getBalance(node.left) > 0) {
+        node.left = leftRotate(node.left);
+        return rightRotate(node);
+    }
+
+    // --- 右子树过高 (balance > 1) ---
+    // RR 型
+    if (balance > 1 && getBalance(node.right) >= 0) {
+        return leftRotate(node);
+    }
+    // RL 型
+    if (balance > 1 && getBalance(node.right) < 0) {
+        node.right = rightRotate(node.right);
+        return leftRotate(node);
+    }
+
+    return node;
+}
+```
+
 ---
 
 **[返回](../README.md)**
