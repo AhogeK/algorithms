@@ -198,6 +198,8 @@
       * [AVL树如何定义“平衡”（“平衡因子”概念）](#avl树如何定义平衡平衡因子概念)
       * [AVL树旋转(Rotation)](#avl树旋转rotation)
       * [完整可运行的 AVL 树 Java 代码](#完整可运行的-avl-树-java-代码)
+    * [红黑树](#红黑树)
+      * [红黑树完整实现](#红黑树完整实现)
 <!-- TOC -->
 
 # 二叉树
@@ -3156,7 +3158,7 @@ private Node deleteRec(Node node, int key) {
 }
 ```
 
-#### 红黑树
+### 红黑树
 
 它和 AVL 树一样，都是为了解决二叉搜索树退化的问题，但它实现“平衡”的思路非常不同。
 
@@ -3265,6 +3267,540 @@ if (uncle != null && uncle.color == RED) {
     // --- 情况二：叔叔节点是黑色 (我们接下来会讨论) ---
 }
 ```
+
+我们来看叔叔节点是**黑色**的这种情况。这是需要**旋转**来解决的，稍微复杂一些。
+
+当叔叔是黑色时，我们需要根据新节点 `X`、父节点 `P` 和祖父节点 `G` 的相对位置，把它分为两种情况：
+
+1. **“直线” (Line):** `G`, `P`, `X` 形成一条直线 (比如左-左, LL 或 右-右, RR)。
+2. **“三角形” (Triangle):** `G`, `P`, `X` 形成一个 "之" 字形 (比如左-右, LR 或 右-左, RL)。
+
+我们先看比较直接的“直线”型。
+
+**子情况 A: “直线”型 (以 LL 为例)**
+
+**1. 状态:** 祖父 `G`、父亲 `P`、新节点 `X` 形成一条直线。
+
+```text
+      G (黑)
+     /
+    P (红)
+   /
+  X (红)  <-- P 和 X 存在红-红冲突
+```
+
+**2. 修复操作 (两步)：**
+
+* **步骤 a (旋转):** 对**祖父节点 `G`** 进行一次**右旋转**。
+* **步骤 b (变色):** 将旋转后新的根节点 `P` 变为**黑色**，被换下来的 `G` 变为**红色**。
+
+**3. 结果:**
+
+```text
+      P (黑)
+     / \
+    X (红) G (红)
+```
+
+这样一来，红-红冲突被彻底解决，并且由于路径上黑节点数量不变（之前是 `G`，现在是 `P`），黑高属性也得到了维持。
+
+**子情况 B: “三角形”型 (以 LR 为例)**
+
+现在我们来看“三角形”。它的修复思路是：**通过一次旋转，先把它变成我们刚刚解决的“直线”型**。
+
+**1. 状态:** `G`, `P`, `X` 形成一个 "之" 字形。
+
+```text
+      G (黑)
+     /
+    P (红)
+     \
+      X (红)
+```
+
+**修复操作:**
+
+* **步骤 a (变为直线):** 对**父节点 `P`** 进行一次**左旋转**。这会把“三角形”拉直，变成上面的 LL“直线”型。
+* **步骤 b (按直线型修复):** 既然已经变成了直线型，我们就按刚才学的方法处理即可（对 `G` 右旋，然后 `G` 和 `X` 变色）。
+
+```java
+// ... (在 fixInsert 循环或递归方法中)
+
+} else { // --- 情况二：叔叔节点是黑色或不存在 ---
+
+    // 首先判断父节点 P 是 G 的左孩子还是右孩子
+    if (parent == grandparent.left) {
+        
+        // 子情况 B: “三角形” (LR 型)
+        // 如果新节点 X 是父节点 P 的右孩子，形成 "之" 字形
+        if (x == parent.right) {
+            // 步骤 a: 对父节点 P 进行左旋，将其转为“直线”型
+            leftRotate(parent);
+            // 旋转后，原来的父节点 P 就变成了 x 的子节点
+            // 为了后续操作的统一，我们需要更新 parent 的指向
+            parent = x;
+        }
+
+        // 子情况 A: “直线” (LL 型)
+        // 经过上面可能的转换，此时一定是直线型了
+        // 步骤 b: 对祖父节点 G 右旋，并交换颜色
+        parent.color = BLACK;
+        grandparent.color = RED;
+        rightRotate(grandparent);
+
+    } else { // 对称情况：父节点 P 是 G 的右孩子
+        
+        // 子情况 B: “三角形” (RL 型)
+        if (x == parent.left) {
+            rightRotate(parent);
+            parent = x;
+        }
+
+        // 子情况 A: “直线” (RR 型)
+        parent.color = BLACK;
+        grandparent.color = RED;
+        leftRotate(grandparent);
+    }
+    
+    // 只要进入了“叔叔是黑色”的逻辑，
+    // 通过一次或两次旋转和变色，冲突一定会被解决，
+    // 所以我们可以直接结束修复过程。
+    break; 
+}
+```
+
+**现在来学习红黑树的删除操作**
+
+删除通常被认为比插入更复杂，因为它需要考虑的情况更多。但核心思想是一样的：
+
+1. 先执行标准的 BST 删除。
+2. 然后通过一系列的“修复”操作（重新着色和旋转）来恢复红黑树的五条规则。
+
+删除操作的核心问题在于：如果我们删除了一个**黑色**节点，那么经过这个节点的所有路径上的“黑高”就会减一，破坏了规则5。
+
+* 为了解决这个问题，我们引入一个概念叫做“**双重黑**” (Double Black)。你可以想象，被删除的黑色节点的空位，由一个带有“双重黑”属性的节点来占据，我们的任务就是想办法消除这个“双重黑”。
+* (如果我们删除的是一个红色节点，则不会有任何影响，因为不改变黑高。)
+
+和插入时我们关心“叔叔”节点一样，在删除时，解决“双重黑”问题的关键角色是它的**兄弟** (Sibling) 节点。
+
+修复“双重黑”的策略，主要取决于这个兄弟节点的颜色。
+
+1. 兄弟节点是**红色**的。
+2. 兄弟节点是**黑色**的 (这是更常见，也更复杂的情况)。
+
+**情况一：兄弟节点是红色**
+
+这是最简单的一种情况，它的作用是**通过一次旋转和变色，将问题转化为我们接下来要处理的“兄弟是黑色”的情况**。
+
+**1. 状态:** 
+
+“双重黑”节点 `X` 的兄弟 `S` 是红色的。（那么根据规则4，它的父节点 `P` 和侄子节点 `C`, `D` 必然是黑色的）。
+
+```
+      P (黑)
+     / \
+    X (双重黑) S (红)
+             / \
+            C (黑) D (黑)
+```
+
+**2. 修复操作:**
+
+* **步骤 a (变色):** 将父节点 `P` 变为**红色**，兄弟 `S` 变为**黑色**。
+* **步骤 b (旋转):** 对父节点 `P` 进行一次**左旋转**。
+
+**3. 结果:** 
+
+旋转后，原来的兄弟 `S` 成了新的父节点。`X` 的新兄弟变成了 `C` (黑色)。
+
+```
+      S (黑)
+     / \
+    P (红) D (黑)
+   / \
+  X(双重黑) C (黑) <-- 新的兄弟
+```
+
+你看，我们并没有解决“双重黑”的问题，但我们成功地把情况转化为了接下来要处理的“兄弟是黑色”的情况。
+
+**情况二：兄弟节点是黑色**
+
+这是核心，它根据两个侄子（兄弟的孩子）的颜色，又分为三种子情况。
+
+**子情况 2a: 兄弟的两个孩子都是黑色**
+
+**1. 状态:** 兄弟 `S` 是黑色的，它的两个孩子 `C`, `D` 也都是黑色的。
+
+**2. 修复操作 (只变色):**
+
+* **步骤 a:** 将兄弟 `S` 的颜色变为**红色**。
+* **步骤 b:** “双重黑”问题解决了一半，我们将父节点 `P` 视为新的“问题节点”，对其**重新进行平衡检查** (如果 `P` 原来是红色，现在变黑即可；如果原来是黑色，那它就成了新的“双重黑”节点，需要继续向上回溯)。
+
+**这个操作的本质是：** 把 `X` 路径上缺少的黑色，从兄弟 `S` 的路径上“借”过来一个（通过把S变红），然后把问题向上推给父节点 `P`。
+
+**子情况 2c: 兄弟的“内部”孩子是红色，“外部”孩子是黑色 (“三角形”)**
+
+**1. 状态:** 兄弟 `S` 是黑色，靠近 `X` 的那个孩子 `C` 是红色的。
+
+**2. 修复操作 (先变“直线”):**
+
+* **步骤 a (变色):** 将兄弟 `S` 变为**红色**，侄子 `C` 变为**黑色**。
+* **步骤 b (旋转):** 对兄弟 `S` 进行一次**右旋转**。
+
+**这个操作的本质是：** 通过一次小范围的旋转和变色，将“三角形”转化为我们最后要讲的“直线”情况。
+
+**子情况 2b: 兄弟的“外部”孩子是红色 (“直线”)*8
+
+这是**最终解决问题**的情况。
+
+**1. 状态:** 兄弟 `S` 是黑色，远离 `X` 的那个孩子 `D` 是红色的。
+
+**2. 修复操作 (最终修复):**
+
+* **步骤 a (变色):** 将兄弟 `S` 的颜色变得和父节点 `P` 一样，然后将 `P` 变为**黑色**，红色侄子 `D` 也变为**黑色**。
+* **步骤 b (旋转):** 对父节点 `P` 进行一次**左旋转**。
+
+**这个操作的本质是：** 通过一次大范围的旋转，从兄弟路径借调了一个黑节点过来，并且彻底解决了“双重黑”问题，整个修复过程**到此结束**。
+
+```java
+// --- 删除操作 ---
+
+/**
+ * 公开的删除接口，通过键值查找并删除节点
+ */
+public void delete(int key) {
+    Node z = findNode(root, key);
+    if (z == NIL) {
+        // 节点不存在，直接返回
+        return;
+    }
+    deleteNode(z);
+}
+
+// 查找具有给定键的节点
+private Node findNode(Node node, int key) {
+    while (node != NIL && key != node.key) {
+        if (key < node.key) {
+            node = node.left;
+        } else {
+            node = node.right;
+        }
+    }
+    return node;
+}
+
+
+/**
+ * transplant 方法用 v 替换 u
+ */
+private void transplant(Node u, Node v) {
+    if (u.parent == NIL) {
+        root = v;
+    } else if (u == u.parent.left) {
+        u.parent.left = v;
+    } else {
+        u.parent.right = v;
+    }
+    v.parent = u.parent;
+}
+
+/**
+ * 查找子树中的最小节点
+ */
+private Node minimum(Node node) {
+    while (node.left != NIL) {
+        node = node.left;
+    }
+    return node;
+}
+
+/**
+ * 核心的删除节点逻辑
+ */
+private void deleteNode(Node z) {
+    Node y = z;
+    Node x;
+    boolean yOriginalColor = y.color;
+
+    if (z.left == NIL) {
+        x = z.right;
+        transplant(z, z.right);
+    } else if (z.right == NIL) {
+        x = z.left;
+        transplant(z, z.left);
+    } else {
+        y = minimum(z.right);
+        yOriginalColor = y.color;
+        x = y.right;
+        if (y.parent == z) {
+            x.parent = y;
+        } else {
+            transplant(y, y.right);
+            y.right = z.right;
+            y.right.parent = y;
+        }
+        transplant(z, y);
+        y.left = z.left;
+        y.left.parent = y;
+        y.color = z.color;
+    }
+
+    // 如果被删除的节点是黑色的，才需要进行修复
+    if (yOriginalColor == BLACK) {
+        fixDelete(x);
+    }
+}
+
+/**
+ * 删除后的修复方法，处理“双重黑”问题
+ */
+private void fixDelete(Node x) {
+    while (x != root && x.color == BLACK) {
+        // x 是其父节点的左孩子
+        if (x == x.parent.left) {
+            Node sibling = x.parent.right;
+
+            // 情况一：兄弟是红色
+            if (sibling.color == RED) {
+                sibling.color = BLACK;
+                x.parent.color = RED;
+                leftRotate(x.parent);
+                sibling = x.parent.right;
+            }
+
+            // 情况二：兄弟是黑色
+            if (sibling.left.color == BLACK && sibling.right.color == BLACK) {
+                // 2a: 兄弟的两个孩子都是黑色
+                sibling.color = RED;
+                x = x.parent; // 问题上移
+            } else {
+                // 2c: “三角形”
+                if (sibling.right.color == BLACK) {
+                    sibling.left.color = BLACK;
+                    sibling.color = RED;
+                    rightRotate(sibling);
+                    sibling = x.parent.right;
+                }
+                // 2b: “直线”
+                sibling.color = x.parent.color;
+                x.parent.color = BLACK;
+                sibling.right.color = BLACK;
+                leftRotate(x.parent);
+                x = root; // 修复完成
+            }
+        } else { // x 是其父节点的右孩子的对称情况
+            Node sibling = x.parent.left;
+
+            // 情况一：兄弟是红色
+            if (sibling.color == RED) {
+                sibling.color = BLACK;
+                x.parent.color = RED;
+                rightRotate(x.parent);
+                sibling = x.parent.left;
+            }
+
+            // 情况二：兄弟是黑色
+            if (sibling.right.color == BLACK && sibling.left.color == BLACK) {
+                // 2a: 兄弟的两个孩子都是黑色
+                sibling.color = RED;
+                x = x.parent;
+            } else {
+                // 2c: “三角形”
+                if (sibling.left.color == BLACK) {
+                    sibling.right.color = BLACK;
+                    sibling.color = RED;
+                    leftRotate(sibling);
+                    sibling = x.parent.left;
+                }
+                // 2b: “直线”
+                sibling.color = x.parent.color;
+                x.parent.color = BLACK;
+                sibling.left.color = BLACK;
+                rightRotate(x.parent);
+                x = root;
+            }
+        }
+    }
+    x.color = BLACK; // 确保根节点或被修复节点最终是黑色
+}
+```
+
+#### 红黑树完整实现
+
+```java
+/**
+ * 一个完整的红-黑树实现
+ */
+public class RedBlackTree {
+
+    // 颜色枚举
+    private static final boolean RED = true;
+    private static final boolean BLACK = false;
+
+    /**
+     * 内部节点类
+     */
+    private class Node {
+        int key;
+        boolean color;
+        Node parent, left, right;
+
+        Node(int key) {
+            this.key = key;
+            this.color = RED; // 新节点默认为红色
+        }
+    }
+
+    private Node root;
+    private final Node NIL; // 哨兵节点，代表所有的叶子节点
+
+    public RedBlackTree() {
+        NIL = new Node(0);
+        NIL.color = BLACK;
+        root = NIL;
+    }
+
+    // --- 旋转操作 ---
+    private void leftRotate(Node x) {
+        Node y = x.right;
+        x.right = y.left;
+        if (y.left != NIL) {
+            y.left.parent = x;
+        }
+        y.parent = x.parent;
+        if (x.parent == NIL) {
+            root = y;
+        } else if (x == x.parent.left) {
+            x.parent.left = y;
+        } else {
+            x.parent.right = y;
+        }
+        y.left = x;
+        x.parent = y;
+    }
+
+    private void rightRotate(Node y) {
+        Node x = y.left;
+        y.left = x.right;
+        if (x.right != NIL) {
+            x.right.parent = y;
+        }
+        x.parent = y.parent;
+        if (y.parent == NIL) {
+            root = x;
+        } else if (y == y.parent.right) {
+            y.parent.right = x;
+        } else {
+            y.parent.left = x;
+        }
+        x.right = y;
+        y.parent = x;
+    }
+
+    // --- 插入操作 ---
+    public void insert(int key) {
+        Node z = new Node(key);
+        Node y = NIL;
+        Node x = root;
+
+        // 1. 执行标准 BST 插入
+        while (x != NIL) {
+            y = x;
+            if (z.key < x.key) {
+                x = x.left;
+            } else {
+                x = x.right;
+            }
+        }
+        z.parent = y;
+        if (y == NIL) {
+            root = z;
+        } else if (z.key < y.key) {
+            y.left = z;
+        } else {
+            y.right = z;
+        }
+        z.left = NIL;
+        z.right = NIL;
+
+        // 2. 修复红黑树性质
+        fixInsert(z);
+    }
+
+    private void fixInsert(Node z) {
+        while (z.parent.color == RED) {
+            Node parent = z.parent;
+            Node grandparent = parent.parent;
+
+            if (parent == grandparent.left) {
+                Node uncle = grandparent.right;
+                // 情况一：叔叔是红色
+                if (uncle.color == RED) {
+                    parent.color = BLACK;
+                    uncle.color = BLACK;
+                    grandparent.color = RED;
+                    z = grandparent; // 问题上移
+                } else {
+                    // 情况二：叔叔是黑色
+                    // 子情况 B: "三角形" -> 转为 "直线"
+                    if (z == parent.right) {
+                        z = parent;
+                        leftRotate(z);
+                        parent = z.parent; // 更新指针
+                    }
+                    // 子情况 A: "直线"
+                    parent.color = BLACK;
+                    grandparent.color = RED;
+                    rightRotate(grandparent);
+                }
+            } else { // 对称情况
+                Node uncle = grandparent.left;
+                // 情况一：叔叔是红色
+                if (uncle.color == RED) {
+                    parent.color = BLACK;
+                    uncle.color = BLACK;
+                    grandparent.color = RED;
+                    z = grandparent;
+                } else {
+                    // 情况二：叔叔是黑色
+                    // 子情况 B: "三角形"
+                    if (z == parent.left) {
+                        z = parent;
+                        rightRotate(z);
+                        parent = z.parent;
+                    }
+                    // 子情况 A: "直线"
+                    parent.color = BLACK;
+                    grandparent.color = RED;
+                    leftRotate(grandparent);
+                }
+            }
+        }
+        root.color = BLACK; // 规则2：根节点永远是黑色
+    }
+
+    // --- 删除操作 ---
+    // (删除操作代码较长，且逻辑复杂，此处省略以保持清晰)
+    // (完整的删除会包含 bstDelete, transplant, fixDelete 等辅助方法)
+    // (其逻辑与我们之前讨论的理论完全一致)
+
+
+    // --- 打印树 (中序遍历) ---
+    public void inOrder() {
+        inOrderRec(this.root);
+        System.out.println();
+    }
+
+    private void inOrderRec(Node node) {
+        if (node != NIL) {
+            inOrderRec(node.left);
+            System.out.print(node.key + "(" + (node.color == RED ? "R" : "B") + ") ");
+            inOrderRec(node.right);
+        }
+    }
+}
+```
+
 ---
 
 **[返回](../README.md)**
