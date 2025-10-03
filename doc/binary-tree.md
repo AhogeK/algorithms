@@ -3801,6 +3801,48 @@ public class RedBlackTree {
 }
 ```
 
+## 典型问题 1：二叉搜索树中第 K 小的元素
+
+### 「力扣」第 230 题：[二叉搜索树中第 $K$ 小的元素](https://leetcode.cn/problems/kth-smallest-element-in-a-bst/)
+
+#### 解题思路
+
+1. 对 BST 进行递归中序遍历，并在遍历过程中计数。
+2. 每访问一个节点，计数器加一。
+3. 当计数器等于 k 时，记录该节点值并停止遍历。
+4. 返回该值。
+
+
+#### 代码实现
+
+```java
+public class KthSmallestElementInABST {
+    private int count = 0;
+    private int result = -1;
+
+    public int kthSmallest(TreeNode root, int k) {
+        inorder(root, k);
+        return result;
+    }
+
+    private void inorder(TreeNode root, int k) {
+        if (root == null) return;
+        inorder(root.left, k);
+        count++;
+        if (count == k) {
+            result = root.val;
+            return;
+        }
+        inorder(root.right, k);
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度：平均和最坏均为 $\mathcal{O}(H + k)$，其中 H 是树的高度。中序遍历访问 k 个元素后返回，最坏时遍历 $k + H$ 个节点。
+* 空间复杂度：递归调用栈深度为树高度 $\mathcal{O}(H)$，最坏为 $\mathcal{O}(n)$（退化成线性链表）；平均情况下 $\mathcal{O}(\log n)$。
+
 ---
 
 **[返回](../README.md)**
