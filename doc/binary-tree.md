@@ -213,6 +213,10 @@
       * [解题思路](#解题思路-2)
       * [代码实现](#代码实现-33)
       * [复杂度分析](#复杂度分析-38)
+    * [完成「力扣」第 1305 题：两棵二叉搜索树中的所有元素](#完成力扣第-1305-题两棵二叉搜索树中的所有元素)
+      * [解题思路](#解题思路-3)
+      * [代码实现](#代码实现-34)
+      * [复杂度分析](#复杂度分析-39)
 <!-- TOC -->
 
 # 二叉树
@@ -3928,6 +3932,57 @@ public class MinimumDistanceBetweenBSTNodes {
 
 * **时间复杂度**： 遍历整棵树一次， $\mathcal{O}(n)$
 * **空间复杂度**： 主要为递归栈深度 $\mathcal{O}(H)$， 平均 $\mathcal{O}(\log n)$，最坏为 $\mathcal{O}(n)$。
+
+### 完成「力扣」第 1305 题：[两棵二叉搜索树中的所有元素]()
+
+#### 解题思路
+
+* **中序遍历 (Inorder Traversal)**\
+  对 `root1` 和 `root2` 分别进行中序遍历，得到两个升序数组 $A_1$ 与 $A_2$。
+* **双指针归并 (Merge Process)**\
+  类似归并排序的合并步骤，使用两个指针分别遍历 $A_1$ 和 $A_2$，逐个比较并放入结果数组。
+* **返回结果**\
+  合并完成后返回结果数组。
+
+#### 代码实现
+
+```java
+public class AllElementsInTwoBinarySearchTrees {
+    public List<Integer> getAllElements(TreeNode root1, TreeNode root2) {
+        List<Integer> list1 = new ArrayList<>();
+        List<Integer> list2 = new ArrayList<>();
+        inorder(root1, list1);
+        inorder(root2, list2);
+        List<Integer> result = new ArrayList<>();
+        int i = 0, j = 0;
+        while (i < list1.size() && j < list2.size())
+            if (list1.get(i) <= list2.get(j)) result.add(list1.get(i++));
+            else result.add(list2.get(j++));
+        while (i < list1.size()) result.add(list1.get(i++));
+        while (j < list2.size()) result.add(list2.get(j++));
+        return result;
+    }
+
+    private void inorder(TreeNode node, List<Integer> list) {
+        if (node == null) return;
+        inorder(node.left, list);
+        list.add(node.val);
+        inorder(node.right, list);
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**
+
+  $$ T = \mathcal{O}(n_1) + \mathcal{O}(n_2) + \mathcal{O}(n_1 + n_2) = \mathcal{O}(n_1 + n_2)$$
+
+* **空间复杂度**
+
+  $$ S = \mathcal{O}(n_1 + n_2)$$
+
+  用于存储两个有序数组。
 
 ---
 
