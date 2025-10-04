@@ -200,6 +200,15 @@
       * [完整可运行的 AVL 树 Java 代码](#完整可运行的-avl-树-java-代码)
     * [红黑树](#红黑树)
       * [红黑树完整实现](#红黑树完整实现)
+  * [典型问题 1：二叉搜索树中第 K 小的元素](#典型问题-1二叉搜索树中第-k-小的元素)
+    * [「力扣」第 230 题：二叉搜索树中第 $K$ 小的元素](#力扣第-230-题二叉搜索树中第-k-小的元素)
+      * [解题思路](#解题思路)
+      * [代码实现](#代码实现-31)
+      * [复杂度分析](#复杂度分析-36)
+    * [完成「力扣」第 669 题：修剪二叉搜索树](#完成力扣第-669-题修剪二叉搜索树)
+      * [解题思路](#解题思路-1)
+      * [代码实现](#代码实现-32)
+      * [复杂度分析](#复杂度分析-37)
 <!-- TOC -->
 
 # 二叉树
@@ -3842,6 +3851,40 @@ public class KthSmallestElementInABST {
 
 * 时间复杂度：平均和最坏均为 $\mathcal{O}(H + k)$，其中 H 是树的高度。中序遍历访问 k 个元素后返回，最坏时遍历 $k + H$ 个节点。
 * 空间复杂度：递归调用栈深度为树高度 $\mathcal{O}(H)$，最坏为 $\mathcal{O}(n)$（退化成线性链表）；平均情况下 $\mathcal{O}(\log n)$。
+
+### 完成「力扣」第 669 题：[修剪二叉搜索树](https://leetcode.cn/problems/trim-a-binary-search-tree/description/)
+
+#### 解题思路
+
+采用**递归**方式，步骤为：
+
+1. 若当前节点为空，返回 `null`。
+2. 若当前节点值小于 `low`，说明当前节点和左子树都小于 `low`，整棵左子树舍弃，递归调用右子树修剪结果返回。
+3. 若当前节点值大于 `high`，说明当前节点和右子树都大于 `high`，整个右子树舍弃，递归调用左子树修剪结果返回。
+4. 当前节点值在区间内，则递归调用左右子树修剪，分别更新 `root.left` 和 `root.right`，返回当前节点。
+
+#### 代码实现
+
+```java
+public class TrimABinarySearchTree {
+    public TreeNode trimBST(TreeNode root, int low, int high) {
+        if (root == null) return null;
+
+        if (root.val < low) return trimBST(root.right, low, high);
+        else if (root.val > high) return trimBST(root.left, low, high);
+        else {
+            root.left = trimBST(root.left, low, high);
+            root.right = trimBST(root.right, low, high);
+            return root;
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度: $\mathcal{O}(n)$，每个节点最多访问一次，递归遍历整棵树。
+* 空间复杂度: $\mathcal{O}(H)$，为递归栈空间，H 为树的高度，平均为 $\mathcal{O}(\log n)$，最坏退化为链表 $\mathcal{O}(n)$。
 
 ---
 
