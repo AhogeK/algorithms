@@ -209,6 +209,10 @@
       * [解题思路](#解题思路-1)
       * [代码实现](#代码实现-32)
       * [复杂度分析](#复杂度分析-37)
+    * [完成「力扣」第 783 题：二叉搜索树节点最小距离](#完成力扣第-783-题二叉搜索树节点最小距离)
+      * [解题思路](#解题思路-2)
+      * [代码实现](#代码实现-33)
+      * [复杂度分析](#复杂度分析-38)
 <!-- TOC -->
 
 # 二叉树
@@ -3885,6 +3889,45 @@ public class TrimABinarySearchTree {
 
 * 时间复杂度: $\mathcal{O}(n)$，每个节点最多访问一次，递归遍历整棵树。
 * 空间复杂度: $\mathcal{O}(H)$，为递归栈空间，H 为树的高度，平均为 $\mathcal{O}(\log n)$，最坏退化为链表 $\mathcal{O}(n)$。
+
+### 完成「力扣」第 783 题：[二叉搜索树节点最小距离](https://leetcode.cn/problems/minimum-distance-between-bst-nodes/description/)
+
+#### 解题思路
+
+* 利用 **中序遍历** 得到一个递增序列（无需完整保存数组，只需记录上一个节点即可节省空间）。
+* 在遍历过程中：
+    * 维护上一个节点值变量 `prev`。
+    * 每访问一个节点时，计算当前节点与 `prev` 的差值并更新全局最小差 `ans`。
+* 遍历结束后得到最小差值。
+
+
+#### 代码实现
+
+```java
+public class MinimumDistanceBetweenBSTNodes {
+    private int ans = Integer.MAX_VALUE;
+    private Integer prev = null;
+
+    public int minDiffInBST(TreeNode root) {
+        inorder(root);
+        return ans;
+    }
+
+    private void inorder(TreeNode node) {
+        if (node == null) return;
+
+        inorder(node.left);
+        if (prev != null) ans = Math.min(ans, node.val - prev);
+        prev = node.val;
+        inorder(node.right);
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： 遍历整棵树一次， $\mathcal{O}(n)$
+* **空间复杂度**： 主要为递归栈深度 $\mathcal{O}(H)$， 平均 $\mathcal{O}(\log n)$，最坏为 $\mathcal{O}(n)$。
 
 ---
 
