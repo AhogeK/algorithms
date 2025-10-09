@@ -226,6 +226,10 @@
       * [解题思路](#解题思路-5)
       * [代码实现](#代码实现-36)
       * [复杂度分析](#复杂度分析-41)
+    * [完成「力扣」第 1373 题：二叉搜索子树的最大键值和](#完成力扣第-1373-题二叉搜索子树的最大键值和)
+      * [解题思路](#解题思路-6)
+      * [代码实现](#代码实现-37)
+      * [复杂度分析](#复杂度分析-42)
 <!-- TOC -->
 
 # 二叉树
@@ -4093,6 +4097,70 @@ public class ContainsDuplicateIII {
   * 每次 `TreeSet` 操作（`add`/`remove`/`ceiling`）为 $\mathcal{O}(\log k)$
   * $k = \min(n, \text{indexDiff} + 1)$
 * **空间复杂度**： $\mathcal{O}(k)$，`TreeSet` 最多存储 `indexDiff + 1` 个元素
+
+### 完成「力扣」第 1373 题：[二叉搜索子树的最大键值和](https://leetcode.cn/problems/maximum-sum-bst-in-binary-tree/)
+
+#### 解题思路
+
+**后序遍历 + 信息上传**
+
+使用 **DFS 后序遍历**，自底向上收集信息并验证 BST 性质。
+
+**核心思想**
+
+每个节点需要向父节点上传 **4 个关键信息**：
+
+$$\begin{aligned} &\textbf{1. } \text{isBST} : \text{当前子树是否为 BST} \\\ &\textbf{2. } \text{sum} : \text{当前子树节点值之和} \\\ &\textbf{3. } \text{min} : \text{当前子树最小值（用于验证父节点）} \\\ &\textbf{4. } \text{max} : \text{当前子树最大值（用于验证父节点）} \end{aligned}$$
+
+**BST 判定条件**
+
+对于节点 `node`：
+
+$$\text{node is BST} \iff \begin{cases} \text{left.isBST} = \text{true} \\\ \text{right.isBST} = \text{true} \\\ \text{left.max} < \text{node.val} \\\ \text{right.min} > \text{node.val} \end{cases}$$
+
+**状态更新**
+
+若当前节点为 BST：
+
+$$\begin{aligned} &\text{sum} = \text{left.sum} + \text{right.sum} + \text{node.val} \\\ &\text{min} = \text{left.min (若存在)} \\\ &\text{max} = \text{right.max (若存在)} \end{aligned}$$
+
+#### 代码实现
+
+```java
+public class MaximumSumBSTInBinaryTree {
+    private int ans = 0;
+
+    public int maxSumBST(TreeNode root) {
+        dfs(root);
+        return ans;
+    }
+
+    // return [isBST, sum, min, max]
+    private int[] dfs(TreeNode node) {
+        if (node == null) return new int[]{1, 0, Integer.MAX_VALUE, Integer.MIN_VALUE};
+        int[] left = dfs(node.left);
+        int[] right = dfs(node.right);
+        if (left[0] == 1 && right[0] == 1 && left[3] < node.val && node.val < right[2]) {
+            int sum = left[1] + right[1] + node.val;
+            ans = Math.max(ans, sum);
+            int min = node.left != null ? left[2] : node.val;
+            int max = node.right != null ? right[3] : node.val;
+            return new int[]{1, sum, min, max};
+        }
+        return new int[]{0, 0, 0, 0};
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}(n)$
+  * 每个节点访问一次
+  * 每次节点处理为 $\mathcal{O}(1)$
+* **空间复杂度**： $\mathcal{O}(h)$
+  * 递归栈深度为树高 $h$
+  * 最坏情况（链状树）： $\mathcal{O}(n)$
+  * 平衡树： $\mathcal{O}(\log n)$
 
 ---
 
