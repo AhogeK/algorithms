@@ -222,6 +222,10 @@
       * [解题思路](#解题思路-4)
       * [代码实现](#代码实现-35)
       * [复杂度分析](#复杂度分析-40)
+    * [完成「力扣」第 220 题：存在重复元素 III](#完成力扣第-220-题存在重复元素-iii)
+      * [解题思路](#解题思路-5)
+      * [代码实现](#代码实现-36)
+      * [复杂度分析](#复杂度分析-41)
 <!-- TOC -->
 
 # 二叉树
@@ -4028,6 +4032,67 @@ public class ValidateBinarySearchTree {
 
 * 时间复杂度： $\mathcal{O}(n)$，每个节点访问一次。
 * 空间复杂度： $\mathcal{O}(h)$，递归栈最大深度为树高 $h$。
+
+### 完成「力扣」第 220 题：[存在重复元素 III](https://leetcode.cn/problems/contains-duplicate-iii/description/)
+
+#### 解题思路
+
+**滑动窗口 + 有序集合**
+
+**关键观察**：对于当前位置 $i$，只需检查**窗口 $[i - \text{indexDiff}, i - 1]$** 内是否存在满足数值条件的元素。
+
+**核心策略**
+
+使用 `TreeSet`（Java 的红黑树）维护滑动窗口内的元素，利用其**有序性**快速查找：
+
+对于 `nums[i]`，需要在窗口中找到元素 $x$ 满足：
+
+$$|\text{nums}[i] - x| \le \text{valueDiff}$$
+
+等价于：
+
+$$\text{nums}[i] - \text{valueDiff} \le x \le \text{nums}[i] + \text{valueDiff}$$
+
+**TreeSet 操作**：
+
+* `ceiling(nums[i] - valueDiff)`：找到 $\ge \text{nums}[i] - \text{valueDiff}$ 的最小值
+* 判断该值是否 $\le \text{nums}[i] + \text{valueDiff}$
+
+**算法流程**
+
+1. 遍历数组，维护大小不超过 `indexDiff` 的滑动窗口
+2. 对于每个 `nums[i]`：
+  * 在 `TreeSet` 中查找是否存在满足数值条件的元素
+  * 若存在，返回 `true`
+  * 将 `nums[i]` 加入 `TreeSet`
+  * 若窗口超过 `indexDiff`，移除最左侧元素
+
+
+#### 代码实现
+
+```java
+public class ContainsDuplicateIII {
+    public boolean containsNearbyAlmostDuplicate(int[] nums, int indexDiff, int valueDiff) {
+        TreeSet<Long> set = new TreeSet<>();
+        for (int i = 0; i < nums.length; i++) {
+            long num = nums[i];
+            Long ceil = set.ceiling(num - valueDiff);
+            if (ceil != null && ceil <= num + valueDiff) return true;
+            set.add(num);
+            if (i >= indexDiff) set.remove((long) nums[i - indexDiff]);
+        }
+        return false;
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}(n \log k)$
+  * $n$ 次遍历
+  * 每次 `TreeSet` 操作（`add`/`remove`/`ceiling`）为 $\mathcal{O}(\log k)$
+  * $k = \min(n, \text{indexDiff} + 1)$
+* **空间复杂度**： $\mathcal{O}(k)$，`TreeSet` 最多存储 `indexDiff + 1` 个元素
 
 ---
 
