@@ -3984,6 +3984,46 @@ public class AllElementsInTwoBinarySearchTrees {
 
   用于存储两个有序数组。
 
+## 典型问题 2：验证二叉搜索树
+
+### 例：「力扣」第 98 题：[验证二叉搜索树](https://leetcode.cn/problems/validate-binary-search-tree/description/)
+
+#### 解题思路
+
+采用 **递归+范围限制**（上下界）的方法：
+
+* 对每个节点，将允许它的值的范围设置为 `(lower, upper)`，初始为 `(-∞, +∞)`。
+* 判断当前节点值是否在 `(lower, upper)` 范围内，若不在，则返回 false。
+* 递归验证左子树时，上界为当前节点值（因为左子树必须小于当前节点）。
+* 递归验证右子树时，下界为当前节点值（因为右子树必须大于当前节点）。
+
+这种方法从顶向下传递约束边界，确保了全树的严格BST性质。
+
+#### 代码实现
+
+```java
+public class ValidateBinarySearchTree {
+    public boolean isValidBST(TreeNode root) {
+        return validate(root, Long.MIN_VALUE, Long.MAX_VALUE);
+    }
+
+    private boolean validate(TreeNode node, long lower, long upper) {
+        if (node == null) return true;
+        if (node.val <= lower || node.val >= upper) return false;
+        
+        if (!validate(node.left, lower, node.val)) return false;
+        if (!validate(node.right, node.val, upper)) return false;
+        
+        return true;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度： $\mathcal{O}(n)$，每个节点访问一次。
+* 空间复杂度： $\mathcal{O}(h)$，递归栈最大深度为树高 $h$。
+
 ---
 
 **[返回](../README.md)**
