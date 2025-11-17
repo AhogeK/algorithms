@@ -20,6 +20,11 @@
         * [3. 约束满足问题（Constraint Satisfaction Problem, CSP）](#3-约束满足问题constraint-satisfaction-problem-csp)
       * [4. 路径与搜索问题](#4-路径与搜索问题)
       * [三、时间和空间考虑](#三时间和空间考虑)
+    * [通过全排列问题理解回溯算法是树形问题上的深度优先遍历](#通过全排列问题理解回溯算法是树形问题上的深度优先遍历)
+      * [例：「力扣」第 46 题：全排列](#例力扣第-46-题全排列)
+        * [核心思路 （回溯 DFS 构造序列）](#核心思路-回溯-dfs-构造序列)
+        * [代码](#代码)
+        * [复杂度分析](#复杂度分析)
 <!-- TOC -->
 
 # 回溯算法
@@ -198,6 +203,167 @@ $$\mathcal{O}(b^{d})$$
 * 输入规模较小；
 * 可以剪枝的大空间问题；
 * 搜索解有限、但逻辑复杂的问题。
+
+### 通过全排列问题理解回溯算法是树形问题上的深度优先遍历
+
+#### 例：「力扣」第 46 题：[全排列](https://leetcode.cn/problems/permutations/description/)
+
+##### 核心思路 （回溯 DFS 构造序列）
+
+用 DFS 按位置从前往后构造一个长度为 $n$ 的排列：
+
+* 当前构造的排列记为 `path`（一个动态数组）
+* 对于每个位置，枚举还没使用过的元素放进去
+* 当 `path` 长度为 $n$ 时，得到一个完整排列，加入答案
+
+回溯的核心框架可以抽象成：
+
+$$\begin{aligned} &\text{dfs(当前层)}: \\\ &\quad \text{如果 path 长度 = n，记录答案并返回} \\\ &\quad \text{否则：枚举每一个还没用过的 nums[i]} \\\ &\qquad \text{选择：把 nums[i] 放入 path} \\\ &\qquad \text{递归：进入下一层} \\\ &\qquad \text{撤销选择：把 nums[i] 从 path 移除} \end{aligned}$$
+
+要知道某个元素是否已被使用，需要一个 `used[]` 数组：
+
+* `used[i] == true`：`nums[i]` 已经在当前 `path` 中
+* `used[i] == false`：可以使用 `nums[i]`
+
+**状态设计与转移**
+
+1. **状态变量**
+    * `List<List<Integer>> res`：存所有排列
+    * `List<Integer> path`：当前构造中的排列（路径）
+    * `boolean[] used`：长度为 `n`，记录每个位置是否已经使用
+    * `int depth`（可选）：当前递归到第几层（即 `path` 长度），也可以直接用 `path.size()` 判断
+2. **转移逻辑（DFS）**\
+   对于当前递归层：
+    1. 若 `path.size() == n`：
+        * 说明已经选满了 `n` 个数，得到一个合法排列
+        * 需要把 `path` 的一份 **拷贝** 加入结果 `res`\
+          因为 `path` 后续还要继续被修改
+    2. 否则，遍历所有下标 `i = 0..n-1`：
+        * 如果 `used[i] == true`，跳过
+        * 若为 `false`：
+            * 选择：`path.add(nums[i])`，`used[i] = true`
+            * 递归：`dfs` 到下一层
+            * 撤销选择（回溯）：`path.remove(path.size() - 1)`，`used[i] = false`
+
+**回溯的知识点与技巧**
+
+1. **“选-递归-撤销”三步固定形式**
+
+    这是几乎所有回溯题的核心模板：
+
+    $$\text{选} \Rightarrow \text{递归} \Rightarrow \text{撤销}$$
+
+    对应代码顺序严格是：
+
+    ```
+    path.add(x);
+    used[...] = true;
+
+    dfs(...);
+
+    path.remove(path.size() - 1);
+    used[...] = false;
+    ```
+
+    **撤销要对称**，不能少一步。
+
+2. **为什么结果里要 `new ArrayList<>(path)`？**
+
+    `path` 是一个全局共享的可变对象，在递归过程中不断改动。\
+    如果直接把 `path` 放进结果：
+
+    ```
+    res.add(path);  // 错误写法
+    ```
+
+    后续对 `path` 的修改会影响已经存入的“结果”，最终所有结果引用的都是同一个 `path` 对象，会变成一样的。
+
+    所以必须拷贝一份当前内容：
+
+    ```
+    res.add(new ArrayList<>(path));
+    ```
+
+    竞赛中如果忘记这一步，会导致输出所有排列都相同，是非常常见的坑。
+
+3. **不需要排序、不需要去重**
+
+    * 题意保证 `nums` 内元素互不相同，不存在重复值
+    * 所以不需要任何“去重剪枝”的技巧（比如常见的 `i > 0 && nums[i] == nums[i - 1]`）
+    * 只要简单用 `used[]` 就够用了
+
+4. **深度和 `path.size()` 谁更好用？**
+
+    两种写法：
+
+    * 传 `depth` 参数：\
+      递归时 `depth + 1`，终止条件 `depth == n`
+    * 用 `path.size()` 作为当前已选个数，终止条件：
+
+      $$\text{path.size()} == n$$
+
+    这里推荐用 `path.size()`，参数更少，代码更简洁。
+
+##### 代码
+
+```java
+public class Permutations {
+    public List<List<Integer>> permute(int[] nums) {
+        int n = nums.length;
+        List<List<Integer>> res = new ArrayList<>();
+        List<Integer> path = new ArrayList<>(n);
+        boolean[] used = new boolean[n];
+
+        dfs(nums, n, path, used, res);
+        return res;
+    }
+
+    private void dfs(int[] nums, int n, List<Integer> path, boolean[] used, List<List<Integer>> res) {
+        if (path.size() == n) {
+            res.add(new ArrayList<>(path));
+            return;
+        }
+        for (int i = 0; i < n; i++) {
+            if (used[i]) continue;
+            used[i] = true;
+            path.add(nums[i]);
+            dfs(nums, n, path, used, res);
+            path.removeLast();
+            used[i] = false;
+        }
+    }
+}
+```
+
+##### 复杂度分析
+
+设数组长度为 $n$：
+
+* 全排列个数为：
+
+  $$n! $$
+
+* 每个排列构造过程中，要做 $n$ 次 `add` 和 $n$ 次 `remove`，常数操作
+
+* 整体时间复杂度：
+
+  $$\mathcal{O}(n \times n!) $$
+
+空间复杂度：
+
+* 递归深度最多为 $n$，递归栈占用：
+
+  $$\mathcal{O}(n)$$
+
+* `path` 长度最多 $n$，`used` 长度 $n$，也是：
+
+  $$\mathcal{O}(n)$$
+
+* 输出本身需要存储 $n!$ 个长度为 $n$ 的排列，是不可避免的：
+
+  $$\Theta(n \times n!)$$
+
+通常复杂度分析中会说明：**额外辅助空间**为 $\mathcal{O}(n)$，而结果集空间为问题本身的下界。
 
 ***
 
