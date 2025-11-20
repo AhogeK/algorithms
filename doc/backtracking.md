@@ -379,7 +379,7 @@ public class Permutations {
 
 我们可以将问题分解为三个步骤：**选择 (Choose)** $\to$ **递归 (Recurse)** $\to$ **撤销 (Unchoose/Backtrack)**。
 
-$\begin{aligned} &\textbf{Algorithm } \text{DFS}(node, \text{remain}) \\\ &\quad \mathbf{1.} \ \textbf{if } node \text{ is null} \textbf{ then return} \\\ &\quad \mathbf{2.} \ \text{path.add}(node.val) \quad \textcolor{blue}{\text{// 1. 做选择}} \\\ &\quad \mathbf{3.} \ \textbf{if } \text{isLeaf}(node) \textbf{ and } \text{remain} == node.val \textbf{ then} \\\ &\qquad \text{result.add}(\text{copy of path}) \quad \textcolor{green}{\text{// 找到一条有效路径}} \\\ &\quad \mathbf{4.} \ \textbf{else} \\\ &\qquad \text{DFS}(node.left, \text{remain} - node.val) \quad \textcolor{orange}{\text{// 2. 递归左右}} \\\ &\qquad \text{DFS}(node.right, \text{remain} - node.val) \\\ &\quad \mathbf{5.} \ \text{path.removeLast()} \quad \textcolor{red}{\text{// 3. 撤销选择 (回溯)}} \end{aligned}$
+$$\begin{aligned} &\textbf{Algorithm } \text{DFS}(node, \text{remain}) \\\ &\quad \mathbf{1.} \ \textbf{if } node \text{ is null} \textbf{ then return} \\\ &\quad \mathbf{2.} \ \text{path.add}(node.val) \quad \textcolor{blue}{\text{// 1. 做选择}} \\\ &\quad \mathbf{3.} \ \textbf{if } \text{isLeaf}(node) \textbf{ and } \text{remain} == node.val \textbf{ then} \\\ &\qquad \text{result.add}(\text{copy of path}) \quad \textcolor{green}{\text{// 找到一条有效路径}} \\\ &\quad \mathbf{4.} \ \textbf{else} \\\ &\qquad \text{DFS}(node.left, \text{remain} - node.val) \quad \textcolor{orange}{\text{// 2. 递归左右}} \\\ &\qquad \text{DFS}(node.right, \text{remain} - node.val) \\\ &\quad \mathbf{5.} \ \text{path.removeLast()} \quad \textcolor{red}{\text{// 3. 撤销选择 (回溯)}} \end{aligned}$$
 
 **状态流转图**
 
@@ -419,9 +419,9 @@ public class PathSumII {
 
 ##### 复杂度分析
 
-设树中节点总数为 $N$，树的高度为 $H$（最好情况 $\log N$，最坏情况 $$N$$）。
+设树中节点总数为 $N$，树的高度为 $H$（最好情况 $\log N$，最坏情况 $N$）。
 
-1. **时间复杂度**：$$\mathcal{O}(N^2)$$ （最坏情况下）
+1. **时间复杂度**： $\mathcal{O}(N^2)$ （最坏情况下）
     * 我们必须遍历每个节点一次，这部分是 $\mathcal{O}(N)$。
     * 在最坏情况下（例如完整二叉树，每个叶子节点的路径都符合条件），我们需要对路径进行拷贝。路径平均长度为 $H$。
     * 如果符合条件的路径很多，总拷贝代价可能达到 $\mathcal{O}(N \times H)$。在链状结构下 $H=N$，故最坏为 $\mathcal{O}(N^2)$。
@@ -431,7 +431,7 @@ public class PathSumII {
     * `path` 列表存储当前路径节点，最大长度为 $H$。
     * （不计算输出结果 `res` 占用的空间）。
 
-$\begin{array}{c|c|c} \text{维度} & \text{复杂度} & \text{说明} \\\ \hline \text{时间 (Time)} & \mathcal{O}(N \times H) & \text{遍历节点 + 路径拷贝代价} \\\ \text{空间 (Space)} & \mathcal{O}(H) & \text{递归栈 + 路径存储} \end{array}$
+$$\begin{array}{c|c|c} \text{维度} & \text{复杂度} & \text{说明} \\\ \hline \text{时间 (Time)} & \mathcal{O}(N \times H) & \text{遍历节点 + 路径拷贝代价} \\\ \text{空间 (Space)} & \mathcal{O}(H) & \text{递归栈 + 路径存储} \end{array}$$
 
 ***
 
