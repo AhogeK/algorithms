@@ -25,6 +25,10 @@
         * [核心思路 （回溯 DFS 构造序列）](#核心思路-回溯-dfs-构造序列)
         * [代码](#代码)
         * [复杂度分析](#复杂度分析)
+      * [「力扣」第 113 题：路径总和 II](#力扣第-113-题路径总和-ii)
+        * [算法思路](#算法思路)
+        * [代码实现](#代码实现)
+        * [复杂度分析](#复杂度分析-1)
 <!-- TOC -->
 
 # 回溯算法
@@ -364,6 +368,70 @@ public class Permutations {
   $$\Theta(n \times n!)$$
 
 通常复杂度分析中会说明：**额外辅助空间**为 $\mathcal{O}(n)$，而结果集空间为问题本身的下界。
+
+#### 「力扣」第 113 题：[路径总和 II](https://leetcode.cn/problems/path-sum-ii/description/)
+
+##### 算法思路
+
+这是一个经典的 DFS + 回溯 问题。我们需要遍历整棵树，在遍历的过程中维护当前的路径和。
+
+**核心逻辑推导**
+
+我们可以将问题分解为三个步骤：**选择 (Choose)** $\to$ **递归 (Recurse)** $\to$ **撤销 (Unchoose/Backtrack)**。
+
+$\begin{aligned} &\textbf{Algorithm } \text{DFS}(node, \text{remain}) \\\ &\quad \mathbf{1.} \ \textbf{if } node \text{ is null} \textbf{ then return} \\\ &\quad \mathbf{2.} \ \text{path.add}(node.val) \quad \textcolor{blue}{\text{// 1. 做选择}} \\\ &\quad \mathbf{3.} \ \textbf{if } \text{isLeaf}(node) \textbf{ and } \text{remain} == node.val \textbf{ then} \\\ &\qquad \text{result.add}(\text{copy of path}) \quad \textcolor{green}{\text{// 找到一条有效路径}} \\\ &\quad \mathbf{4.} \ \textbf{else} \\\ &\qquad \text{DFS}(node.left, \text{remain} - node.val) \quad \textcolor{orange}{\text{// 2. 递归左右}} \\\ &\qquad \text{DFS}(node.right, \text{remain} - node.val) \\\ &\quad \mathbf{5.} \ \text{path.removeLast()} \quad \textcolor{red}{\text{// 3. 撤销选择 (回溯)}} \end{aligned}$
+
+**状态流转图**
+
+$$\boxed{ \begin{aligned} &\text{进入节点} \xrightarrow{\text{path.add}} \text{更新状态} \\\ &\quad \downarrow \\\ &\text{递归子节点 (尝试解)} \\\ &\quad \downarrow \\\ &\text{离开节点} \xrightarrow{\text{path.remove}} \text{恢复状态} \end{aligned} }$$
+
+**算法知识点与技巧**
+
+1. **回溯法 (Backtracking)**：通过维护一个全局的（或传递引用的）`path` 列表，在进入递归前添加元素，在递归返回后删除元素。这样可以避免在每个递归层级都创建新的列表，大大节省空间和时间。
+2. **引用拷贝 (Deep Copy)**：当找到满足条件的路径时，不能直接把 `path` 引用加入结果集（因为 `path` 会随回溯改变）。必须创建一份**副本**：`new ArrayList<>(path)`。
+3. **前序遍历 (Preorder Traversal)**：本质上是遵循“根 -> 左 -> 右”的顺序进行深度优先搜索。
+
+##### 代码实现
+
+```java
+public class PathSumII {
+    List<List<Integer>> res = new ArrayList<>();
+    List<Integer> path = new ArrayList<>();
+
+    public List<List<Integer>> pathSum(TreeNode root, int targetSum) {
+        dfs(root, targetSum);
+        return res;
+    }
+
+    private void dfs(TreeNode node, int target) {
+        if (node == null) return;
+        path.add(node.val);
+        target -= node.val;
+        if (node.left == null && node.right == null && target == 0) res.add(new ArrayList<>(path));
+        else {
+            dfs(node.left, target);
+            dfs(node.right, target);
+        }
+        path.removeLast();
+    }
+}
+```
+
+##### 复杂度分析
+
+设树中节点总数为 $N$，树的高度为 $H$（最好情况 $\log N$，最坏情况 $$N$$）。
+
+1. **时间复杂度**：$$\mathcal{O}(N^2)$$ （最坏情况下）
+    * 我们必须遍历每个节点一次，这部分是 $\mathcal{O}(N)$。
+    * 在最坏情况下（例如完整二叉树，每个叶子节点的路径都符合条件），我们需要对路径进行拷贝。路径平均长度为 $H$。
+    * 如果符合条件的路径很多，总拷贝代价可能达到 $\mathcal{O}(N \times H)$。在链状结构下 $H=N$，故最坏为 $\mathcal{O}(N^2)$。
+    * *一般情况*：通常远优于最坏情况，接近 $\mathcal{O}(N)$。
+2. **空间复杂度**： $\mathcal{O}(H)$
+    * 递归栈的深度取决于树的高度 $H$。
+    * `path` 列表存储当前路径节点，最大长度为 $H$。
+    * （不计算输出结果 `res` 占用的空间）。
+
+$\begin{array}{c|c|c} \text{维度} & \text{复杂度} & \text{说明} \\\ \hline \text{时间 (Time)} & \mathcal{O}(N \times H) & \text{遍历节点 + 路径拷贝代价} \\\ \text{空间 (Space)} & \mathcal{O}(H) & \text{递归栈 + 路径存储} \end{array}$
 
 ***
 
