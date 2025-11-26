@@ -30,6 +30,13 @@
         * [代码实现](#代码实现)
         * [复杂度分析](#复杂度分析-1)
   * [什么是剪枝](#什么是剪枝)
+    * [例 1：「力扣」：第 47 题：全排列 II](#例-1力扣第-47-题全排列-ii)
+      * [算法思路：交换回溯 + 局部去重 (Swap-based Backtracking)](#算法思路交换回溯--局部去重-swap-based-backtracking)
+        * [1. 原地交换 (In-place Swap)](#1-原地交换-in-place-swap)
+        * [2. 局部去重 (Local Deduplication)](#2-局部去重-local-deduplication)
+      * [核心知识点与技巧](#核心知识点与技巧)
+      * [代码实现](#代码实现-1)
+      * [复杂度分析](#复杂度分析-2)
 <!-- TOC -->
 
 # 回溯算法
@@ -483,6 +490,83 @@ $$\begin{array}{c|c|c} \text{维度} & \text{复杂度} & \text{说明} \\\ \hli
 * 好的剪枝可以将 $100$ 秒的运行时间缩短到 $0.1$ 秒。
 * 剪枝的难点在于**设计剪枝条件**：条件太松，剪不掉多少废枝；条件太严，可能会把正确答案也误剪掉。
  
+### 例 1：「力扣」：第 47 题：[全排列 II](https://leetcode.cn/problems/permutations-ii/description/)
+
+#### 算法思路：交换回溯 + 局部去重 (Swap-based Backtracking)
+
+为了超越常规的 `visited` 数组解法，我们采用**基于交换（Swap）的原地回溯**策略。
+
+##### 1. 原地交换 (In-place Swap)
+
+我们不再维护一个额外的 `path` 列表，而是直接在原数组 `nums` 上进行操作。
+
+* 将数组分为 **\[已确定的前缀]** 和 **\[待选的后缀]**。
+* 通过 `swap` 操作，将后缀中的任意一个数交换到当前位置 `index`，从而确定当前位置的数字。
+* 递归完成后，再 `swap` 回来（回溯），恢复数组状态。
+
+##### 2. 局部去重 (Local Deduplication)
+
+由于交换操作会打乱数组顺序，传统的“排序 + 比较相邻元素”的去重策略失效。我们需要一个新的去重机制：
+
+* **核心思想**：在递归的**每一层（Level）**，也就是决定 `index` 位置放哪个数时，我们需要记录**在这个位置上已经尝试过哪些数值**。
+* **实现**：如果在这个位置上，之前已经放过数字 `X` 并递归过了，那么后面如果再遇到一个 `X`，就直接跳过，因为它生成的子树必然是重复的。
+
+#### 核心知识点与技巧
+
+1. **回溯的本质**：回溯不一定要用 `add`/`remove`，**交换（Swap）** 也是一种回溯状态变化。
+2. **空间换时间**：利用题目数据范围极小（`-10` 到 `10`），使用栈上的 `boolean` 数组代替 `HashSet` 进行查重，将哈希开销降为零。
+3. **Cache Friendly**：该算法极度依赖数组的连续内存访问，且无额外对象创建，对 CPU 缓存极其友好。
+
+#### 代码实现
+
+```java
+public class PermutationsII {
+    List<List<Integer>> res;
+
+    public List<List<Integer>> permuteUnique(int[] nums) {
+        res = new ArrayList<>();
+        dfs(nums, 0);
+        return res;
+    }
+
+    private void dfs(int[] nums, int index) {
+        if (index == nums.length) {
+            List<Integer> path = new ArrayList<>(nums.length);
+            for (int num : nums) path.add(num);
+            res.add(path);
+            return;
+        }
+
+        boolean[] usedInCurrentLevel = new boolean[21];
+
+        for (int i = index; i < nums.length; i++) {
+            if (usedInCurrentLevel[nums[i] + 10]) continue;
+
+            usedInCurrentLevel[nums[i] + 10] = true;
+            swap(nums, index, i);
+            dfs(nums, index + 1);
+            swap(nums, index, i);
+        }
+    }
+
+    private void swap(int[] nums, int i, int j) {
+        int temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}(n \times n!)$
+    * 最坏情况下（无重复元素），解的个数为 $n!$。
+    * 每个解在叶子节点需要 $\mathcal{O}(n)$ 的时间复制到结果集。
+    * **优势**：相比常规解法，循环次数随着深度递减（ $\sum (n-k)$ vs $\sum n$），且剪枝判断（数组索引访问）比常规解法的判断更快。
+* **空间复杂度**： $\mathcal{O}(n)$
+    * 递归栈深度为 $n$。
+    * 每一层递归分配一个微小的 `boolean[21]`，总空间开销仍然是线性的 $\mathcal{O}(n)$。
+
 ***
 
 [返回](../README.md)
