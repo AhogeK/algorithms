@@ -45,6 +45,10 @@
       * [算法思路：频率统计 + 聚合回溯](#算法思路频率统计--聚合回溯)
       * [完整代码](#完整代码-1)
       * [复杂度分析](#复杂度分析-4)
+    * [完成「力扣」第 78 题：子集](#完成力扣第-78-题子集)
+      * [算法思路](#算法思路-1)
+      * [完整代码](#完整代码-2)
+      * [复杂度分析](#复杂度分析-5)
 <!-- TOC -->
 
 # 回溯算法
@@ -714,6 +718,59 @@ public class CombinationSumII {
 * **空间复杂度**： $\mathcal{O}(K)$
     * 主要开销是递归栈的深度，最大为 50（即去重后的数字个数）。
     * `path` 和 `res` 不计入算法辅助空间。
+
+### 完成「力扣」第 78 题：[子集](https://leetcode.cn/problems/subsets/description/)
+
+#### 算法思路
+
+回溯法是解决此类组合类问题的通用解法。我们可以将生成子集的过程想象成构造一棵状态空间树。
+
+**算法逻辑**
+
+1. **定义状态**：我们需要记录当前已经选择的数字路径（`path`）以及下一步可以从哪个位置开始选择（`startIndex`）。
+2. **递归选择**：
+    * 在递归的每一层，我们从 `startIndex` 开始遍历数组 `nums`。
+    * 对于每一个数字 $nums_i$，我们做出选择：将其加入 `path`。
+    * 然后递归调用，处理下一个位置 $i + 1$。
+    * **回溯（撤销选择）**：递归返回后，将 $nums_i$ 从 `path` 中移除，以便尝试下一个数字。
+3. **收集结果**：与全排列不同，子集问题中**树上的每一个节点**（包括根节点的空集）都是一个合法的子集。因此，我们在进入递归函数的一开始，就将当前的 `path` 加入结果集 `res`。
+
+#### 完整代码
+
+```java
+public class Subsets {
+    List<List<Integer>> res = new ArrayList<>();
+    List<Integer> path = new ArrayList<>();
+
+    public List<List<Integer>> subsets(int[] nums) {
+        backtrack(nums, 0);
+        return res;
+    }
+
+    private void backtrack(int[] nums, int startIndex) {
+        res.add(new ArrayList<>(path));
+        for (int i = startIndex; i < nums.length; i++) {
+            path.add(nums[i]);
+            backtrack(nums, i + 1);
+            path.removeLast();
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+假设数组 `nums` 的长度为 $n$。
+
+* **时间复杂度**： $\mathcal{O}(n \times 2^n)$
+    * 子集总数为 $2^n$ 个。
+    * 对于每个子集，我们需要将其复制到结果列表中，平均或最坏情况下复制操作的耗时与子集长度成正比，平均长度为 $\frac{n}{2}$，即 $\mathcal{O}(n)$。
+    * 因此总时间复杂度为 $\mathcal{O}(n \times 2^n)$。
+* **空间复杂度**： $\mathcal{O}(n)$
+    * 这里只计算除了返回结果以外的额外空间。
+    * 递归栈的深度最大为 $n$。
+    * `path` 列表在递归过程中最大长度为 $n$。
+    * 因此空间复杂度为 $\mathcal{O}(n)$。
 
 ***
 
