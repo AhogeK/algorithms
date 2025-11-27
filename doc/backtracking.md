@@ -30,13 +30,6 @@
         * [代码实现](#代码实现)
         * [复杂度分析](#复杂度分析-1)
   * [什么是剪枝](#什么是剪枝)
-    * [例 1：「力扣」：第 47 题：全排列 II](#例-1力扣第-47-题全排列-ii)
-      * [算法思路：交换回溯 + 局部去重 (Swap-based Backtracking)](#算法思路交换回溯--局部去重-swap-based-backtracking)
-        * [1. 原地交换 (In-place Swap)](#1-原地交换-in-place-swap)
-        * [2. 局部去重 (Local Deduplication)](#2-局部去重-local-deduplication)
-      * [核心知识点与技巧](#核心知识点与技巧)
-      * [代码实现](#代码实现-1)
-      * [复杂度分析](#复杂度分析-2)
 <!-- TOC -->
 
 # 回溯算法
@@ -459,10 +452,6 @@ $$\begin{array}{c|c|c} \text{维度} & \text{复杂度} & \text{说明} \\\ \hli
 2. **剪枝的核心逻辑**
 
     回溯算法本质上是**深度优先搜索（DFS）**。剪枝就是在这个递归过程中加入一个判断语句（`if`），如果满足特定条件，直接 `return` 或 `continue`，不再进行下一层递归。
-
-    用伪代码表示，剪枝的位置通常非常靠前：
-
-    $$\begin{aligned} &\textbf{Function } \text{backtrack}(path, choices) \\\ &\qquad \textbf{if } \text{satisfies end condition} \textbf{ then } \\\ &\qquad \qquad \text{add } path \text{ to result} \\\ &\qquad \qquad \textbf{return} \\\ &\qquad \\\ &\qquad \textbf{for } choice \in choices \textbf{ do} \\\ &\qquad \qquad \text{make a move} \\\ &\qquad \qquad \textcolor{red}{\textbf{if } \text{isValid}(path) \textbf{ is false } \textbf{ then continue} \quad // \text{ ✂️ 剪枝点}} \\\ &\qquad \qquad \text{backtrack}(path, \text{remaining choices}) \\\ &\qquad \qquad \text{undo the move (backtrack)} \end{aligned}$$
 
 3. **常见的剪枝类型**
 
