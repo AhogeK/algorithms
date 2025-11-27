@@ -556,6 +556,72 @@ public class PermutationsII {
     * 递归栈深度为 $n$。
     * 每一层递归分配一个微小的 `boolean[21]`，总空间开销仍然是线性的 $\mathcal{O}(n)$。
 
+### 例 2：完成「力扣」第 39 题：[组合之和](https://leetcode.cn/problems/combination-sum/description/)
+
+#### 算法思路：排序 + 数组模拟栈回溯
+
+为了达到竞速级别的速度，算法设计围绕两个核心点：**剪枝** 和 **内存管理**。
+
+**逻辑流程**
+
+1. **排序**：首先对 `candidates` 进行升序排序。这是后续剪枝的基础。
+2. **搜索策略**：
+    * 按顺序遍历数组，对于当前元素 $candidates_i$，我们可以选择放入路径。
+    * 为了避免重复组合（如 `[2,3]` vs `[3,2]`），规定**下一层递归的搜索起点只能是当前下标 $i$ 或更大的下标**。
+3. **极速剪枝**：
+    * 在遍历过程中，如果发现当前数字 $candidates_i > \text{剩余 target}$，由于数组已排序，后面的数字肯定更大，直接停止当前层的循环（`break`）。
+
+**性能优化策略（本代码核心）**
+
+* **拒绝 ArrayList**：常规写法使用 `LinkedList` 或 `ArrayList` 来模拟栈。这会产生大量的 `Integer` 包装对象和节点对象。
+* **数组模拟栈**：题目限制 `target <= 40`，且最小元素为 $2$，这意味着递归深度（路径长度）最多为 $40/2 = 20$。代码中预分配一个 `int[41]` 的数组 `path`，配合整数指针 `pathLen` 模拟入栈出栈，全程无堆内存分配（除最终结果外）。
+
+#### 完整代码
+
+```java
+public class CombinationSum {
+    private List<List<Integer>> res;
+    private int[] path;
+    private int pathLen;
+
+    public List<List<Integer>> combinationSum(int[] candidates, int target) {
+        path = new int[41];
+        pathLen = 0;
+        res = new ArrayList<>();
+        Arrays.sort(candidates);
+        dfs(candidates, target, 0);
+        return res;
+    }
+
+    private void dfs(int[] candidates, int target, int start) {
+        if (target == 0) {
+            List<Integer> list = new ArrayList<>(pathLen);
+            for (int i = 0; i < pathLen; i++) list.add(path[i]);
+            res.add(list);
+            return;
+        }
+
+        for (int i = start; i < candidates.length; i++) {
+            int num = candidates[i];
+            if (target < num) break;
+            path[pathLen++] = num;
+            dfs(candidates, target - num, i);
+            pathLen--;
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}(S)$\
+  其中 $S$ 是所有可行解的长度总和。
+    * 理论最坏情况是指数级的 $\mathcal{O}(N^{\frac{target}{min}})$，但在强力剪枝和题目限制（解的数量 $< 150$）下，实际运行的节点数非常少。
+    * 排序的时间 $\mathcal{O}(N \log N)$ 远小于搜索时间，可忽略。
+* **空间复杂度**： $\mathcal{O}(target)$
+    * 我们需要 $\mathcal{O}(target)$ 的空间来存储递归调用栈和 `path` 数组。
+    * `path` 数组固定分配了 $41 \times 4$ 字节，几乎可以忽略不计。
+
 ***
 
 [返回](../README.md)
