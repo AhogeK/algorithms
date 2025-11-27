@@ -41,6 +41,10 @@
       * [算法思路：排序 + 数组模拟栈回溯](#算法思路排序--数组模拟栈回溯)
       * [完整代码](#完整代码)
       * [复杂度分析](#复杂度分析-3)
+    * [「力扣」第 40 题：组合之和 II](#力扣第-40-题组合之和-ii)
+      * [算法思路：频率统计 + 聚合回溯](#算法思路频率统计--聚合回溯)
+      * [完整代码](#完整代码-1)
+      * [复杂度分析](#复杂度分析-4)
 <!-- TOC -->
 
 # 回溯算法
@@ -632,6 +636,84 @@ public class CombinationSum {
 * **空间复杂度**： $\mathcal{O}(target)$
     * 我们需要 $\mathcal{O}(target)$ 的空间来存储递归调用栈和 `path` 数组。
     * `path` 数组固定分配了 $41 \times 4$ 字节，几乎可以忽略不计。
+
+### 「力扣」第 40 题：[组合之和 II](https://leetcode.cn/problems/combination-sum-ii/description/)
+
+#### 算法思路：频率统计 + 聚合回溯
+
+传统的做法是"排序 + 逐个回溯"，但面对大量重复元素（如 `[1,1,1,1...]`）时，递归树会变得非常深且宽。本解法采用了**聚合思维**，将题目转化为：
+
+> "对于数字 1，我有 3 个，我要选几个？对于数字 2，我有 1 个，我要选几个？"
+
+**核心步骤：**
+
+1. **频率统计（桶排序）**：
+    * 创建一个大小为 51 的数组 `freq`。
+    * 遍历输入数组，统计每个数字出现的次数。
+    * 同时忽略掉大于 `target` 的数字（预先剪枝）。
+2. **构建去重数组**：
+    * 生成一个不包含重复数字的 `candidates` 数组（且天然有序），例如原数组 `[1, 2, 1, 5]` 变为 `[1, 2, 5]`，同时记录对应的频率。
+3. **聚合递归（DFS）**：
+    * 不再按原数组下标遍历，而是按**去重后的数字**遍历。
+    * 对于当前数字 `val`（拥有 `count` 个），我们在这一层递归中直接通过循环尝试：**选 0 个、选 1 个、...、选 k 个**。
+    * 这种方式一次性处理了所有相同的数字，天然解决了"去重"问题，并极大地压缩了递归树的高度。
+
+#### 完整代码
+
+```java
+public class CombinationSumII {
+    List<List<Integer>> res = new ArrayList<>();
+    List<Integer> path = new ArrayList<>();
+    int[] candidates;
+    int[] freq;
+
+    public List<List<Integer>> combinationSum2(int[] originalCandidates, int target) {
+        freq = new int[51];
+        for (int num : originalCandidates)
+            if (num <= target)
+                freq[num]++;
+        candidates = new int[51];
+        int size = 0;
+        for (int i = 1; i <= 50; i++)
+            if (freq[i] > 0)
+                candidates[size++] = i;
+        dfs(0, target, size);
+        return res;
+    }
+
+    private void dfs(int idx, int rest, int size) {
+        if (rest == 0) {
+            res.add(new ArrayList<>(path));
+            return;
+        }
+        if (idx == size || candidates[idx] > rest) return;
+        int val = candidates[idx];
+        int count = freq[val];
+        dfs(idx + 1, rest, size);
+        for (int i = 1; i <= count; i++) {
+            int cost = i * val;
+            if (rest - cost < 0) break;
+            path.add(val);
+            dfs(idx + 1, rest - cost, size);
+        }
+        int currentSize = path.size();
+        while (currentSize > 0 && path.get(currentSize - 1) == val) {
+            path.remove(currentSize - 1);
+            currentSize--;
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}(N + K \cdot 2^K)$
+    * $N$ 是原数组长度，用于统计频率。
+    * $K$ 是去重后的数字个数（ $K \le 50$）。
+    * 最坏情况下，每个数字都可以选或不选，或者选多个。但由于 `target` 很小（30），实际合法的组合非常少，剪枝效果极强，实际运行时间接近 $\mathcal{O}(N)$。
+* **空间复杂度**： $\mathcal{O}(K)$
+    * 主要开销是递归栈的深度，最大为 50（即去重后的数字个数）。
+    * `path` 和 `res` 不计入算法辅助空间。
 
 ***
 
