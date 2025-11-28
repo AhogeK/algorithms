@@ -955,7 +955,7 @@ public class PermutationSequence {
 * **时间复杂度**： $\mathcal{O}(n^2)$
     * 虽然只有一层循环遍历 $n$ 次，但在循环内部使用了 `nums.remove(index)`。`ArrayList` 的移除操作需要移动后续元素，最坏复杂度是 $\mathcal{O}(n)$。
     * 因此总复杂度是 $n \times n = n^2$。
-    * 考虑到 $n \le 9$，这个计算量极小（最多几十次操作），远比 $\mathcal{O}(n!)$ 的暴力回溯快得多。这也是为什么它能击败 100% 或 90%+ 的原因。
+    * 考虑到 $n \le 9$，这个计算量极小（最多几十次操作），远比 $\mathcal{O}(n!)$ 的暴力回溯快得多。
 
 * **空间复杂度**： $\mathcal{O}(n)$
     * 需要一个 `nums` 列表存储 $n$ 个数字。
