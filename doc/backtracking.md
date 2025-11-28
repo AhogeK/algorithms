@@ -57,6 +57,10 @@
       * [算法思路：回溯法 + 剪枝优化](#算法思路回溯法--剪枝优化)
       * [完整代码](#完整代码-4)
       * [复杂度分析](#复杂度分析-7)
+    * [完成「力扣」第 60 题：排列序列](#完成力扣第-60-题排列序列)
+      * [算法思路：数学定位法（类进制转换）](#算法思路数学定位法类进制转换)
+      * [完整代码](#完整代码-5)
+      * [复杂度分析](#复杂度分析-8)
 <!-- TOC -->
 
 # 回溯算法
@@ -901,6 +905,62 @@ public class Combinations {
     * 递归的最大深度为 $k$。
     * `path` 列表最多存储 $k$ 个元素。
     * 如果考虑结果数组 `result`，则空间复杂度为 $\mathcal{O}(C(n, k))$，但通常不将输出占用的空间计入算法的辅助空间。
+
+### 完成「力扣」第 60 题：[排列序列](https://leetcode.cn/problems/permutation-sequence)
+
+#### 算法思路：数学定位法（类进制转换）
+
+想象一下 $n=4, k=9$ 的情况。全排列的总数是 $4! = 24$。\
+排列是按顺序生成的，我们可以把排列分组：
+
+1. 以 `1` 开头的排列：`1 + {2,3,4}的排列`。剩余 3 个数，有 $3! = 6$ 种情况。范围是第 $1 \to 6$ 个。
+2. 以 `2` 开头的排列：`2 + {1,3,4}的排列`。剩余 3 个数，有 $3! = 6$ 种情况。范围是第 $7 \to 12$ 个。
+3. 以 `3` 开头的排列：`3 + {1,2,4}的排列`。剩余 3 个数，有 $3! = 6$ 种情况。范围是第 $13 \to 18$ 个。
+4. ...
+
+**核心逻辑**：\
+我们要求的 $k=9$ 落在第 2 组（ $7 \to 12$）里。这意味着：
+
+* 第一位数字一定是 **2**。
+* 问题缩小为：在 `{1, 3, 4}` 中找第 $9 - 6 = 3$ 个排列。
+
+这就形成了一个递归（回溯）的子问题。我们可以通过不断计算阶乘数，直接确定每一位填什么，而不需要真正生成那些被跳过的排列。
+
+#### 完整代码
+
+```java
+public class PermutationSequence {
+    public String getPermutation(int n, int k) {
+        int[] factorial = new int[n];
+        factorial[0] = 1;
+        for (int i = 1; i < n; i++)
+            factorial[i] = factorial[i - 1] * i;
+        List<Integer> nums = new ArrayList<>();
+        for (int i = 1; i <= n; i++) nums.add(i);
+        k--;
+        StringBuilder sb = new StringBuilder();
+        for (int i = n - 1; i >= 0; i--) {
+            int index = k / factorial[i];
+            k %= factorial[i];
+            sb.append(nums.get(index));
+            nums.remove(index);
+        }
+        return sb.toString();
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}(n^2)$
+    * 虽然只有一层循环遍历 $n$ 次，但在循环内部使用了 `nums.remove(index)`。`ArrayList` 的移除操作需要移动后续元素，最坏复杂度是 $\mathcal{O}(n)$。
+    * 因此总复杂度是 $n \times n = n^2$。
+    * 考虑到 $n \le 9$，这个计算量极小（最多几十次操作），远比 $\mathcal{O}(n!)$ 的暴力回溯快得多。这也是为什么它能击败 100% 或 90%+ 的原因。
+
+* **空间复杂度**： $\mathcal{O}(n)$
+    * 需要一个 `nums` 列表存储 $n$ 个数字。
+    * 需要一个 `factorial` 数组存储阶乘值。
+    * `StringBuilder` 存储结果。
 
 ***
 
