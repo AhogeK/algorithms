@@ -53,6 +53,10 @@
       * [算法思路](#算法思路-2)
       * [完整代码](#完整代码-3)
       * [复杂度分析](#复杂度分析-6)
+    * [完成「力扣」第 77 题：组合](#完成力扣第-77-题组合)
+      * [算法思路：回溯法 + 剪枝优化](#算法思路回溯法--剪枝优化)
+      * [完整代码](#完整代码-4)
+      * [复杂度分析](#复杂度分析-7)
 <!-- TOC -->
 
 # 回溯算法
@@ -844,6 +848,59 @@ public class SubsetsII {
 2. **空间复杂度**： $\mathcal{O}(n)$
     * 不考虑存储结果的空间，递归栈的深度最大为 $n$。
     * `path` 列表在递归过程中最多存储 $n$ 个元素。
+
+### 完成「力扣」第 77 题：[组合](https://leetcode.cn/problems/combinations)
+
+#### 算法思路：回溯法 + 剪枝优化
+
+我们可以将组合问题抽象为一棵**多叉树**的遍历过程：
+
+1. **树的宽度**：由当前还可以选择的元素个数决定。
+
+2. **树的深度**：由 $k$ 决定，即我们需要递归 $k$ 层。
+
+在每一层递归中，我们尝试选取一个数加入集合，然后递归进入下一层去选下一个数。当集合的大小达到 $k$ 时，我们就找到了一个合法的组合，将其加入结果集。
+
+#### 完整代码
+
+```java
+public class Combinations {
+    List<List<Integer>> result = new ArrayList<>();
+    List<Integer> path = new ArrayList<>();
+
+    public List<List<Integer>> combine(int n, int k) {
+        backtracking(n, k, 1);
+        return result;
+    }
+
+    private void backtracking(int n, int k, int startIndex) {
+        if (path.size() == k) {
+            result.add(new ArrayList<>(path));
+            return;
+        }
+        int needed = k - path.size();
+        int limit = n - needed + 1;
+        for (int i = startIndex; i <= limit; i++) {
+            path.add(i);
+            backtracking(n, k, i + 1);
+            path.removeLast();
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}(C(n, k) \times k)$
+    * 组合的总数为 $C(n, k) = \frac{n!}{k!(n-k)!}$。
+    * 回溯算法会生成所有合法的组合。虽然有剪枝，但在最坏情况下（需要遍历所有解时），我们需要构造每一个解。
+    * 对于每个解，我们需要 $\mathcal{O}(k)$ 的时间将其复制到 `result` 列表中。
+    * 因此总时间复杂度近似为组合数乘以 $k$。
+* **空间复杂度**： $\mathcal{O}(n)$ 或 $\mathcal{O}(k)$
+    * 主要消耗在递归堆栈和存储路径的 `path` 上。
+    * 递归的最大深度为 $k$。
+    * `path` 列表最多存储 $k$ 个元素。
+    * 如果考虑结果数组 `result`，则空间复杂度为 $\mathcal{O}(C(n, k))$，但通常不将输出占用的空间计入算法的辅助空间。
 
 ***
 
