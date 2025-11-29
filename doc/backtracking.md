@@ -61,6 +61,10 @@
       * [算法思路：数学定位法（类进制转换）](#算法思路数学定位法类进制转换)
       * [完整代码](#完整代码-5)
       * [复杂度分析](#复杂度分析-8)
+    * [完成「力扣」第 216 题：组合总和 III](#完成力扣第-216-题组合总和-iii)
+      * [算法思路](#算法思路-3)
+      * [完整代码](#完整代码-6)
+      * [复杂度分析](#复杂度分析-9)
 <!-- TOC -->
 
 # 回溯算法
@@ -961,6 +965,62 @@ public class PermutationSequence {
     * 需要一个 `nums` 列表存储 $n$ 个数字。
     * 需要一个 `factorial` 数组存储阶乘值。
     * `StringBuilder` 存储结果。
+
+### 完成「力扣」第 216 题：[组合总和 III](https://leetcode.cn/problems/combination-sum-iii)
+
+#### 算法思路
+
+我们使用回溯法（Backtracking）来暴力枚举所有情况，并将搜索过程抽象为一棵树。
+
+1. **路径（Path）**：记录当前已经选择的数字。
+2. **选择列表**：在每一层递归中，从当前起始数字 `startIndex` 开始向后遍历到 $9$。
+3. **终止条件**：当路径长度达到 $k$ 时，检查路径和是否等于 $n$。如果是，则加入结果集。
+4. **剪枝（Pruning）**：
+    * **和剪枝**：如果当前和已经超过 $n$，直接返回。
+    * **数量剪枝**：如果在 `for` 循环中，剩余的可选数字个数已经不足以填满 $k$ 个位置，则无需继续遍历。即 $9 - i + 1 < k - \text{path.size()}$ 时停止。
+
+#### 完整代码
+
+```java
+/**
+ * 216. 组合总和 III
+ *
+ * @author AhogeK [ahogek@gmail.com]
+ * @since 2025-11-30 04:17:09
+ */
+public class CombinationSumIII {
+    List<List<Integer>> res = new ArrayList<>();
+    List<Integer> path = new ArrayList<>();
+
+    public List<List<Integer>> combinationSum3(int k, int n) {
+        backtracking(k, n, 1, 0);
+        return res;
+    }
+
+    private void backtracking(int k, int n, int startIndex, int sum) {
+        if (sum > n) return;
+        if (path.size() == k) {
+            if (sum == n) res.add(new ArrayList<>(path));
+            return;
+        }
+        for (int i = startIndex; i <= 9 - (k - path.size()) + 1; i++) {
+            path.add(i);
+            sum += i;
+            backtracking(k, n, i + 1, sum);
+            sum -= i;
+            path.removeLast();
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}(C_9^k \times k)$。\
+  我们需要从 $9$ 个数字中选 $k$ 个，组合数为 $C_9^k$。对于每个有效组合，我们需要 $\mathcal{O}(k)$ 的时间将其加入结果列表。由于 $k$ 和 $n$ 都很小（ $k \le 9$， $n \le 60$），剪枝后实际搜索空间非常小，速度极快。
+
+* **空间复杂度**： $\mathcal{O}(k)$。\
+  主要消耗在递归调用栈和存储 `path` 列表上，深度最大为 $k$。
 
 ***
 
