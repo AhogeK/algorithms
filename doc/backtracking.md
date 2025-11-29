@@ -70,6 +70,11 @@
       * [核心知识点与技巧](#核心知识点与技巧-1)
       * [完整代码](#完整代码-7)
       * [复杂度分析](#复杂度分析-10)
+    * [完成「力扣」第 491 题：递增子序列](#完成力扣第-491-题递增子序列)
+      * [算法思路](#算法思路-5)
+      * [核心知识点与技巧](#核心知识点与技巧-2)
+      * [完整代码](#完整代码-8)
+      * [复杂度分析](#复杂度分析-11)
 <!-- TOC -->
 
 # 回溯算法
@@ -1092,6 +1097,71 @@ public class SplitAStringIntoTheMaxNumberOfUniqueSubstrings {
   最坏情况下（例如字符串所有字符都不同），我们需要枚举所有分割点，分割点有 $n-1$ 个，每个点选或不选，共有 $2^{n-1}$ 种情况。每次 `substring` 和哈希操作耗时 $\mathcal{O}(n)$。但在实际运行中，由于重复子串的限制和强力剪枝，实际运行次数远小于理论上限。对于 $n=16$，这非常快。
 * **空间复杂度**： $\mathcal{O}(n)$。\
   递归栈的最大深度为 $n$，`HashSet` 存储的子串总字符数最多也为 $n$ 量级。
+
+### 完成「力扣」第 491 题：[递增子序列](https://leetcode.cn/problems/non-decreasing-subsequences)
+
+#### 算法思路
+
+由于题目要求找出“所有”符合条件的组合，且数组长度 $N \le 15$ 极小，这暗示了我们需要遍历整个解空间。这正是**回溯算法（Backtracking）** 的典型应用场景。回溯法本质上是在一棵决策树上进行深度优先搜索（DFS），每一层递归代表选择子序列中的下一个元素。
+
+#### 核心知识点与技巧
+
+1. **数组模拟路径栈**：\
+  不使用 `List<Integer> path`，而是用一个固定大小的 `int[] temp` 和一个标量 `len` 来维护当前路径。
+    * **入栈**：`temp[len] = nums[i]`，然后 `len + 1`。
+    * **出栈（回溯）**：不需要显式删除，递归返回后 `len` 自然回退，下次写入直接覆盖旧值。
+    * **优势**：避免了 `ArrayList` 的自动扩容、装箱/拆箱操作，且内存访问连续，缓存命中率高。
+2. **同层线性扫描去重**：\
+  题目要求去重（例如 `[4, 6, 7, 7]` 中，第二个 `7` 不能再次作为起点生成重复的 `[4, 6, 7]`）。\
+  通常做法是用 `HashSet` 记录本层已用过的元素。但在这里，我们利用 `isDuplicate` 函数，直接扫描当前层数组区间 `[cur, i-1]`。
+    * **逻辑**：如果在当前层的前面位置已经出现过 `nums[i]`，说明之前那个相同的数已经走过这条分支了，现在再走必然重复，直接剪枝。
+    * **优势**：当 $N=15$ 时，简单的循环扫描比分配内存并初始化 `HashSet` 或 `boolean[]` 要快得多。
+
+#### 完整代码
+
+```java
+public class NonDecreasingSubsequences {
+    List<List<Integer>> ans = new ArrayList<>();
+    int[] temp;
+
+    public List<List<Integer>> findSubsequences(int[] nums) {
+        temp = new int[nums.length];
+        dfs(0, 0, nums);
+        return ans;
+    }
+
+    private void dfs(int cur, int len, int[] nums) {
+        if (len >= 2) {
+            List<Integer> path = new ArrayList<>();
+            for (int k = 0; k < len; k++) path.add(temp[k]);
+            ans.add(path);
+        }
+        for (int i = cur; i < nums.length; i++) {
+            if ((len > 0 && nums[i] < temp[len - 1]) || isDuplicate(nums, cur, i)) continue;
+            temp[len] = nums[i];
+            dfs(i + 1, len + 1, nums);
+        }
+    }
+
+    private boolean isDuplicate(int[] nums, int start, int currIndex) {
+        for (int k = start; k < currIndex; k++)
+            if (nums[k] == nums[currIndex]) return true;
+        return false;
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}(N \times 2^N)$
+    * 最坏情况下（数组严格递增），每个元素都有选或不选两种可能，子序列总数为 $2^N$。
+    * 对于每个合法子序列，我们需要 $\mathcal{O}(N)$ 的时间将其复制到结果集中。
+    * `isDuplicate` 在最坏情况下的开销累积也是可控的，总体不会超过指数级增长的路径生成过程。
+    * 由于 $N \le 15$，运算量非常小，这种纯数组操作可以轻松跑到 1ms - 2ms。
+* **空间复杂度**： $\mathcal{O}(N)$
+    * 我们只额外使用了长度为 $N$ 的 `temp` 数组。
+    * 递归栈的最大深度为 $N$。
+    * 这是除存储结果集外的最小空间消耗。
 
 ***
 
