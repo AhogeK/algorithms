@@ -65,6 +65,11 @@
       * [算法思路](#算法思路-3)
       * [完整代码](#完整代码-6)
       * [复杂度分析](#复杂度分析-9)
+    * [完成「力扣」第 1593 题：拆分字符串使唯一子字符串的数目最大](#完成力扣第-1593-题拆分字符串使唯一子字符串的数目最大)
+      * [算法思路](#算法思路-4)
+      * [核心知识点与技巧](#核心知识点与技巧-1)
+      * [完整代码](#完整代码-7)
+      * [复杂度分析](#复杂度分析-10)
 <!-- TOC -->
 
 # 回溯算法
@@ -1021,6 +1026,72 @@ public class CombinationSumIII {
 
 * **空间复杂度**： $\mathcal{O}(k)$。\
   主要消耗在递归调用栈和存储 `path` 列表上，深度最大为 $k$。
+
+### 完成「力扣」第 1593 题：[拆分字符串使唯一子字符串的数目最大](https://leetcode.cn/problems/split-a-string-into-the-max-number-of-unique-substrings)
+
+#### 算法思路
+
+我们将问题抽象为一颗决策树：
+
+* **状态**：当前处理到的起始索引 `start`，以及当前已经拆分出的唯一子串集合 `set`。
+* **选择**：从 `start` 开始，尝试截取长度为 $1, 2, \dots$ 的子串作为当前分割出的新子串。
+* **约束**：截取的新子串必须不在 `set` 中。
+* **目标**：当 `start` 到达字符串末尾时，统计 `set` 的大小，维护一个全局最大值 `maxCount`。
+
+**核心剪枝优化**
+
+在递归过程中，如果 **当前已选子串数量 + 剩余字符长度 $\le$ 当前找到的最大子串数量**，则直接停止搜索。
+
+* **原理**：即使剩下的每个字符都单独拆分成一个子串（理想情况下的最多增加数量），总数也无法超过已知的最优解 `maxCount`，因此无需浪费时间继续尝试。
+
+#### 核心知识点与技巧
+
+1. **回溯法（Backtracking）**：标准的“做选择 -> 递归 -> 撤销选择”模板。
+2. **HashSet 去重**：利用哈希表 $\mathcal{O}(1)$ 的查找特性快速判断子串是否重复。
+3. **剪枝（Pruning）**：利用剩余长度进行预判，大幅减少无效分支的搜索。
+
+#### 完整代码
+
+```java
+/**
+ * 1593. 拆分字符串使唯一子字符串的数目最大
+ *
+ * @author AhogeK [ahogek@gmail.com]
+ * @since 2025-11-30 04:31:27
+ */
+public class SplitAStringIntoTheMaxNumberOfUniqueSubstrings {
+    private int maxCount = 0;
+
+    public int maxUniqueSplit(String s) {
+        backtrack(s, 0, new HashSet<>());
+        return maxCount;
+    }
+
+    private void backtrack(String s, int start, Set<String> seen) {
+        int length = s.length();
+        if (start == length) {
+            maxCount = Math.max(maxCount, seen.size());
+            return;
+        }
+        if (seen.size() + (length - start) <= maxCount) return;
+        for (int i = start + 1; i <= length; i++) {
+            String sub = s.substring(start, i);
+            if (!seen.contains(sub)) {
+                seen.add(sub);
+                backtrack(s, i, seen);
+                seen.remove(sub);
+            }
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}(2^n \cdot n)$。\
+  最坏情况下（例如字符串所有字符都不同），我们需要枚举所有分割点，分割点有 $n-1$ 个，每个点选或不选，共有 $2^{n-1}$ 种情况。每次 `substring` 和哈希操作耗时 $\mathcal{O}(n)$。但在实际运行中，由于重复子串的限制和强力剪枝，实际运行次数远小于理论上限。对于 $n=16$，这非常快。
+* **空间复杂度**： $\mathcal{O}(n)$。\
+  递归栈的最大深度为 $n$，`HashSet` 存储的子串总字符数最多也为 $n$ 量级。
 
 ***
 
