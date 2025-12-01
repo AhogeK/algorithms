@@ -75,6 +75,11 @@
       * [核心知识点与技巧](#核心知识点与技巧-2)
       * [完整代码](#完整代码-8)
       * [复杂度分析](#复杂度分析-11)
+  * [字符串中的回溯问题](#字符串中的回溯问题)
+    * [例 1：「力扣」第 22 题：括号生成](#例-1力扣第-22-题括号生成)
+      * [算法思路](#算法思路-6)
+      * [完整代码](#完整代码-9)
+      * [复杂度分析](#复杂度分析-12)
 <!-- TOC -->
 
 # 回溯算法
@@ -1162,6 +1167,66 @@ public class NonDecreasingSubsequences {
     * 我们只额外使用了长度为 $N$ 的 `temp` 数组。
     * 递归栈的最大深度为 $N$。
     * 这是除存储结果集外的最小空间消耗。
+
+## 字符串中的回溯问题
+
+### 例 1：「力扣」第 22 题：[括号生成](https://leetcode.cn/problems/generate-parentheses)
+
+#### 算法思路
+
+我们可以将生成括号的过程看作是一棵二叉树的生成过程。对于每一步，我们只有两个选择：放一个左括号 `(` 或者放一个右括号 `)`。
+
+为了保证生成的是“有效”组合，我们需要维护两个变量：
+
+* `left`：当前已经放入的左括号数量。
+* `right`：当前已经放入的右括号数量。
+
+**回溯策略如下：**
+
+1. **递归入口**：从空字符串开始，`left = 0`, `right = 0`。
+2. **左括号选择**：只要 `left < n`，我们就可以放一个左括号。因为只要没超过总数 $n$，放左括号总是安全的（它等待后续的右括号来匹配）。
+3. **右括号选择**：只有当 `right < left` 时，我们才可以放一个右括号。这是关键的剪枝条件。如果 `right >= left`，意味着目前没有多余的左括号供匹配，放右括号会导致非法序列（例如 `())`）。
+4. **终止条件**：当字符串长度达到 $2n$（或者 `left == n` 且 `right == n`）时，说明我们成功构建了一个有效组合，将其加入结果列表。
+
+#### 完整代码
+
+```java
+public class GenerateParentheses {
+    public List<String> generateParenthesis(int n) {
+        List<String> res = new ArrayList<>();
+        if (n <= 0) return res;
+        backtrack(res, new StringBuilder(), 0, 0, n);
+        return res;
+    }
+
+    private void backtrack(List<String> res, StringBuilder currentPath, int left, int right, int n) {
+        if (currentPath.length() == 2 * n) {
+            res.add(currentPath.toString());
+            return;
+        }
+        if (left < n) {
+            currentPath.append('(');
+            backtrack(res, currentPath, left + 1, right, n);
+            currentPath.deleteCharAt(currentPath.length() - 1);
+        }
+        if (right < left) {
+            currentPath.append(')');
+            backtrack(res, currentPath, left, right + 1, n);
+            currentPath.deleteCharAt(currentPath.length() - 1);
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}\left(\frac{4^n}{\sqrt{n}}\right)$\
+  这个复杂度来源于卡特兰数（Catalan Number）。 $n$ 对括号的有效组合数实际上是第 $n$ 个卡特兰数：\
+  $C_n = \frac{1}{n+1}\binom{2n}{n} \approx \frac{4^n}{n\sqrt{n}}$\
+  因为回溯算法生成的每一个有效节点都接近于最终结果的一个前缀，且我们需要遍历每个结果，所以时间复杂度渐进于卡特兰数的增长，大约是 $\mathcal{O}\left(\frac{4^n}{\sqrt{n}}\right)$。
+
+* **空间复杂度**： $\mathcal{O}(n)$\
+  空间复杂度取决于递归栈的深度。在这个问题中，递归树的最大深度是 $2n$（即生成字符串的长度），因此栈空间为 $\mathcal{O}(n)$。如果不计算存储结果的空间，这就是算法的额外空间开销。
 
 ***
 
