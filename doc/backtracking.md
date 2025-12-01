@@ -84,6 +84,10 @@
       * [算法思路](#算法思路-7)
       * [完整代码](#完整代码-10)
       * [复杂度分析](#复杂度分析-13)
+    * [完成「力扣」第 784 题：字母大小写全排列](#完成力扣第-784-题字母大小写全排列)
+      * [算法思路](#算法思路-8)
+      * [完整代码](#完整代码-11)
+      * [复杂度分析](#复杂度分析-14)
 <!-- TOC -->
 
 # 回溯算法
@@ -1299,6 +1303,65 @@ private static final String[] KEYS = {
     * 这里不计算结果集 `List<String>` 占用的空间。
     * 主要的额外空间开销是**递归调用栈**的深度，最大深度等于输入数字的个数 $n$。
     * 此外，`StringBuilder` 也占用 $\mathcal{O}(n)$ 的空间。
+
+### 完成「力扣」第 784 题：[字母大小写全排列](https://leetcode.cn/problems/letter-case-permutation/)
+
+#### 算法思路
+
+为了达到最快的执行效率，我们避免在递归过程中频繁进行字符串拼接（String concatenation），而是直接操作一个**字符数组**。
+
+**算法流程：**
+
+1. **初始化**：将输入字符串 `s` 转换为字符数组 `chars`，这样可以直接修改特定位置的字符，效率远高于 `StringBuilder` 或 `String` 操作。
+2. **递归函数设计**：
+    * 参数：当前处理到的索引 `index`。
+    * 终止条件：当 `index` 等于字符串长度时，说明所有位置都已确定，将当前 `chars` 转换为字符串加入结果列表。
+3. **单层搜索逻辑**：
+    * **情况 A：当前字符是数字**。不需要做选择，直接跳到下一层 (`index + 1`)。
+    * **情况 B：当前字符是字母**。这是一个分叉点。
+        1. **分支 1**：保持该字母原来的样子（或者统一转为小写），递归进入下一层。
+        2. **分支 2**：变换该字母的大小写（toggle case），递归进入下一层。
+
+#### 完整代码
+
+```java
+public class LetterCasePermutation {
+    public List<String> letterCasePermutation(String s) {
+        List<String> res = new ArrayList<>();
+        char[] chars = s.toCharArray();
+        dfs(chars, 0, res);
+        return res;
+    }
+
+    private void dfs(char[] chars, int index, List<String> res) {
+        if (index == chars.length) {
+            res.add(new String(chars));
+            return;
+        }
+        if (Character.isDigit(chars[index])) {
+            dfs(chars, index + 1, res);
+            return;
+        }
+        dfs(chars, index + 1, res);
+        chars[index] ^= 32;
+        dfs(chars, index + 1, res);
+        chars[index] ^= 32;
+    }
+}
+```
+
+#### 复杂度分析
+
+设 $n$ 为字符串 `s` 的长度， $m$ 为字符串中**字母**的个数。
+
+* **时间复杂度**： $\mathcal{O}(n \times 2^m)$
+    * 每个字母都有 2 种可能（大写/小写），所以总共有 $2^m$ 个解。
+    * 对于每个解，我们需要构造一个字符串（`new String(chars)`），这需要 $\mathcal{O}(n)$ 的时间。
+    * 虽然总长度 $n$ 最多为 12，但在复杂度分析中我们关注规模增长趋势。
+* **空间复杂度**： $\mathcal{O}(n)$
+    * 这里不计算存储结果的 `res` 列表空间。
+    * 空间消耗主要在于递归调用栈，最大深度为 $n$。
+    * 以及我们额外使用的 `char[]` 数组，大小也为 $n$。
 
 ***
 
