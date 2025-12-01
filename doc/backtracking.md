@@ -80,6 +80,10 @@
       * [算法思路](#算法思路-6)
       * [完整代码](#完整代码-9)
       * [复杂度分析](#复杂度分析-12)
+    * [例 2：完成「力扣」第 17 题：电话号码的字母组合](#例-2完成力扣第-17-题电话号码的字母组合)
+      * [算法思路](#算法思路-7)
+      * [完整代码](#完整代码-10)
+      * [复杂度分析](#复杂度分析-13)
 <!-- TOC -->
 
 # 回溯算法
@@ -1227,6 +1231,74 @@ public class GenerateParentheses {
 
 * **空间复杂度**： $\mathcal{O}(n)$\
   空间复杂度取决于递归栈的深度。在这个问题中，递归树的最大深度是 $2n$（即生成字符串的长度），因此栈空间为 $\mathcal{O}(n)$。如果不计算存储结果的空间，这就是算法的额外空间开销。
+
+### 例 2：完成「力扣」第 17 题：[电话号码的字母组合](https://leetcode.cn/problems/letter-combinations-of-a-phone-number)
+
+#### 算法思路
+
+回溯法非常适合解决“排列组合”类问题。我们可以维护一个哈希表或数组来存储数字到字母的映射关系。
+
+**算法流程：**
+
+1. **映射建立**：首先建立数字 2-9 到字母的映射表（可以使用数组或 HashMap）。
+2. **特判**：如果输入字符串为空，直接返回空列表。
+3. **回溯函数设计**：
+    * 我们需要一个变量 `index` 来记录当前正在处理输入字符串 `digits` 的第几个数字。
+    * 我们需要一个 `StringBuilder` 来记录当前的路径（即当前拼凑出的字母组合）。
+4. **递归步骤**：
+    * **终止条件**：当 `index` 等于 `digits` 的长度时，说明所有的数字都处理完了，当前 `StringBuilder` 中的内容就是一个完整的组合，将其加入结果列表。
+    * **单层搜索逻辑**：
+        * 取出当前 `index` 对应的数字（例如 '2'）。
+        * 找到该数字对应的字母字符串（例如 "abc"）。
+        * 遍历这个字符串中的每一个字母：
+            1. **处理**：将当前字母加入 `StringBuilder`。
+            2. **递归**：调用函数处理下一个数字（`index + 1`）。
+            3. **回溯**：将刚才加入的字母删去，以便尝试下一个字母。
+
+#### 完整代码
+
+```java
+private static final String[] KEYS = {
+            "", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"
+    };
+
+    public List<String> letterCombinations(String digits) {
+        List<String> result = new ArrayList<>();
+        if (digits == null || digits.isEmpty()) return result;
+        backtrack(digits, result, new StringBuilder(), 0);
+        return result;
+    }
+
+    private void backtrack(String digits, List<String> result, StringBuilder currentPath, int index) {
+        if (index == digits.length()) {
+            result.add(currentPath.toString());
+            return;
+        }
+        int digit = digits.charAt(index) - '0';
+        String letters = KEYS[digit];
+        for (int i = 0 i < letters.length(); i++) {
+            currentPath.append(letters.charAt(i));
+            backtrack(digits, result, currentPath, index + 1);
+            currentPath.deleteCharAt(currentPath.length() - 1);
+        }
+    }
+```
+
+#### 复杂度分析
+
+假设输入 `digits` 的长度为 $n$。
+
+* 输入中对应 3 个字母的数字（2, 3, 4, 5, 6, 8）有 $m$ 个。
+* 输入中对应 4 个字母的数字（7, 9）有 $k$ 个。
+* 显然 $n = m + k$。
+
+1. **时间复杂度**： $\mathcal{O}(3^m \times 4^k)$
+    * 这是因为每个数字对应 3 或 4 个选择。总的组合数是这些选择的乘积。回溯算法会遍历这棵决策树的所有叶子节点。
+    * 更宽松的界是 $\mathcal{O}(4^n)$，因为每个数字最多对应 4 个字母。
+2. **空间复杂度**： $\mathcal{O}(n)$
+    * 这里不计算结果集 `List<String>` 占用的空间。
+    * 主要的额外空间开销是**递归调用栈**的深度，最大深度等于输入数字的个数 $n$。
+    * 此外，`StringBuilder` 也占用 $\mathcal{O}(n)$ 的空间。
 
 ***
 
