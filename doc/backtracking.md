@@ -88,6 +88,10 @@
       * [算法思路](#算法思路-8)
       * [完整代码](#完整代码-11)
       * [复杂度分析](#复杂度分析-14)
+    * [完成「力扣」第 93 题：复原 IP 地址](#完成力扣第-93-题复原-ip-地址)
+      * [算法思路](#算法思路-9)
+      * [完整代码](#完整代码-12)
+      * [复杂度分析](#复杂度分析-15)
 <!-- TOC -->
 
 # 回溯算法
@@ -1362,6 +1366,89 @@ public class LetterCasePermutation {
     * 这里不计算存储结果的 `res` 列表空间。
     * 空间消耗主要在于递归调用栈，最大深度为 $n$。
     * 以及我们额外使用的 `char[]` 数组，大小也为 $n$。
+
+### 完成「力扣」第 93 题：[复原 IP 地址](https://leetcode.cn/problems/restore-ip-addresses)
+
+#### 算法思路
+
+本题本质是**分割问题**，标准解法是回溯（DFS）。但为了达到极致性能（0ms / 100%），我们需要跳出常规的 `substring` 和 `List` 操作，采用 **In-Place（原地）字符数组构建** 的策略。
+
+1. **整体框架**
+
+    使用 DFS 递归尝试在不同位置切分。
+
+    * **状态定义**：`backtrack(sIdx, pIdx, segment)`
+        * `sIdx`: 原字符串 `s` 当前处理到的下标。
+        * `pIdx`: 结果缓冲区 `path` 当前填写的下标。
+        * `segment`: 当前正在处理第几段（0, 1, 2, 3）。
+
+2. **核心优化策略**
+
+    * **零对象创建**：不在递归中创建 `String` 或 `StringBuilder`。我们直接申请一个长度为 `n + 3` 的 `char[] path` 数组作为缓冲区。最终只有在找到合法解时才 `new String(path)`。
+    * **数学计算代替解析**：不使用 `Integer.parseInt`，而是在遍历字符时通过 `val = val * 10 + digit` 累加计算数值。
+    * **双重剪枝**：
+        * **全局剪枝**：字符串长度不在 `[4, 12]` 直接返回。
+        * **过程剪枝**：在递归过程中，如果剩余字符数太少（不够填满剩余段）或太多（每段填 3 个字符都填不完），立即回溯。
+
+#### 完整代码
+
+```java
+public class RestoreIpAddresses {
+    private List<String> ans;
+    private char[] sArr;
+    private char[] path;
+
+    public List<String> restoreIpAddresses(String s) {
+        ans = new ArrayList<>();
+        int n = s.length();
+        if (n < 4 || n > 12) return ans;
+
+        sArr = s.toCharArray();
+        path = new char[n + 3];
+
+        backtrack(0, 0, 0);
+        return ans;
+    }
+
+    private void backtrack(int sIdx, int pIdx, int segment) {
+        int remainChar = sArr.length - sIdx;
+        int remainSegment = 4 - segment;
+        if (remainChar < remainSegment || remainChar > remainSegment * 3) return;
+        if (segment == 4) {
+            ans.add(new String(path));
+            return;
+        }
+        int val = 0;
+        for (int i = 1; i <= 3; i++) {
+            if (sIdx + i - 1 >= sArr.length) break;
+            char c = sArr[sIdx + i - 1];
+            val = val * 10 + (c - '0');
+            if (val > 255) break;
+            if (i > 1 && sArr[sIdx] == '0') break;
+            path[pIdx + i - 1] = c;
+            if (segment < 3) {
+                path[pIdx + i] = '.';
+                backtrack(sIdx + i, pIdx + i + 1, segment + 1);
+            } else {
+                backtrack(sIdx + i, pIdx + i, segment + 1);
+            }
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}(1)$
+    * 看似是回溯，但 IP 地址的结构限制了搜索空间。
+    * 深度固定为 4 层（4 段）。
+    * 每层最多尝试 3 种长度。
+    * 虽然输入字符串长度 $N$ 最多为 20，但在长度判断剪枝后，只有 $N \le 12$ 才会进入递归。
+    * 因此，整个计算量是一个很小的常数，可视作 $\mathcal{O}(1)$。
+* **空间复杂度**： $\mathcal{O}(1)$
+    * 我们需要存储结果 `ans`（不计入算法辅助空间）。
+    * 辅助空间主要是一个长度最大为 15 (`12 + 3`) 的 `path` 数组和 4 层递归调用栈。
+    * 这是一个极小的常数空间。
 
 ***
 

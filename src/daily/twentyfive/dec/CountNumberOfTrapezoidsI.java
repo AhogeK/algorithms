@@ -1,4 +1,4 @@
-package backtracking;
+package daily.twentyfive.dec;
 
 import java.util.Arrays;
 
