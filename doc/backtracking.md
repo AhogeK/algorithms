@@ -94,6 +94,10 @@
       * [复杂度分析](#复杂度分析-15)
   * [Flood Fill](#flood-fill)
     * [核心原理与回溯的关系](#核心原理与回溯的关系)
+    * [例 1：「力扣」第 733 题：图像渲染](#例-1力扣第-733-题图像渲染)
+      * [算法思路](#算法思路-10)
+      * [代码实现](#代码实现-2)
+      * [复杂度分析](#复杂度分析-16)
 <!-- TOC -->
 
 # 回溯算法
@@ -1481,6 +1485,71 @@ Flood Fill 本质上是在在一个**隐式图（Implicit Graph）**上寻找**�
     2. **检查颜色**：如果 $(r, c)$ 的颜色不是我们要替换的目标颜色，或者已经是新颜色，停止（剪枝）。
     3. **修改状态**：将 $(r, c)$ 的颜色修改为新颜色（或标记为已访问）。
     4. **递归扩散**：向 **上、下、左、右** 四个方向递归调用该函数。
+
+### 例 1：「力扣」第 733 题：[图像渲染](https://leetcode.cn/problems/flood-fill)
+
+#### 算法思路
+
+本题最直接、最高效的解法是基于 **DFS (深度优先搜索)** 的递归实现。在网格图论中，这也被称为“隐式图的遍历”。
+
+1. **核心逻辑**
+
+    我们可以将每个像素看作图中的一个节点，相邻且同色的像素之间有一条边。我们的任务是从起点 `(sr, sc)` 出发，遍历整个连通分量。
+
+    * **起点**：`(sr, sc)`。
+    * **初始颜色 (`oldColor`)**：记录 `image[sr][sc]` 的值。如果 `oldColor` 已经等于目标 `color`，说明无需任何操作，直接返回原图（这是一个重要的剪枝/边界情况）。
+    * **递归定义**：`fill(r, c)`
+        * 将 `image[r][c]` 修改为 `color`。
+        * 检查 `(r, c)` 的上下左右四个邻居：
+            * 如果邻居坐标越界，忽略。
+            * 如果邻居颜色不等于 `oldColor`，忽略。
+            * 如果邻居颜色等于 `oldColor`，递归调用 `fill`。
+
+2. **为什么不需要显式的 `visited` 数组？**
+
+    通常 DFS 需要一个 `boolean[][] visited` 数组来防止死循环（比如 A 走到 B，B 又走回 A）。\
+    但在这里，我们直接修改 `image[r][c] = color`。
+
+    * 如果 `color != oldColor`：修改后的像素颜色变成了新颜色，下次递归检查时，因为它的颜色不再是 `oldColor`，所以自然不会重复访问。
+    * 如果 `color == oldColor`：这在入口处会被我们直接拦截（无需操作），所以也不会死循环。
+
+因此，**原图本身的状态变化充当了 visited 数组**，节省了空间。
+
+#### 代码实现
+
+```java
+public class FloodFill {
+    public int[][] floodFill(int[][] image, int sr, int sc, int newColor) {
+        int oldColor = image[sr][sc];
+        if (oldColor == newColor) return image;
+        dfs(image, sr, sc, oldColor, newColor);
+        return image;
+    }
+
+    private void dfs(int[][] image, int r, int c, int oldColor, int newColor) {
+        if (r < 0 || r >= image.length || c < 0 || c >= image[0].length || image[r][c] != oldColor) return;
+        image[r][c] = newColor;
+
+        dfs(image, r - 1, c, oldColor, newColor);
+        dfs(image, r + 1, c, oldColor, newColor);
+        dfs(image, r, c - 1, oldColor, newColor);
+        dfs(image, r, c + 1, oldColor, newColor);
+    }
+}
+```
+
+#### 复杂度分析
+
+设图像的大小为 $m \times n$，需要填充的像素数量为 $k$。
+
+1. **时间复杂度**： $\mathcal{O}(m \times n)$
+    * 最坏情况下，整个图像的像素颜色都相同，都需要被修改。
+    * 每个像素点最多被访问 1 次（染色）和 检查 4 次（作为邻居被查看）。
+    * 实际时间复杂度与连通区域的大小 $k$ 成正比，即 $\mathcal{O}(k)$，但在大 O 表示法下上限为矩阵大小。
+2. **空间复杂度**： $\mathcal{O}(m \times n)$
+    * 这是递归调用栈的空间开销。
+    * 最坏情况下（例如一条蛇形的连通区域贯穿整个图像），递归深度可能达到 $m \times n$。
+    * 如果不需要额外的递归栈，使用 BFS + 队列可以将空间控制在 $\mathcal{O}(\min(m, n))$ 级别（对于特定的形状），但在本题数据规模下 DFS 更简洁。
 
 ***
 

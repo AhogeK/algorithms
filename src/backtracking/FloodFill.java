@@ -1,0 +1,26 @@
+package backtracking;
+
+/**
+ * 733. 图像渲染
+ *
+ * @author AhogeK [ahogek@gmail.com]
+ * @since 2025-12-03 15:04:52
+ */
+public class FloodFill {
+    public int[][] floodFill(int[][] image, int sr, int sc, int newColor) {
+        int oldColor = image[sr][sc];
+        if (oldColor == newColor) return image;
+        dfs(image, sr, sc, oldColor, newColor);
+        return image;
+    }
+
+    private void dfs(int[][] image, int r, int c, int oldColor, int newColor) {
+        if (r < 0 || r >= image.length || c < 0 || c >= image[0].length || image[r][c] != oldColor) return;
+        image[r][c] = newColor;
+
+        dfs(image, r - 1, c, oldColor, newColor);
+        dfs(image, r + 1, c, oldColor, newColor);
+        dfs(image, r, c - 1, oldColor, newColor);
+        dfs(image, r, c + 1, oldColor, newColor);
+    }
+}
