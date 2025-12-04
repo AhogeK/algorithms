@@ -102,6 +102,10 @@
       * [算法思路](#算法思路-11)
       * [代码实现](#代码实现-3)
       * [复杂度分析](#复杂度分析-17)
+    * [完成「力扣」第 130 题：被围绕的区域](#完成力扣第-130-题被围绕的区域)
+      * [算法思路](#算法思路-12)
+      * [代码实现](#代码实现-4)
+      * [复杂度分析](#复杂度分析-18)
 <!-- TOC -->
 
 # 回溯算法
@@ -1627,6 +1631,80 @@ public class WordSearch {
     * 递归调用栈的深度最大为 $L$。
     * 使用了原地修改，不需要额外的 `visited` 数组。
     * `boardCount` 和 `wordCount` 数组大小固定为 128，视为 $\mathcal{O}(1)$。
+
+### 完成「力扣」第 130 题：[被围绕的区域](https://leetcode.cn/problems/surrounded-regions/)
+
+#### 算法思路
+
+这是一个经典的 **Flood Fill（泛洪填充）** 问题。我们使用 DFS（回溯思想）从边界向内部渗透。
+
+1. **算法步骤**
+
+    1. **边界扫描**：遍历矩阵的四条边（上、下、左、右）。
+    2. **触发 DFS**：如果边界上发现了 `'O'`，则以该点为起点进行 DFS。
+    3. **DFS 过程**：
+        * 将当前 `'O'` 修改为临时占位符（例如 `'A'` 或 `'#'`），表示“已访问且安全”。
+        * 递归访问上下左右四个相邻节点。
+        * 如果相邻节点是 `'O'`，继续递归；如果是 `'X'` 或 `'A'`，停止。
+    4. **全图恢复**：遍历整个矩阵。
+        * 如果遇到 `'A'`（安全），将其还原为 `'O'`。
+        * 如果遇到 `'O'`（不安全，说明DFS没触达它），将其捕获为 `'X'`。
+
+2. **为什么是回溯思路？**
+
+    这里的 Flood Fill 本质上是隐式图的深度优先搜索。
+
+    * **做选择**：将 `'O'` 标记为 `'A'`。
+    * **递归**：进入相邻格子。
+    * **无需撤销**：与标准回溯不同的是，我们不需要撤销标记，因为我们的目的就是要把连通块染色。这种“只进不退”的 DFS 是回溯算法的一种特例或应用。
+
+#### 代码实现
+
+```java
+public class SurroundedRegions {
+    public void solve(char[][] board) {
+        if (board == null || board.length == 0) return;
+        int m = board.length;
+        int n = board[0].length;
+        for (int i = 0; i < m; i++) {
+            if (board[i][0] == 'O') dfs(board, i, 0);
+            if (board[i][n - 1] == 'O') dfs(board, i, n - 1);
+        }
+        for (int j = 1; j < n - 1; j++) {
+            if (board[0][j] == 'O') dfs(board, 0, j);
+            if (board[m - 1][j] == 'O') dfs(board, m - 1, j);
+        }
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (board[i][j] == 'A') board[i][j] = 'O';
+                else if (board[i][j] == 'O') board[i][j] = 'X';
+            }
+        }
+    }
+
+    private void dfs(char[][] board, int r, int c) {
+        if (r < 0 || r >= board.length || c < 0 || c >= board[0].length || board[r][c] != 'O') return;
+        board[r][c] = 'A';
+        dfs(board, r - 1, c);
+        dfs(board, r + 1, c);
+        dfs(board, r, c - 1);
+        dfs(board, r, c + 1);
+    }
+}
+```
+
+#### 复杂度分析
+
+设矩阵大小为 $M \times N$。
+
+* **时间复杂度**： $\mathcal{O}(M \times N)$
+    * 边界扫描最多触发 $2(M+N)$ 次 DFS 入口判断。
+    * DFS 过程中，每个格子最多被访问一次（变成 `'A'` 后就不会再进去了）。
+    * 最后的全局扫描也是一次遍历。
+    * 总操作数与格子总数成线性关系。
+* **空间复杂度**： $\mathcal{O}(M \times N)$（递归栈）
+    * 最坏情况下（全屏都是 `'O'`），DFS 递归深度可能达到 $M \times N$。
+    * 如果使用 BFS（队列）实现，空间复杂度同样取决于队列最大长度，最坏也是量级相当。
 
 ***
 
