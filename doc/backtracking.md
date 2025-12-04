@@ -122,6 +122,10 @@
       * [算法思路](#算法思路-16)
       * [代码实现](#代码实现-8)
       * [复杂度分析](#复杂度分析-22)
+    * [完成「力扣」第 1034 题：边框着色](#完成力扣第-1034-题边框着色)
+      * [算法思路](#算法思路-17)
+      * [代码实现](#代码实现-9)
+      * [复杂度分析](#复杂度分析-23)
 <!-- TOC -->
 
 # 回溯算法
@@ -2033,6 +2037,83 @@ public class NumberOfClosedIslands {
 * **空间复杂度**： $\mathcal{O}(M \times N)$
     * 主要开销是递归调用栈。
     * 最坏情况（全图是蛇形陆地）下深度为 $M \times N$。
+
+### 完成「力扣」第 1034 题：[边框着色](https://leetcode.cn/problems/coloring-a-border)
+
+#### 算法思路
+
+整体思路是典型的 Flood Fill + DFS：
+
+1. 记录起点原始颜色：
+    * $\text{originalColor} = \text{grid[row][col]}$
+    * 如果 $\text{originalColor} == \text{color}$，直接返回，不用做任何事。
+2. 准备一个访问标记数组：
+    * $\text{visited}[m][n]$，防止 DFS 重复访问同一格子导致死循环。
+3. 从起点调用 DFS：
+    * 只会沿着颜色等于 $\text{originalColor}$ 的格子继续扩展。
+    * 从而精确遍历到这个连通分量的所有格子。
+4. 在 DFS 中，每访问到一个格子 $(r,c)$，判断它是不是边界格子：
+    * 遍历四个方向：
+        * 如果某个方向越界：说明 $(r,c)$ 在网格边缘，是边界。
+        * 如果某个方向未越界但颜色不同：说明该方向是“外面”的格子， $(r,c)$ 是边界。
+        * 如果某个方向是同色且未访问：继续 DFS。
+        * 如果是同色且已访问：同一连通分量内部，不构成边界判据。
+    * 只要四个方向里有“越界”或“异色邻居”，就把当前格子判为边界。
+5. 若当前格子是边界格子，则把它的颜色改成新颜色 $\text{color}$。
+
+**关键点**：\
+利用 $\text{visited}$ 数组表示“是否属于当前连通分量并已处理”，不再依赖 $\text{grid}$ 中实时的颜色来判断连通性，从而避免“边界格子改色后影响后续判断”的问题。
+
+#### 代码实现
+
+```java
+public class ColoringABorder {
+    public int[][] colorBorder(int[][] grid, int row, int col, int color) {
+        int originalColor = grid[row][col];
+        if (originalColor == color) return grid;
+        int m = grid.length;
+        int n = grid[0].length;
+        boolean[][] visited = new boolean[m][n];
+        dfs(grid, row, col, originalColor, color, visited);
+        return grid;
+    }
+
+    private void dfs(int[][] grid, int r, int c, int originalColor, int targetColor, boolean[][] visited) {
+        visited[r][c] = true;
+        int m = grid.length;
+        int n = grid[0].length;
+        boolean isBorder = false;
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        for (int[] dir : directions) {
+            int nr = r + dir[0];
+            int nc = c + dir[1];
+            if (nr < 0 || nr >= m || nc < 0 || nc >= n) isBorder = true;
+            else if (!visited[nr][nc])
+                if (grid[nr][nc] == originalColor) dfs(grid, nr, nc, originalColor, targetColor, visited);
+                else isBorder = true;
+        }
+        if (isBorder) grid[r][c] = targetColor;
+    }
+}
+```
+
+#### 复杂度分析
+
+设网格大小为 $m \times n$。
+
+* **时间复杂度**
+    * 每个格子最多被 DFS 访问一次。
+    * 每次访问只检查固定四个方向，操作是常数级。
+    * 总时间复杂度为：
+        * $\boxed{\mathcal{O}(m \times n)}$
+* **空间复杂度**
+    * 显式使用一个 $m \times n$ 的 $\text{visited}$ 数组，占用：
+        * $\mathcal{O}(m \times n)$ 额外空间。
+    * 递归调用栈深度在最坏情况下也可能达到 $\mathcal{O}(m \times n)$（例如整张图是一条长链）。
+
+  综合空间复杂度为：
+
+    * $\boxed{\mathcal{O}(m \times n)}$
 
 ***
 
