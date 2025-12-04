@@ -106,6 +106,14 @@
       * [算法思路](#算法思路-12)
       * [代码实现](#代码实现-4)
       * [复杂度分析](#复杂度分析-18)
+    * [完成「力扣」第 200 题：岛屿数量](#完成力扣第-200-题岛屿数量)
+      * [算法思路](#算法思路-13)
+      * [代码实现](#代码实现-5)
+      * [复杂度分析](#复杂度分析-19)
+    * [完成「力扣」第 417 题：太平洋大西洋水流问题](#完成力扣第-417-题太平洋大西洋水流问题)
+      * [算法思路](#算法思路-14)
+      * [代码实现](#代码实现-6)
+      * [复杂度分析](#复杂度分析-20)
 <!-- TOC -->
 
 # 回溯算法
@@ -1774,6 +1782,80 @@ public class NumberOfIslands {
     * 主要开销是 DFS 的递归调用栈。
     * **最坏情况**：整个地图全是陆地，且形状是蛇形（像一条长线），递归深度可达 $M \times N$。
     * **平均情况**：递归深度通常远小于总格子数。
+
+### 完成「力扣」第 417 题：[太平洋大西洋水流问题](https://leetcode.cn/problems/pacific-atlantic-water-flow/)
+
+#### 算法思路
+
+我们将使用两次 Flood Fill（基于 DFS）：
+
+1. 创建一个布尔矩阵 `pacific`，记录能流入太平洋的格子。
+2. 创建一个布尔矩阵 `atlantic`，记录能流入大西洋的格子。
+3. **第一轮 DFS**：以**左边界**和**上边界**的所有点为起点，向矩阵内部逆流搜索（要求 `nextHeight >= currentHeight`），并在 `pacific` 矩阵中标记。
+4. **第二轮 DFS**：以**右边界**和**下边界**的所有点为起点，向矩阵内部逆流搜索，并在 `atlantic` 矩阵中标记。
+5. **合并结果**：遍历整个矩阵，如果某个坐标 `(i, j)` 在 `pacific[i][j]` 和 `atlantic[i][j]` 均为 `true`，则加入结果集。
+
+**为什么是回溯思路？**
+
+这里的 Flood Fill 本质上是图的遍历。
+
+* **做选择**：标记当前格子为 `true`。
+* **递归**：探索四周比自己高的格子。
+* **无需撤销**：我们的目标是标记可达区域，一旦到达就是 true，不需要回退状态。
+
+#### 代码实现
+
+```java
+public class PacificAtlanticWaterFlow {
+    private static final int[][] DIRS = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+
+    public List<List<Integer>> pacificAtlantic(int[][] heights) {
+        List<List<Integer>> result = new ArrayList<>();
+        if (heights == null || heights.length == 0 || heights[0].length == 0) return result;
+        int m = heights.length;
+        int n = heights[0].length;
+        boolean[][] pacific = new boolean[m][n];
+        boolean[][] atlantic = new boolean[m][n];
+        for (int i = 0; i < m; i++) {
+            dfs(heights, i, 0, pacific, heights[i][0]);
+            dfs(heights, i, n - 1, atlantic, heights[i][n - 1]);
+        }
+        for (int j = 0; j < n; j++) {
+            dfs(heights, 0, j, pacific, heights[0][j]);
+            dfs(heights, m - 1, j, atlantic, heights[m - 1][j]);
+        }
+        for (int i = 0; i < m; i++)
+            for (int j = 0; j < n; j++)
+                if (pacific[i][j] && atlantic[i][j])
+                    result.add(List.of(i, j));
+        return result;
+    }
+
+    private void dfs(int[][] heights, int r, int c, boolean[][] visited, int prevHeight) {
+        if (r < 0 || r >= heights.length || c < 0 || c >= heights[0].length || visited[r][c] || heights[r][c] < prevHeight)
+            return;
+        visited[r][c] = true;
+        for (int[] dir : DIRS) {
+            int nextR = r + dir[0];
+            int nextC = c + dir[1];
+            dfs(heights, nextR, nextC, visited, heights[r][c]);
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+设矩阵大小为 $M \times N$。
+
+* **时间复杂度**： $\mathcal{O}(M \times N)$
+    * 我们进行了两次全图扫描性质的 DFS（一次针对太平洋，一次针对大西洋）。
+    * 在每次 DFS 过程中，每个格子最多被访问一次（由 `visited` 数组保证）。
+    * 最后遍历一次矩阵找交集。
+    * 总操作次数是线性的。
+* **空间复杂度**： $\mathcal{O}(M \times N)$
+    * 我们需要两个大小为 $M \times N$ 的布尔矩阵。
+    * 递归调用栈的深度最大可能为 $M \times N$（最坏情况）。
 
 ***
 
