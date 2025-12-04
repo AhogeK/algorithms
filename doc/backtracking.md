@@ -114,6 +114,10 @@
       * [算法思路](#算法思路-14)
       * [代码实现](#代码实现-6)
       * [复杂度分析](#复杂度分析-20)
+    * [完成「力扣」第 1020 题：飞地的数量](#完成力扣第-1020-题飞地的数量)
+      * [算法思路](#算法思路-15)
+      * [代码实现](#代码实现-7)
+      * [复杂度分析](#复杂度分析-21)
 <!-- TOC -->
 
 # 回溯算法
@@ -1856,6 +1860,86 @@ public class PacificAtlanticWaterFlow {
 * **空间复杂度**： $\mathcal{O}(M \times N)$
     * 我们需要两个大小为 $M \times N$ 的布尔矩阵。
     * 递归调用栈的深度最大可能为 $M \times N$（最坏情况）。
+
+### 完成「力扣」第 1020 题：[飞地的数量](https://leetcode.cn/problems/number-of-enclaves)
+
+#### 算法思路
+
+这个题目与 **[130. 被围绕的区域](https://leetcode.cn/problems/surrounded-regions/)** 几乎一模一样，只是输出结果不同（那题是染色，这题是计数）。
+
+直接找“被包围的陆地”比较困难，但找“**没被包围的陆地**”非常简单：\
+**所有与边界相连的陆地，都不是飞地。**
+
+因此，解题策略如下：
+
+1. **排除法**：从网格的四条边界出发，找到所有边界上的 `'1'`。
+2. **Flood Fill**：以这些边界 `'1'` 为起点，进行 DFS/BFS 遍历，将所有相连的 `'1'` 都标记为“安全”（例如改成 `'0'`，或者标记为已访问）。这些是可以走到边界的陆地。
+3. **统计剩余**：遍历完边界后，矩阵中剩下的所有 `'1'`，就是无法到达边界的飞地。统计它们的数量即可。
+
+我们采用 **DFS (深度优先搜索)** 来实现 Flood Fill。
+
+1. **算法流程**
+
+    1. **边界扫描**：遍历矩阵的四条边（第一行、最后一行、第一列、最后一列）。
+    2. **清除边缘陆地**：如果边界上发现 `grid[i][j] == 1`，则触发 `dfs(i, j)`。
+        * **DFS 逻辑**：
+            * 将当前格子 `grid[i][j]` 置为 `0`（或者其他特殊值），表示这块陆地不属于飞地，将其“淹没”。
+            * 递归向 上、下、左、右 四个方向搜索，继续淹没相连的陆地。
+    3. **统计飞地**：经过上述处理后，所有能通往边界的陆地都变成了 `0`。此时遍历整个矩阵，剩下的 `1` 就是真正的飞地，累加计数并返回。
+
+2. **回溯思路的体现**
+
+    这里的 DFS 是回溯思想在图遍历中的简化应用：
+
+    * **做选择**：进入一个格子，将其标记为 `0`。
+    * **递归**：探索邻居。
+    * **无撤销**：不需要恢复状态，因为我们的目的就是永久排除这些非飞地。
+
+#### 代码实现
+
+```java
+public class NumberOfEnclaves {
+    public int numEnclaves(int[][] grid) {
+        if (grid == null || grid.length == 0) return 0;
+        int m = grid.length;
+        int n = grid[0].length;
+        for (int i = 0; i < m; i++) {
+            if (grid[i][0] == 1) dfs(grid, i, 0);
+            if (grid[i][n - 1] == 1) dfs(grid, i, n - 1);
+        }
+        for (int j = 0; j < n; j++) {
+            if (grid[0][j] == 1) dfs(grid, 0, j);
+            if (grid[m - 1][j] == 1) dfs(grid, m - 1, j);
+        }
+        int count = 0;
+        for (int[] rows : grid)
+            for (int j = 0; j < n; j++)
+                if (rows[j] == 1) count++;
+        return count;
+    }
+
+    private void dfs(int[][] grid, int r, int c) {
+        if (r < 0 || r >= grid.length || c < 0 || c >= grid[0].length || grid[r][c] == 0) return;
+        grid[r][c] = 0;
+        dfs(grid, r - 1, c);
+        dfs(grid, r + 1, c);
+        dfs(grid, r, c - 1);
+        dfs(grid, r, c + 1);
+    }
+}
+```
+
+#### 复杂度分析
+
+设网格大小为 $M \times N$。
+
+* **时间复杂度**： $\mathcal{O}(M \times N)$
+    * 边界扫描触发的 DFS 总共访问的节点数不会超过矩阵总格子数。
+    * 最后的全局统计遍历一次矩阵。
+    * 整体是线性的。
+* **空间复杂度**： $\mathcal{O}(M \times N)$
+    * 取决于 DFS 递归栈的最大深度。
+    * 最坏情况（整个地图都是陆地）下为 $\mathcal{O}(M \times N)$。
 
 ***
 
