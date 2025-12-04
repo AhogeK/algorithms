@@ -118,6 +118,10 @@
       * [算法思路](#算法思路-15)
       * [代码实现](#代码实现-7)
       * [复杂度分析](#复杂度分析-21)
+    * [完成「力扣」第 1254 题：统计封闭岛屿的数目](#完成力扣第-1254-题统计封闭岛屿的数目)
+      * [算法思路](#算法思路-16)
+      * [代码实现](#代码实现-8)
+      * [复杂度分析](#复杂度分析-22)
 <!-- TOC -->
 
 # 回溯算法
@@ -1940,6 +1944,95 @@ public class NumberOfEnclaves {
 * **空间复杂度**： $\mathcal{O}(M \times N)$
     * 取决于 DFS 递归栈的最大深度。
     * 最坏情况（整个地图都是陆地）下为 $\mathcal{O}(M \times N)$。
+
+### 完成「力扣」第 1254 题：[统计封闭岛屿的数目](https://leetcode.cn/problems/number-of-closed-islands)
+
+#### 算法思路
+
+**核心逻辑**
+
+* 如果一个岛屿接触到了矩阵的边界，那它就不是封闭的。
+* 反之，如果一个岛屿完全在矩阵内部，周围全是 `1`，那就是封闭的。
+
+**解题策略**
+
+1. **清洗边界**：先把所有接触边界的岛屿（`0`）全部“淹没”变成水（`1`）。
+2. **统计剩余**：剩下的岛屿必然都是不接触边界的，也就是封闭的。遍历矩阵统计这些连通块的数量即可。
+
+我们依然采用 **DFS (深度优先搜索)** 来实现 Flood Fill。
+
+1. **算法流程**
+
+    1. **第一步：处理边界**
+        * 遍历矩阵的四条边（第一行、最后一行、第一列、最后一列）。
+        * 如果发现 `grid[i][j] == 0`（土地），说明这是一个非封闭岛屿的一部分。
+        * 立即启动 `dfs(i, j)`，顺藤摸瓜把整个连通的岛屿都变成 `1`（淹没）。
+    2. **第二步：统计封闭岛屿**
+        * 经过第一步清洗后，现在矩阵里剩下的 `0` 都是肯定接触不到边界的。
+        * 遍历整个矩阵内部（`1` 到 `m-2`, `1` 到 `n-2`）。
+        * 如果遇到 `grid[i][j] == 0`：
+            * 这就是一个新的封闭岛屿。
+            * `count++`。
+            * 启动 `dfs(i, j)`，把这个岛屿也变成 `1`（避免重复统计）。
+    3. **返回 `count`**。
+
+2. **回溯思路**
+
+    这里的 DFS 仍然是回溯思想在图遍历中的应用：
+
+    * **做选择**：进入一个格子，将其修改为 `1`。
+    * **递归**：向四个方向扩散。
+    * **无撤销**：状态永久改变，用于标记已处理。
+
+#### 代码实现
+
+```java
+public class NumberOfClosedIslands {
+    public int closedIsland(int[][] grid) {
+        if (grid == null || grid.length == 0) return 0;
+        int m = grid.length;
+        int n = grid[0].length;
+        for (int i = 0; i < m; i++) {
+            if (grid[i][0] == 0) dfs(grid, i, 0);
+            if (grid[i][n - 1] == 0) dfs(grid, i, n - 1);
+        }
+        for (int j = 0; j < n; j++) {
+            if (grid[0][j] == 0) dfs(grid, 0, j);
+            if (grid[m - 1][j] == 0) dfs(grid, m - 1, j);
+        }
+        int closedIslandsCount = 0;
+        for (int i = 1; i < m - 1; i++)
+            for (int j = 1; j < n - 1; j++)
+                if (grid[i][j] == 0) {
+                    closedIslandsCount++;
+                    dfs(grid, i, j);
+                }
+        return closedIslandsCount;
+    }
+
+    private void dfs(int[][] grid, int r, int c) {
+        if (r < 0 || r >= grid.length || c < 0 || c >= grid[0].length || grid[r][c] == 1) return;
+        grid[r][c] = 1;
+        dfs(grid, r - 1, c);
+        dfs(grid, r + 1, c);
+        dfs(grid, r, c - 1);
+        dfs(grid, r, c + 1);
+    }
+}
+```
+
+#### 复杂度分析
+
+设网格大小为 $M \times N$。
+
+* **时间复杂度**： $\mathcal{O}(M \times N)$
+    * 边界清洗阶段访问部分节点。
+    * 全图扫描阶段访问所有节点。
+    * 每个节点最多被 DFS 访问并修改一次。
+    * 整体是线性的。
+* **空间复杂度**： $\mathcal{O}(M \times N)$
+    * 主要开销是递归调用栈。
+    * 最坏情况（全图是蛇形陆地）下深度为 $M \times N$。
 
 ***
 
