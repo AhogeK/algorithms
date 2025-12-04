@@ -1706,6 +1706,75 @@ public class SurroundedRegions {
     * 最坏情况下（全屏都是 `'O'`），DFS 递归深度可能达到 $M \times N$。
     * 如果使用 BFS（队列）实现，空间复杂度同样取决于队列最大长度，最坏也是量级相当。
 
+### 完成「力扣」第 200 题：[岛屿数量](https://leetcode.cn/problems/number-of-islands)
+
+#### 算法思路
+
+这道题是 **Flood Fill（泛洪填充）** 算法最经典的应用场景。我们可以用 **深度优先搜索 (DFS)** 来实现“炸沉岛屿”的过程。
+
+1. **算法流程**
+
+    1. **主循环**：双重循环遍历网格的每一个格子 `(i, j)`。
+    2. **发现岛屿**：如果当前格子 `grid[i][j] == '1'`：
+        * 岛屿数量 `count++`。
+        * 启动 DFS：`dfs(grid, i, j)`。
+    3. **DFS (炸沉过程)**：
+        * **终止条件**：如果当前坐标越界，或者当前格子是水 `'0'`，直接返回。
+        * **标记访问**：将当前格子修改为 `'0'`（表示这块陆地已经被统计过，沉入海底）。
+        * **递归扩散**：向 上、下、左、右 四个方向递归调用 DFS，继续炸沉相连的陆地。
+
+2. **为什么是回溯思路？**
+
+    这里的 DFS 其实就是回溯算法的一种简化形式（或者说是图的遍历）。
+
+    * **做选择**：进入一个 `'1'` 格子，把它变成 `'0'`。
+    * **递归**：探索相邻的格子。
+    * **无需撤销**：与寻找所有路径的回溯不同，我们不需要撤销 `'0'` 变回 `'1'` 的操作。因为我们的目的就是消除，让后续的遍历不再理会它。
+
+#### 代码实现
+
+```java
+public class NumberOfIslands {
+    public int numIslands(char[][] grid) {
+        if (grid == null || grid.length == 0) return 0;
+        int m = grid.length;
+        int n = grid[0].length;
+        int count = 0;
+        for (int i = 0; i < m; i++)
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == '1') {
+                    count++;
+                    dfs(grid, i, j);
+                }
+            }
+        return count;
+    }
+
+    private void dfs(char[][] grid, int r, int c) {
+        if (r < 0 || r >= grid.length || c < 0 || c >= grid[0].length || grid[r][c] == '0') return;
+        grid[r][c] = '0';
+        dfs(grid, r - 1, c);
+        dfs(grid, r + 1, c);
+        dfs(grid, r, c - 1);
+        dfs(grid, r, c + 1);
+    }
+}
+```
+
+#### 复杂度分析
+
+设网格大小为 $M \times N$。
+
+* **时间复杂度**： $\mathcal{O}(M \times N)$
+    * 我们遍历了整个网格一遍。
+    * 每个格子最多被访问两次：一次在主循环中，一次在 DFS 中被标记为 `'0'`。
+    * DFS 内部的操作是常数级的。
+    * 总体操作次数与格子总数成线性关系。
+* **空间复杂度**： $\mathcal{O}(M \times N)$
+    * 主要开销是 DFS 的递归调用栈。
+    * **最坏情况**：整个地图全是陆地，且形状是蛇形（像一条长线），递归深度可达 $M \times N$。
+    * **平均情况**：递归深度通常远小于总格子数。
+
 ***
 
 [返回](../README.md)
