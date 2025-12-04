@@ -98,6 +98,10 @@
       * [算法思路](#算法思路-10)
       * [代码实现](#代码实现-2)
       * [复杂度分析](#复杂度分析-16)
+    * [例 2：「力扣」第 79 题：单词搜索](#例-2力扣第-79-题单词搜索)
+      * [算法思路](#算法思路-11)
+      * [代码实现](#代码实现-3)
+      * [复杂度分析](#复杂度分析-17)
 <!-- TOC -->
 
 # 回溯算法
@@ -1550,6 +1554,79 @@ public class FloodFill {
     * 这是递归调用栈的空间开销。
     * 最坏情况下（例如一条蛇形的连通区域贯穿整个图像），递归深度可能达到 $m \times n$。
     * 如果不需要额外的递归栈，使用 BFS + 队列可以将空间控制在 $\mathcal{O}(\min(m, n))$ 级别（对于特定的形状），但在本题数据规模下 DFS 更简洁。
+
+### 例 2：「力扣」第 79 题：[单词搜索](https://leetcode.cn/problems/word-search/)
+
+#### 算法思路
+
+这是一个典型的 **DFS（深度优先搜索）** 配合 **回溯（Backtracking）** 的问题。也可以看作是一种带有状态撤销机制的 **Flood Fill**。
+
+1. **遍历起点**：由于不知道单词从哪个格子开始，我们需要遍历网格中的每一个格子 `(i, j)` 作为潜在的起点。
+2. **深度优先搜索**：从起点开始，检查当前字符是否匹配 `word` 的第 `k` 个字符。
+    * 如果不匹配，返回 `false`（剪枝）。
+    * 如果匹配，且已经匹配到了单词末尾，返回 `true`（找到答案）。
+    * 如果匹配但未结束，标记当前格子为“已访问”，然后向四周（上下左右）递归搜索 `word` 的第 `k+1` 个字符。
+3. **回溯（撤销选择）**：当四个方向都试探完后，如果都没有找到路径，说明从当前格子走不通。我们需要**撤销**对当前格子的“已访问”标记，以便其他路径还能使用这个格子。
+
+#### 代码实现
+
+```java
+public class WordSearch {
+    public boolean exist(char[][] board, String word) {
+        char[] w = word.toCharArray();
+        int[] boardCount = new int[128];
+        for (char[] row : board) for (char c : row) boardCount[c]++;
+        int[] wordCount = new int[128];
+        for (char c : w) wordCount[c]++;
+        for (int i = 0; i < 128; i++) if (wordCount[i] > boardCount[i]) return false;
+        if (boardCount[w[0]] > boardCount[w[w.length - 1]]) reverse(w);
+        for (int i = 0; i < board.length; i++)
+            for (int j = 0; j < board[0].length; j++)
+                if (board[i][j] == w[0] && dfs(board, i, j, w, 0))
+                    return true;
+        return false;
+    }
+
+    private void reverse(char[] w) {
+        int left = 0;
+        int right = w.length - 1;
+        while (left < right) {
+            char temp = w[left];
+            w[left] = w[right];
+            w[right] = temp;
+            left++;
+            right--;
+        }
+    }
+
+    private boolean dfs(char[][] board, int i, int j, char[] w, int k) {
+        if (k == w.length) return true;
+        if (i < 0 || i >= board.length || j < 0 || j >= board[0].length || board[i][j] != w[k]) return false;
+        char temp = board[i][j];
+        board[i][j] = 0;
+        boolean res = dfs(board, i + 1, j, w, k + 1) ||
+                      dfs(board, i - 1, j, w, k + 1) ||
+                      dfs(board, i, j + 1, w, k + 1) ||
+                      dfs(board, i, j - 1, w, k + 1);
+        board[i][j] = temp;
+        return res;
+    }
+}
+```
+
+#### 复杂度分析
+
+设 $M, N$ 为网格的长宽， $L$ 为单词长度。
+
+* **时间复杂度**： $\mathcal{O}(M \cdot N \cdot 3^L)$
+    * 我们需要遍历 $M \times N$ 个起点。
+    * 对于每个起点，最坏情况下需要进行深度为 $L$ 的 DFS。
+    * 在 DFS 中，除了第一次有 4 个方向，后续由于不能走回头路，最多只有 3 个分支。
+    * 尽管上限很高，但实际上由于强力剪枝（频率检查 + 反转优化），平均运行速度极快。
+* **空间复杂度**： $\mathcal{O}(L)$
+    * 递归调用栈的深度最大为 $L$。
+    * 使用了原地修改，不需要额外的 `visited` 数组。
+    * `boardCount` 和 `wordCount` 数组大小固定为 128，视为 $\mathcal{O}(1)$。
 
 ***
 
