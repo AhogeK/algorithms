@@ -126,6 +126,10 @@
       * [算法思路](#算法思路-17)
       * [代码实现](#代码实现-9)
       * [复杂度分析](#复杂度分析-23)
+    * [完成「力扣」第 279 题：完全平方数](#完成力扣第-279-题完全平方数)
+      * [算法思路](#算法思路-18)
+      * [代码实现](#代码实现-10)
+      * [复杂度分析](#复杂度分析-24)
 <!-- TOC -->
 
 # 回溯算法
@@ -2114,6 +2118,78 @@ public class ColoringABorder {
   综合空间复杂度为：
 
     * $\boxed{\mathcal{O}(m \times n)}$
+
+### 完成「力扣」第 279 题：[完全平方数](https://leetcode.cn/problems/perfect-squares)
+
+#### 算法思路
+
+我们可以将这个问题抽象为一个**无权图的最短路径问题**：
+
+1. **节点（Node）**：从 $0$ 到 $n$ 的每一个整数都可以看作图中的一个节点。
+2. **边（Edge）**：如果两个数字 $x$ 和 $y$ 满足 $x + k^2 = y$（其中 $k$ 是正整数），则存在一条从 $x$ 指向 $y$ 的边。
+3. **起点**： $n$（或者 $0$，视方向而定）。
+4. **终点**： $0$（或者 $n$）。
+5. **目标**：找到从起点到终点的最短路径长度（即边的数量）。
+
+因为我们要求的是“最少数量”，这正是 **广度优先搜索（BFS）** 最擅长的领域。BFS 像水的波纹一样一层一层向外扩散（Flood Fill），最先触达终点的层数就是最短路径。
+
+**核心步骤：**
+
+1. **初始化**：
+    * 创建一个队列 `queue`，将初始节点 $n$ 加入队列。
+    * 创建一个集合 `visited`，用于记录已经访问过的节点，防止重复计算（剪枝）。
+    * 初始化层数 `level = 0`。
+2. **层序遍历**：
+    * 只要队列不为空，就进行循环。
+    * 每次循环开始，`level` 加 1。
+    * 处理当前队列中的所有节点（当前层的所有可能性）。
+3. **状态转移**：
+    * 对于当前节点 `curr`，尝试减去所有的完全平方数 $i^2$（即 $1, 4, 9, \dots$）。
+    * 计算 `next_val = curr - i*i`。
+    * 如果 `next_val` 等于 0，说明我们正好减完了，当前 `level` 就是答案。
+    * 如果 `next_val` 大于 0 且未被访问过，将其加入 `queue` 和 `visited`。
+
+#### 代码实现
+
+```java
+public class PerfectSquares {
+    public int numSquares(int n) {
+        Queue<Integer> queue = new LinkedList<>();
+        queue.offer(n);
+        boolean[] visited = new boolean[n + 1];
+        visited[n] = true;
+        int level = 0;
+        while (!queue.isEmpty()) {
+            level++;
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                int cur = queue.poll();
+                for (int j = 1; j * j <= cur; j++) {
+                    int nextVal = cur - j * j;
+                    if (nextVal == 0) return level;
+                    if (!visited[nextVal]) {
+                        queue.offer(nextVal);
+                        visited[nextVal] = true;
+                    }
+                }
+            }
+        }
+        return level;
+    }
+}
+```
+
+#### 复杂度分析
+
+令 $n$ 为给定的目标整数。
+
+1. **时间复杂度**： $\mathcal{O}(n \cdot \sqrt{n})$
+    * 在最坏情况下，我们需要访问所有 $n$ 个节点。
+    * 对于每个节点 `cur`，我们遍历所有小于 `cur` 的完全平方数。完全平方数的数量约为 $\sqrt{cur}$。
+    * 虽然理论上是乘积，但由于大量重复状态被 `visited` 剪枝，实际运行速度通常非常快，远好于这个上界。实际上，根据拉格朗日四平方和定理，答案最多为 4，这意味着 BFS 的层数非常浅（最大深度 4）。
+2. **空间复杂度**： $\mathcal{O}(n)$
+    * 我们需要一个 `visited` 数组来存储 $n$ 个状态。
+    * 队列在最坏情况下的空间也可以达到 $\mathcal{O}(n)$ 级别。
 
 ***
 
