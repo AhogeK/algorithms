@@ -130,6 +130,10 @@
       * [算法思路](#算法思路-18)
       * [代码实现](#代码实现-10)
       * [复杂度分析](#复杂度分析-24)
+    * [完成「力扣」第 752 题：打开转盘锁](#完成力扣第-752-题打开转盘锁)
+      * [算法思路](#算法思路-19)
+      * [代码实现](#代码实现-11)
+      * [复杂度分析](#复杂度分析-25)
 <!-- TOC -->
 
 # 回溯算法
@@ -2190,6 +2194,137 @@ public class PerfectSquares {
 2. **空间复杂度**： $\mathcal{O}(n)$
     * 我们需要一个 `visited` 数组来存储 $n$ 个状态。
     * 队列在最坏情况下的空间也可以达到 $\mathcal{O}(n)$ 级别。
+
+### 完成「力扣」第 752 题：[打开转盘锁](https://leetcode.cn/problems/open-the-lock)
+
+#### 算法思路
+
+普通 BFS 从起点 `"0000"` 一层一层向外扩展，直到遇到 `target`。\
+双向 BFS 则同时从 **起点** 和 **终点** 两端向中间扩展，谁先“碰头”，谁就得到答案，一般会比单向 BFS 更快。
+
+1. **邻居生成（Flood fill 的“扩散”）**
+
+    从一个状态扩展到相邻状态，非常像 Flood fill “从一个像素向四周漫延”：
+
+    * 对于当前状态字符串，例如 `"0359"`：
+        * 对每一位索引 $i \in {0,1,2,3}$：
+            * 把第 $i$ 位数字加一（ $9$ 变 $0$），得到一个新状态。
+            * 把第 $i$ 位数字减一（ $0$ 变 $9$），得到另一个新状态。
+    * 总共每个状态最多有 8 个邻居（4 位 × 每位 2 个方向）。
+
+    这一步就像 Flood fill 的“从当前像素向上下左右扩散”，只不过这里是“向 8 个邻接状态扩散”。
+
+2. **双向 BFS 的流程**
+
+    用两个集合分别维护当前“边界”（frontier）上的状态：
+
+    * `front`：从 `"0000"` 这一端扩散的边界。
+    * `back`：从 `target` 那一端扩散的边界。
+    * `visited`：已经访问过的状态，防止重复扩展。
+
+    逻辑步骤：
+
+    1. 预处理：
+        * 把 `deadends` 放入 `dead` 集合中便于 $\mathcal{O}(1)$ 查询。
+        * 若 `"0000"` 在 `dead` 中，直接返回 $-1$。
+        * 若 `target` 等于 `"0000"`，直接返回 $0$。
+    2. 初始化：
+        * `front = {"0000"}`, `back = {target}`。
+        * `visited = {"0000", target}`。
+        * `step = 0`，表示已经拨动的次数。
+    3. 主循环（类似分层 Flood fill）：
+        * 如果 `front` 比 `back` 大，就交换它们（始终扩展更小的一端，减少状态数）。
+        * 准备一个新的集合 `next`，存放由 `front` 扩展得到的下一层。
+        * 对 `front` 中的每个状态 `cur`：
+            * 如果 `cur` 在 `dead` 中，跳过。
+            * 枚举 `cur` 的 8 个邻居 `nei`：
+                * 如果 `nei` 在 `back` 中，说明前后两端已经“碰头”，直接返回 `step + 1`。
+                * 如果 `nei` 没在 `visited` 且不在 `dead` 中，加入 `next` 并标记到 `visited`。
+        * 一轮结束后：`front = next`，`step++`。
+    4. 如果两个方向都扩展完了（`front` 为空），还没碰头，返回 $-1$。
+
+    这整个过程，图像化理解就是：\
+    **从起点和终点两个方向做 Flood fill，像两团“水”同时蔓延，当它们首次汇合的那一层，就是最短路径长度。**
+
+#### 代码实现
+
+```java
+public class OpenTheLock {
+    public int openLock(String[] deadends, String target) {
+        Set<String> dead = new HashSet<>();
+        Collections.addAll(dead, deadends);
+        String start = "0000";
+        if (dead.contains(start)) return -1;
+        if (start.equals(target)) return 0;
+        Set<String> front = new HashSet<>();
+        Set<String> back = new HashSet<>();
+        front.add(start);
+        back.add(target);
+        Set<String> visited = new HashSet<>();
+        visited.add(start);
+        visited.add(target);
+        int step = 0;
+        while (!front.isEmpty() && !back.isEmpty()) {
+            if (front.size() > back.size()) {
+                Set<String> tmp = front;
+                front = back;
+                back = tmp;
+            }
+            Set<String> next = new HashSet<>();
+            for (String cur : front) {
+                if (dead.contains(cur)) continue;
+                for (int i = 0; i < 4; i++) {
+                    char[] chars = cur.toCharArray();
+                    chars[i] = up(chars[i]);
+                    String upState = new String(chars);
+                    if (back.contains(upState)) return step + 1;
+                    if (!visited.contains(upState) && !dead.contains(upState)) {
+                        visited.add(upState);
+                        next.add(upState);
+                    }
+                    chars = cur.toCharArray();
+                    chars[i] = down(chars[i]);
+                    String downState = new String(chars);
+                    if (back.contains(new String(chars))) return step + 1;
+                    if (!visited.contains(downState) && !dead.contains(downState)) {
+                        visited.add(downState);
+                        next.add(downState);
+                    }
+                }
+            }
+            front = next;
+            step++;
+        }
+        return -1;
+    }
+
+    private char up(char c) {
+        return c == '9' ? '0' : (char)(c + 1);
+    }
+
+    private char down(char c) {
+        return c == '0' ? '9' : (char)(c - 1);
+    }
+}
+```
+
+#### 复杂度分析
+
+设状态空间规模为 $N$。本题中 $N = 10^4$（四位，每位 10 种）。
+
+* 每个状态最多扩展 8 个邻接状态。
+* 每个状态最多进队一次。
+
+因此：
+
+* 时间复杂度：\
+  邻居扩展总次数为常数倍的 $N$，所以是\
+  $\mathcal{O}(N)$\
+  在本题中相当于 $\mathcal{O}(10^4)$，非常可控。
+* 空间复杂度：\
+  主要为三个集合 `front`、`back`、`visited`，都至多装下所有状态，\
+  所以是\
+  $\mathcal{O}(N)$。
 
 ***
 
