@@ -134,6 +134,10 @@
       * [算法思路](#算法思路-19)
       * [代码实现](#代码实现-11)
       * [复杂度分析](#复杂度分析-25)
+    * [完成「力扣」第 365 题：水壶问题](#完成力扣第-365-题水壶问题)
+      * [算法思路](#算法思路-20)
+      * [代码实现](#代码实现-12)
+      * [复杂度分析](#复杂度分析-26)
 <!-- TOC -->
 
 # 回溯算法
@@ -2325,6 +2329,84 @@ public class OpenTheLock {
   主要为三个集合 `front`、`back`、`visited`，都至多装下所有状态，\
   所以是\
   $\mathcal{O}(N)$。
+
+### 完成「力扣」第 365 题：[水壶问题](https://leetcode.cn/problems/water-and-jug-problem)
+
+#### 算法思路
+
+1. **状态定义**
+
+    我们将当前两个水壶中的水量定义为一个状态对 $(curX, curY)$。\
+    由于水壶容量有限， $0 \le curX \le x$ 且 $0 \le curY \le y$。
+
+2. **操作（状态转移）**
+
+    对于任意状态 $(curX, curY)$，我们可以进行以下 6 种操作，转移到新的状态：
+
+    1. **装满 X 壶**：变为 $(x, curY)$
+    2. **装满 Y 壶**：变为 $(curX, y)$
+    3. **清空 X 壶**：变为 $(0, curY)$
+    4. **清空 Y 壶**：变为 $(curX, 0)$
+    5. **X 壶倒入 Y 壶**：
+        * 如果 X 壶的水能全部倒入 Y 壶（即 $curX + curY \le y$）：变为 $(0, curX + curY)$
+        * 如果 X 壶的水倒不完（Y 壶满了）：变为 $(curX - (y - curY), y)$
+    6. **Y 壶倒入 X 壶**：
+        * 如果 Y 壶的水能全部倒入 X 壶（即 $curX + curY \le x$）：变为 $(curX + curY, 0)$
+        * 如果 Y 壶的水倒不完（X 壶满了）：变为 $(x, curY - (x - curX))$
+
+3. **搜索策略 (Flood Fill / DFS)**
+
+    这就像在一个迷宫中“漫水”填充（Flood Fill）。
+
+    * **起点**： $(0, 0)$。
+    * **目标**：任意状态 $(curX, curY)$ 满足 $curX + curY == \text{target}$。
+    * **去重**：为了避免死循环（例如：加满 -> 清空 -> 加满 -> ...），我们需要一个哈希表（`HashSet`）或二维布尔数组来记录已经访问过的状态。由于 $x, y \le 10^3$，使用二维数组 `visited[x+1][y+1]` 是可行的，但在空间优化上，可以将二维坐标压缩为一个长整数 `hash = (long) curX * 100000 + curY` 存入 `HashSet`。
+
+#### 代码实现
+
+```java
+public class WaterAndJugProblem {
+    public boolean canMeasureWater(int x, int y, int target) {
+        if (target > x + y) return false;
+        Deque<Long> stack = new ArrayDeque<>();
+        Set<Long> visited = new HashSet<>();
+        stack.push(0L);
+        visited.add(0L);
+        while (!stack.isEmpty()) {
+            long state = stack.pop();
+            int curX = (int) (state / 100_000);
+            int curY = (int) (state % 100_000);
+            if (curX + curY == target || curX == target || curY == target) return true;
+            addState(x, curY, stack, visited);
+            addState(curX, y, stack, visited);
+            addState(0, curY, stack, visited);
+            addState(curX, 0, stack, visited);
+            int moveXtoY = Math.min(curX, y - curY);
+            addState(curX - moveXtoY, curY + moveXtoY, stack, visited);
+            int moveYtoX = Math.min(curY, x - curX);
+            addState(curX + moveYtoX, curY - moveYtoX, stack, visited);
+        }
+        return false;
+    }
+
+    private void addState(int newX, int newY, Deque<Long> stack, Set<Long> visited) {
+        long hash = (long) newX * 100_000 + newY;
+        if (visited.contains(hash)) return;
+        visited.add(hash);
+        stack.push(hash);
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}(xy)$
+    * 状态的总数受限于两个水壶容量的组合，最多为 $(x+1)(y+1)$ 种状态。
+    * 虽然实际可达的状态数远小于这个理论上限（必然是 $\gcd(x, y)$ 的倍数），但在最坏情况下，DFS 可能会遍历所有可能的状态。
+    * `HashSet` 的插入和查询操作平均时间复杂度为 $\mathcal{O}(1)$。
+* **空间复杂度**： $\mathcal{O}(xy)$
+    * 主要消耗在于 `visited` 集合存储已访问的状态，最坏情况下需要存储所有可能的状态。
+    * `Deque` 栈的深度在最坏情况下也可能达到 $\mathcal{O}(xy)$ 级别。
 
 ***
 
