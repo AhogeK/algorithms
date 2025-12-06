@@ -138,6 +138,10 @@
       * [算法思路](#算法思路-20)
       * [代码实现](#代码实现-12)
       * [复杂度分析](#复杂度分析-26)
+    * [完成「力扣」第 773 题：滑动谜题](#完成力扣第-773-题滑动谜题)
+      * [算法思路](#算法思路-21)
+      * [代码实现](#代码实现-13)
+      * [复杂度分析](#复杂度分析-27)
 <!-- TOC -->
 
 # 回溯算法
@@ -2407,6 +2411,111 @@ public class WaterAndJugProblem {
 * **空间复杂度**： $\mathcal{O}(xy)$
     * 主要消耗在于 `visited` 集合存储已访问的状态，最坏情况下需要存储所有可能的状态。
     * `Deque` 栈的深度在最坏情况下也可能达到 $\mathcal{O}(xy)$ 级别。
+
+### 完成「力扣」第 773 题：[滑动谜题](https://leetcode.cn/problems/sliding-puzzle)
+
+#### 算法思路
+
+1. **状态表示与压缩**
+
+    为了方便存储和查重，我们不能直接用二维数组作为状态。\
+    由于面板很小（ $2 \times 3$），我们可以将其展平为一个长度为 6 的字符串。
+
+    * 目标状态：`"123450"`。
+    * 初始状态：将输入的二维数组 `board` 转化为字符串。
+
+2. **预处理邻接关系**
+
+    在展平的一维字符串中，索引 $0 \sim 5$ 分别对应原二维数组的位置：
+
+    $$\begin{bmatrix} 0 & 1 & 2 \\\ 3 & 4 & 5 \end{bmatrix}$$
+
+    对于每个位置的 `0`，它可以移动到的邻居索引是固定的：
+
+    * 索引 0 的邻居：`{1, 3}`
+    * 索引 1 的邻居：`{0, 2, 4}`
+    * 索引 2 的邻居：`{1, 5}`
+    * 索引 3 的邻居：`{0, 4}`
+    * 索引 4 的邻居：`{1, 3, 5}`
+    * 索引 5 的邻居：`{2, 4}`
+
+    我们可以预先将这个邻接表存入一个数组 `neighbors`，避免每次动态计算坐标。
+
+3. **广度优先搜索 (BFS)**
+
+    * **队列**：存储当前待访问的状态字符串。
+    * **Visited 集合**：记录已访问过的状态，防止走回头路或死循环。
+    * **步骤**：
+        1. 将初始字符串入队，记步数 `step = 0`。
+        2. 当队列非空时，取出当前层的所有状态。
+        3. 对每个状态，找到 `0` 的位置，尝试将其与所有邻居交换，生成新状态。
+        4. 如果新状态是目标 `"123450"`，返回 `step + 1`。
+        5. 如果新状态未访问过，加入队列和 `visited` 集合。
+        6. 当前层遍历完后，`step` 加 1。
+    * 如果队列空了还没找到，说明无解，返回 -1。
+
+#### 代码实现
+
+```java
+public class SlidingPuzzle {
+    public int slidingPuzzle(int[][] board) {
+        StringBuilder sb = new StringBuilder();
+        for (int[] row : board)
+            for (int num : row)
+                sb.append(num);
+        String start = sb.toString();
+        String target = "123450";
+        if (start.equals(target)) return 0;
+        int[][] neighbors = {
+                {1, 3},
+                {0, 2, 4},
+                {1, 5},
+                {0, 4},
+                {1, 3, 5},
+                {2, 4}
+        };
+        Queue<String> queue = new ArrayDeque<>();
+        Set<String> visited = new HashSet<>();
+        queue.offer(start);
+        visited.add(start);
+        int step = 0;
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                String curr = queue.poll();
+                int zeroIdx = curr.indexOf('0');
+                for (int neighborIdx : neighbors[zeroIdx]) {
+                    String next = swap(curr, zeroIdx, neighborIdx);
+                    if (next.equals(target)) return step + 1;
+                    if (!visited.contains(next)) {
+                        visited.add(next);
+                        queue.offer(next);
+                    }
+                }
+            }
+            step++;
+        }
+        return -1;
+    }
+
+    private String swap(String s, int i, int j) {
+        char[] chars = s.toCharArray();
+        char temp = chars[i];
+        chars[i] = chars[j];
+        chars[j] = temp;
+        return new String(chars);
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}((R \times C)! \times (R \times C))$
+    * 这里 $R=2, C=3$。状态总数上限为 $(R \times C)!$ 即 $6! = 720$。
+    * 每次状态转移涉及字符串操作和查找，长度为 $R \times C = 6$。
+    * 总体上是常数级别的（最多几千次操作）。
+* **空间复杂度**： $\mathcal{O}((R \times C)! \times (R \times C))$
+    * 我们需要存储所有可能访问到的状态字符串。
 
 ***
 
