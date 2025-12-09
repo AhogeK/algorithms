@@ -142,6 +142,10 @@
       * [算法思路](#算法思路-21)
       * [代码实现](#代码实现-13)
       * [复杂度分析](#复杂度分析-27)
+    * [完成「力扣」第 785 题：判断二分图](#完成力扣第-785-题判断二分图)
+      * [算法思路](#算法思路-22)
+      * [代码实现](#代码实现-14)
+      * [复杂度分析](#复杂度分析-28)
 <!-- TOC -->
 
 # 回溯算法
@@ -2516,6 +2520,63 @@ public class SlidingPuzzle {
     * 总体上是常数级别的（最多几千次操作）。
 * **空间复杂度**： $\mathcal{O}((R \times C)! \times (R \times C))$
     * 我们需要存储所有可能访问到的状态字符串。
+
+### 完成「力扣」第 785 题：[判断二分图](https://leetcode.cn/problems/is-graph-bipartite)
+
+#### 算法思路
+
+在图论中，Flood Fill 本质上就是 遍历 (Traversal)，通常使用 DFS (深度优先搜索) 或 BFS (广度优先搜索)。
+这里的“回溯”并非指穷举所有路径的暴力回溯，而是指 DFS 递归调用栈的特性：一条路走到黑，发现走不通或处理完后再退回来。
+
+**核心策略：DFS 染色法**
+
+1. **颜色数组**：我们需要一个数组 `colors` 来记录每个节点的染色状态。
+    * `0`: 未染色 (Unvisited)
+    * `1`: 红色 (Set A)
+    * `-1`: 蓝色 (Set B)
+    * (用 1 和 -1 是为了方便取反：`-color` 就是另一种颜色)
+2. **遍历所有节点**：由于图可能不连通，我们需要遍历节点 $0$ 到 $n-1$。如果当前节点 `i` 未染色（`colors[i] == 0`），则从它开始发起一次 DFS 染色。
+3. **DFS 过程**：
+    * 将当前节点 `u` 染成指定颜色 `color`。
+    * 遍历 `u` 的所有邻居 `v`：
+        * 如果 `v` 未染色：递归调用 DFS，尝试将 `v` 染成 `-color`。如果递归返回 `false`（发现冲突），则当前也返回 `false`。
+        * 如果 `v` 已染色：检查 `colors[v]` 是否等于 `-color`（即是否与 `u` 颜色不同）。如果 `colors[v] == color`（与 `u` 同色），说明发现了冲突，返回 `false`。
+4. **结果**：如果所有节点都成功染色且无冲突，返回 `true`。
+
+#### 代码实现
+
+```java
+public class IsGraphBipartite {
+    private int[] colors;
+    private int[][] graph;
+
+    public boolean isBipartite(int[][] graph) {
+        int n = graph.length;
+        this.colors = new int[n];
+        this.graph = graph;
+        for (int i = 0; i < n; i++) if (colors[i] == 0 && dfs(i, 1)) return false;
+        return true;
+    }
+
+    private boolean dfs(int node, int color) {
+        colors[node] = color;
+        int nextColor = -color;
+        for (int neighbor : graph[node])
+            if ((colors[neighbor] == 0 && dfs(neighbor, nextColor)) || colors[neighbor] == color) return true;
+        return false;
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}(V + E)$。
+    * $V$ 是节点数， $E$ 是边数。
+    * DFS 会访问每个节点一次，且每条边会被检查两次（每个端点各一次）。
+    * 外层循环确保了所有节点都会被覆盖。
+* **空间复杂度**： $\mathcal{O}(V)$。
+    * 需要 `colors` 数组存储 $V$ 个节点的状态。
+    * 递归栈的深度最大为 $V$（当图退化为一条链时）。
 
 ***
 
