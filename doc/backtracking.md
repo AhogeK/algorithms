@@ -2436,7 +2436,10 @@ public class WaterAndJugProblem {
 
     在展平的一维字符串中，索引 $0 \sim 5$ 分别对应原二维数组的位置：
 
-    $$\begin{bmatrix} 0 & 1 & 2 \\\ 3 & 4 & 5 \end{bmatrix}$$
+    ```text
+    ⎡ 0  1  2 ⎤
+    ⎣ 3  4  5 ⎦
+    ```
 
     对于每个位置的 `0`，它可以移动到的邻居索引是固定的：
 
