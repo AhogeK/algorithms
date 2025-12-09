@@ -146,6 +146,10 @@
       * [算法思路](#算法思路-22)
       * [代码实现](#代码实现-14)
       * [复杂度分析](#复杂度分析-28)
+    * [完成「力扣」第 886 题：可能的二分法](#完成力扣第-886-题可能的二分法)
+      * [算法思路](#算法思路-23)
+      * [代码实现](#代码实现-15)
+      * [复杂度分析](#复杂度分析-29)
 <!-- TOC -->
 
 # 回溯算法
@@ -2577,6 +2581,91 @@ public class IsGraphBipartite {
 * **空间复杂度**： $\mathcal{O}(V)$。
     * 需要 `colors` 数组存储 $V$ 个节点的状态。
     * 递归栈的深度最大为 $V$（当图退化为一条链时）。
+
+### 完成「力扣」第 886 题：[可能的二分法](https://leetcode.cn/problems/possible-bipartition)
+
+#### 算法思路
+
+为了解决这个问题，我们需要遍历整个图，并尝试对每个节点进行 **2-染色 (2-Coloring)**。如果整个图可以成功地用两种颜色染色且没有冲突，那么它就是二分图。
+
+1. **高效建图：链式前向星 (Chain Forward Star)**
+
+    在算法竞赛中，处理稀疏图时，为了避免使用 `ArrayList` 或 `LinkedList` 带来的对象创建开销和额外的内存占用，通常使用一种基于数组的静态邻接表结构，称为 **链式前向星**。\
+    它使用三个数组来模拟邻接表：
+
+    * `head[u]`：存储以节点 $u$ 为起点的第一条边的索引。
+    * `next[i]`：存储索引为 $i$ 的边的下一条同起点边的索引（相当于链表的 next 指针）。
+    * `to[i]`：存储索引为 $i$ 的边的终点节点。
+
+2. **染色判定：深度优先搜索 (DFS)**
+
+    * **状态定义**：使用 `color` 数组记录每个节点的染色状态。
+        * `0`: 未染色。
+        * `1`: 染成颜色 1（如红色）。
+        * `-1`: 染成颜色 2（如蓝色，用 -1 表示方便取反）。
+    * **遍历策略**：
+        * 由于图可能是不连通的（有多个独立的圈子），我们需要遍历所有节点 $1$ 到 $n$。
+        * 如果节点 $i$ 未染色（`color[i] == 0`），则从 $i$ 开始进行 DFS。
+    * **DFS 逻辑**：
+        * 将当前节点 $u$ 染成颜色 $c$。
+        * 遍历 $u$ 的所有邻居 $v$：
+            * 如果 $v$ 未染色，递归将其染成 $-c$。如果递归失败，返回 `false`。
+            * 如果 $v$ 已染色，检查是否与 $u$ 同色（`color[v] == c`）。如果同色，说明冲突，返回 `false`。
+        * 如果没有冲突，返回 `true`。
+
+#### 代码实现
+
+```java
+public class PossibleBipartition {
+    int[] head, next, to;
+    int tot;
+    int[] color;
+
+    public boolean possibleBipartition(int n, int[][] dislikes) {
+        head = new int[n + 1];
+        Arrays.fill(head, -1);
+        int m = dislikes.length;
+        next = new int[m * 2];
+        to = new int[m * 2];
+        tot = 0;
+        for (int[] d : dislikes) {
+            addEdge(d[0], d[1]);
+            addEdge(d[1], d[0]);
+        }
+        color = new int[n + 1];
+        for (int i = 1; i <= n; i++)
+            if (color[i] == 0 && dfs(i, 1)) return false;
+        return true;
+    }
+
+    private void addEdge(int u, int v) {
+        to[tot] = v;
+        next[tot] = head[u];
+        head[u] = tot++;
+    }
+    
+    private boolean dfs(int u, int c) {
+        color[u] = c;
+        for (int i = head[u]; i != -1; i = next[i]) {
+            int v = to[i];
+            if ((color[v] == 0 && dfs(v, -c)) || color[v] == c) return true;
+        }
+        return false;
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}(N + M)$。
+    * $N$ 是人数， $M$ 是 `dislikes` 的对数。
+    * 初始化数组需要 $\mathcal{O}(N)$。
+    * 建图需要 $\mathcal{O}(M)$。
+    * DFS 过程中，每个节点最多被访问一次，每条边最多被检查两次（双向）。所以是 $\mathcal{O}(N + M)$。
+    * 这已经是图遍历算法的理论下界。
+* **空间复杂度**： $\mathcal{O}(N + M)$。
+    * 我们需要数组来存储图结构和染色状态。
+    * 链式前向星极其节省空间，相比于 `ArrayList`（每个节点一个 List 对象，每个邻居一个 Integer 对象），数组实现只有纯粹的 `int` 存储开销，且无内存碎片。
 
 ***
 
