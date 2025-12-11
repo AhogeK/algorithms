@@ -150,6 +150,10 @@
       * [算法思路](#算法思路-23)
       * [代码实现](#代码实现-15)
       * [复杂度分析](#复杂度分析-29)
+    * [完成「力扣」第 133 题：克隆图](#完成力扣第-133-题克隆图)
+      * [算法思路](#算法思路-24)
+      * [代码实现](#代码实现-16)
+      * [复杂度分析](#复杂度分析-30)
 <!-- TOC -->
 
 # 回溯算法
@@ -2669,6 +2673,60 @@ public class PossibleBipartition {
 * **空间复杂度**： $\mathcal{O}(N + M)$。
     * 我们需要数组来存储图结构和染色状态。
     * 链式前向星极其节省空间，相比于 `ArrayList`（每个节点一个 List 对象，每个邻居一个 Integer 对象），数组实现只有纯粹的 `int` 存储开销，且无内存碎片。
+
+### 完成「力扣」第 133 题：[克隆图](https://leetcode.cn/problems/clone-graph)
+
+#### 算法思路
+
+我们可以将图看作一个迷宫，从给定的起始节点开始“泛洪”（Flood Fill）整个图。
+
+1. **映射记录（Visited Map）**：\
+   我们需要一个哈希表（或数组，因为题目提示节点值范围小）来记录**原图节点**到**克隆图节点**的映射关系。
+ 
+    * `Map<Node, Node> visited`：Key 是原节点，Value 是克隆后的新节点。
+    * 这就好比在 Flood Fill 中给格子染色，如果一个节点已经在 `visited` 中，说明它已经被“染色”（克隆）过了，直接返回对应的克隆节点即可，不需要重复递归。
+     
+2. **递归函数（DFS）设计**：
+ 
+    * **输入**：当前原图节点 `node`。
+    * **终止条件**：如果 `node` 为空，返回 null。如果 `node` 已经在 `visited` 中，说明该节点成环或已被访问，直接返回 `visited.get(node)`。
+    * **递归过程**：
+        1. **创建节点**：创建一个新节点 `cloneNode`，值等于 `node.val`。
+        2. **记录映射**：**立即**将 `(node, cloneNode)` 放入 `visited` 中。这一步必须在递归邻居之前做，否则遇到环会死循环。
+        3. **克隆邻居**：遍历 `node.neighbors`，对每个邻居递归调用 DFS 函数，并将返回的克隆邻居加入 `cloneNode.neighbors`。
+    * **输出**：返回当前创建的 `cloneNode`。
+
+#### 代码实现
+
+```java
+public class CloneGraph {
+    private final Node[] visited = new Node[101];
+
+    public Node cloneGraph(Node node) {
+        if (node == null) return null;
+        if (visited[node.val] != null) return visited[node.val];
+        Node cloneNode = new Node(node.val);
+        visited[node.val] = cloneNode;
+        for (Node neighbor : node.neighbors)
+            cloneNode.neighbors.add(cloneGraph(neighbor));
+        return cloneNode;
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}(N + E)$
+
+    * $N$ 是节点数， $E$ 是边数。
+    * 每个节点只会被创建一次，`visited` 检查机制保证了每个节点只会被完整处理一次。
+    * 我们需要遍历每条边来连接邻居关系，所以总耗时与节点和边的总数成正比。
+
+* **空间复杂度**： $\mathcal{O}(N)$
+
+    * 我们需要一个大小为 $N$ 的数组（或哈希表）来存储映射关系。
+    * 递归调用栈的深度最大为 $N$（在最坏情况下，图退化为一条链表）。
+    * 因此总空间复杂度为 $\mathcal{O}(N)$。
 
 ***
 
