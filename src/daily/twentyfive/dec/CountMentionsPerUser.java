@@ -16,8 +16,8 @@ public class CountMentionsPerUser {
             int timeA = Integer.parseInt(a.get(1));
             int timeB = Integer.parseInt(b.get(1));
             if (timeA != timeB) return timeA - timeB;
-            String typeA = a.get(0);
-            String typeB = b.get(0);
+            String typeA = a.getFirst();
+            String typeB = b.getFirst();
             if (typeA.equals("OFFLINE")) return -1;
             if (typeB.equals("OFFLINE")) return 1;
             return 0;
