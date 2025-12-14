@@ -154,6 +154,10 @@
       * [算法思路](#算法思路-24)
       * [代码实现](#代码实现-16)
       * [复杂度分析](#复杂度分析-30)
+    * [完成「力扣」之「剑指 Offer 系列」第 13 题：机器人的运动范围 | 相当于力扣 LCR 130. 衣橱整理](#完成力扣之剑指-offer-系列第-13-题机器人的运动范围--相当于力扣-lcr-130-衣橱整理)
+      * [算法思路](#算法思路-25)
+      * [代码实现](#代码实现-17)
+      * [复杂度分析](#复杂度分析-31)
 <!-- TOC -->
 
 # 回溯算法
@@ -2727,6 +2731,68 @@ public class CloneGraph {
     * 我们需要一个大小为 $N$ 的数组（或哈希表）来存储映射关系。
     * 递归调用栈的深度最大为 $N$（在最坏情况下，图退化为一条链表）。
     * 因此总空间复杂度为 $\mathcal{O}(N)$。
+
+### 完成「力扣」之「剑指 Offer 系列」第 13 题：机器人的运动范围 | 相当于力扣 [LCR 130. 衣橱整理](https://leetcode.cn/problems/ji-qi-ren-de-yun-dong-fan-wei-lcof)
+
+#### 算法思路
+
+用 DFS 回溯做 flood fill：把每个可达且合法的格子访问一次，并从它继续尝试扩展到右边与下边。
+
+对位置 $(i,j)$，DFS 的停止条件：
+
+* 越界： $i\notin [0,m-1]$ 或 $j\notin [0,n-1]$
+* 已访问：避免重复计数与重复搜索
+* 数位和超限： $digit(i)+digit(j)>cnt$
+
+否则：
+
+1. 标记 `visited[i][j] = true`
+2. 贡献 `1`
+3. 继续搜索 `dfs(i+1,j)` 与 `dfs(i,j+1)`
+
+因为每个格子最多被递归进入一次，所以整体是线性级别。
+
+#### 代码实现
+
+```java
+public class WardrobeFinishing {
+    public int wardrobeFinishing(int m, int n, int cnt) {
+        int[] rowSum = new int[m];
+        int[] colSum = new int[n];
+        for (int i = 0; i < m; i++) rowSum[i] = digitSum(i);
+        for (int j = 0; j < n; j++) colSum[j] = digitSum(j);
+        boolean[][] visited = new boolean[m][n];
+        return dfs(0, 0, m, n, cnt, rowSum, colSum, visited); 
+    }
+    
+    private int dfs(int i, int j, int m, int n, int cnt, int[] rowSum, int[] colSum, boolean[][] visited) {
+        if (i < 0 || i >= m || j < 0 || j >= n) return 0;
+        if (visited[i][j]) return 0;
+        if (rowSum[i] + colSum[j] > cnt) return 0;
+        visited[i][j] = true;
+        int res = 1;
+        res += dfs(i + 1, j, m, n, cnt, rowSum, colSum, visited);
+        res += dfs(i, j + 1, m, n, cnt, rowSum, colSum, visited);
+        return res;
+    }
+
+    private int digitSum(int x) {
+        int s = 0;
+        while (x > 0) {
+            s += x % 10;
+            x /= 10;
+        }
+        return s;
+    }
+}
+```
+
+#### 复杂度分析
+
+设矩阵大小为 $m\times n$。
+
+* 时间复杂度：每个格子最多进入一次并做 $\mathcal{O}(1)$ 判断，因此为 $\mathcal{O}(mn)$
+* 空间复杂度：`visited` 为 $\mathcal{O}(mn)$，递归栈深度为 $\mathcal{O}(m+n)$
 
 ***
 
