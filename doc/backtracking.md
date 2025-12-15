@@ -158,6 +158,10 @@
       * [算法思路](#算法思路-25)
       * [代码实现](#代码实现-17)
       * [复杂度分析](#复杂度分析-31)
+    * [完成「力扣」第 695 题：岛屿的最大面积](#完成力扣第-695-题岛屿的最大面积)
+      * [算法思路](#算法思路-26)
+      * [代码实现](#代码实现-18)
+      * [复杂度分析](#复杂度分析-32)
 <!-- TOC -->
 
 # 回溯算法
@@ -2793,6 +2797,73 @@ public class WardrobeFinishing {
 
 * 时间复杂度：每个格子最多进入一次并做 $\mathcal{O}(1)$ 判断，因此为 $\mathcal{O}(mn)$
 * 空间复杂度：`visited` 为 $\mathcal{O}(mn)$，递归栈深度为 $\mathcal{O}(m+n)$
+
+### 完成「力扣」第 695 题：[岛屿的最大面积](https://leetcode.cn/problems/max-area-of-island/)
+
+#### 算法思路
+
+对每个格子 `(r,c)`：
+
+* 若它是 `1`，说明发现了一个新岛屿的某个起点。
+* 以它为起点做 DFS flood fill，把与之连通的所有 `1` 都访问到，并累计面积。
+* DFS 的过程中把访问过的 `1` 原地改成 `0`（相当于“淹没”），避免重复访问，这比额外开 `visited` 数组更省空间、也更快。
+
+DFS 递归函数 `dfs(r,c)` 的含义：返回以 `(r,c)` 为入口能覆盖到的连通陆地面积。
+
+终止条件：
+
+* 越界返回 `0`
+* `grid[r][c] == 0` 返回 `0`
+
+否则：
+
+* 将 `grid[r][c]` 置为 `0`（标记已访问）
+* 面积 = `1 + dfs(上) + dfs(下) + dfs(左) + dfs(右)`
+
+可用如下形式理解（仅作思路表达）：
+
+$$\text{area}(r,c)= \begin{cases} 0, & \text{越界或 } grid[r][c]=0 \\\ 1+\text{area}(r+1,c)+\text{area}(r-1,c)+\text{area}(r,c+1)+\text{area}(r,c-1), & \text{否则} \end{cases}$$
+
+#### 代码实现
+
+```java
+public class MaxAreaOfIsland {
+    private int m, n;
+    private int[][] g;
+
+    public int maxAreaOfIsland(int[][] grid) {
+        this.g = grid;
+        this.m = grid.length;
+        this.n = grid[0].length;
+        int best = 0;
+        for (int r = 0; r < m; r++) {
+            for (int c = 0; c < n; c++) {
+                if (grid[r][c] == 1) {
+                    int area = dfs(r, c);
+                    if (area > best) best = area;
+                }
+            }
+        }
+        return best;
+    }
+
+    private int dfs(int r, int c) {
+        if (r < 0 || r >= m || c < 0 || c >= n || g[r][c] == 0) return 0;
+        g[r][c] = 0;
+        int area = 1;
+        area += dfs(r + 1, c);
+        area += dfs(r - 1, c);
+        area += dfs(r, c + 1);
+        area += dfs(r, c - 1);
+        return area;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度：每个格子最多被访问一次，每次处理常数个方向，故为 $\mathcal{O}(mn)$
+* 空间复杂度：除输入外主要是递归栈，最坏为 $\mathcal{O}(mn)$（蛇形连通时），平均远小于此；若用迭代栈同量级
 
 ***
 
