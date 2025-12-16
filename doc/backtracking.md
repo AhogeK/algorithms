@@ -170,6 +170,14 @@
       * [算法思路](#算法思路-28)
       * [代码实现](#代码实现-20)
       * [复杂度分析](#复杂度分析-34)
+    * [完成「力扣」第 1162 题：地图分析](#完成力扣第-1162-题地图分析)
+      * [算法思路](#算法思路-29)
+      * [代码实现](#代码实现-21)
+      * [复杂度分析](#复杂度分析-35)
+    * [完成「力扣」第 1091 题：二进制矩阵中的最短路径](#完成力扣第-1091-题二进制矩阵中的最短路径)
+      * [算法思路](#算法思路-30)
+      * [代码实现](#代码实现-22)
+      * [复杂度分析](#复杂度分析-36)
 <!-- TOC -->
 
 # 回溯算法
@@ -3094,6 +3102,73 @@ public class AsFarFromLandAsPossible {
 * 时间复杂度： $\mathcal{O}(n^2)$
 * 空间复杂度： $\mathcal{O}(n^2)$（`dist` 与队列）
 
+
+### 完成「力扣」第 1091 题：[二进制矩阵中的最短路径](https://leetcode.cn/problems/shortest-path-in-binary-matrix/)
+
+#### 算法思路
+
+拿到**最短**路径，普通 DFS 回溯会把所有路线都试一遍，既慢又不保证最早找到的就是最短；而 BFS 的分层 flood fill 天生保证最短性。
+
+做法（最快常见实现）：
+
+1. 若 `grid[0][0] == 1` 或 `grid[n-1][n-1] == 1`，直接返回 `-1`（起点或终点不可走）。
+2. 用队列做 BFS，从 `(0,0)` 入队。
+3. 用“层序遍历”计步：
+    * `steps = 1` 表示当前层对应的路径长度（经过格子数）
+    * 每处理完一层（队列当前大小 `size`），`steps++`
+4. 扩展 8 个方向邻居：只要邻居在界内且为 `0`，就入队，并立刻标记为已访问，避免重复入队。
+5. 一旦出队位置是终点，立刻返回当前 `steps`。
+
+这里的“Flood fill”体现在：从起点出发，把所有可达的 `0` 按距离一层层“填充”；“回溯式思维”体现在我们用访问标记剪枝，防止走回头路与重复扩展（只是实现上用 BFS 更高效）。
+
+**核心知识点与技巧**
+
+* BFS 的层数就是最短路长度（等权图性质）。如果把每个格子视为节点、8 邻接视为边，那么 BFS 求的是无权最短路。
+* 访问标记推荐**原地复用**：将已入队的 `0` 直接改成 `1`，表示“已经访问过/不可再入队”，省去 `visited` 数组，常数更小。
+* 路径长度定义是“经过格子数”，所以起点本身长度为 1（这也是 `steps` 从 1 开始的原因）。
+
+#### 代码实现
+
+```java
+public class ShortestPathInBinaryMatrix {
+    private static final int[] DR = {-1, -1, -1, 0, 0, 1, 1, 1};
+    private static final int[] DC = {-1, 0, 1, -1, 1, -1, 0, 1};
+
+    public int shortestPathBinaryMatrix(int[][] grid) {
+        int n = grid.length;
+        if (grid[0][0] == 1 || grid[n - 1][n - 1] == 1) return -1;
+        if (n == 1) return 1;
+        Deque<Integer> q = new ArrayDeque<>();
+        q.addLast(0);
+        grid[0][0] = 1;
+        int steps = 1;
+        while (!q.isEmpty()) {
+            int size = q.size();
+            steps++;
+            for (int i = 0; i < size; i++) {
+                int pos = q.removeFirst();
+                int r = pos / n;
+                int c = pos % n;
+                for (int k = 0; k < 8; k++) {
+                    int nr = r + DR[k];
+                    int nc = c + DC[k];
+                    if (nr < 0 || nr >= n || nc < 0 || nc >= n || grid[nr][nc] == 1) continue;
+                    if (nr == n - 1 && nc == n - 1) return steps;
+                    grid[nr][nc] = 1;
+                    q.addLast(nr * n + nc);
+                }
+            }
+        }
+        return -1;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 每个格子最多入队一次、出队一次，每次最多检查 8 个方向
+* 时间复杂度： $\mathcal{O}(n^2)$
+* 空间复杂度：队列最坏存放 $n^2$ 个格子， $\mathcal{O}(n^2)$
 
 ***
 
