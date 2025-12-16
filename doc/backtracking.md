@@ -3013,6 +3013,88 @@ public class RottingOranges {
 * 时间复杂度： $\mathcal{O}(mn)$
 * 空间复杂度：队列最坏存下所有格子， $\mathcal{O}(mn)$
 
+### 完成「力扣」第 1162 题：[地图分析](https://leetcode.cn/problems/as-far-from-land-as-possible)
+
+#### 算法思路
+
+这题最快且最稳的 Flood fill 做法是**多源 BFS**：
+
+* 把所有陆地格子同时当作起点（距离为 0）入队
+* 让距离像“波纹”一样一层层向外扩散到海洋格子
+* 某个海洋格子第一次被扩散到时，它得到的层数（步数）就是它到最近陆地的最短距离
+* 最后被扩散到的海洋格子所在层数，就是答案（最大最短距离）
+
+这其实就是“从陆地向海洋做 flood fill”，只不过是按层推进，保证第一次到达即最短距离。
+
+**为什么多源 BFS 一定正确**
+
+把所有陆地一起入队，相当于在一张无权图上做“超级源点”的最短路。BFS 的性质保证：队列按层推进时，第一次访问到某个格子得到的距离就是最短距离。因此海洋格子的“最近陆地距离”会被正确计算，而取其中最大值即可。
+
+可以用下面的形式理解（按层扩散）：
+
+* 第 0 层：所有陆地
+* 第 1 层：与任意陆地四邻接的海洋
+* 第 2 层：距离最近陆地为 2 的海洋
+* …
+* 最大层数就是答案
+
+**核心知识点与技巧**
+
+* **多源 BFS**：把多个起点同时入队，比对每个海洋单独 BFS 快得多
+* 用 `dist[][] == -1` 作为“未访问”标记，避免重复入队
+* 用 `pos = r * n + c` 编码坐标，减少对象创建，通常更快
+
+#### 代码实现
+
+```java
+public class AsFarFromLandAsPossible {
+    private static final int[] DR = {1, -1, 0, 0};
+    private static final int[] DC = {0, 0, 1, -1};
+
+    public int maxDistance(int[][] grid) {
+        int n = grid.length;
+        int[][] dist = new int[n][n];
+        for (int r = 0; r < n; r++)
+            for (int c = 0; c < n; c++)
+                dist[r][c] = -1;
+        Deque<Integer> q = new ArrayDeque<>();
+        int landCnt = 0;
+        for (int r = 0; r < n; r++)
+            for (int c = 0; c < n; c++) {
+                if (grid[r][c] == 1) {
+                    landCnt++;
+                    dist[r][c] = 0;
+                    q.addLast(r * n + c);
+                }
+            }
+        if (landCnt == 0 || landCnt == n * n) return -1;
+        int ans = -1;
+        while (!q.isEmpty()) {
+            int pos = q.removeFirst();
+            int r = pos / n;
+            int c = pos % n;
+            for (int k = 0; k < 4; k++) {
+                int nr = r + DR[k];
+                int nc = c + DC[k];
+                if (nr < 0 || nr >= n || nc < 0 || nc >= n || dist[nr][nc] != -1) continue;
+                dist[nr][nc] = dist[r][c] + 1;
+                q.addLast(nr * n + nc);
+                if (grid[nr][nc] == 0 && dist[nr][nc] > ans)
+                    ans = dist[nr][nc];
+            }
+        }
+        return ans;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 网格大小为 $n^2$，每个格子最多出入队一次，每次检查 4 个方向
+* 时间复杂度： $\mathcal{O}(n^2)$
+* 空间复杂度： $\mathcal{O}(n^2)$（`dist` 与队列）
+
+
 ***
 
 [返回](../README.md)
