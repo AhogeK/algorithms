@@ -162,6 +162,10 @@
       * [算法思路](#算法思路-26)
       * [代码实现](#代码实现-18)
       * [复杂度分析](#复杂度分析-32)
+    * [完成「力扣」第 529 题：扫雷问题](#完成力扣第-529-题扫雷问题)
+      * [算法思路](#算法思路-27)
+      * [代码实现](#代码实现-19)
+      * [复杂度分析](#复杂度分析-33)
 <!-- TOC -->
 
 # 回溯算法
@@ -2864,6 +2868,76 @@ public class MaxAreaOfIsland {
 
 * 时间复杂度：每个格子最多被访问一次，每次处理常数个方向，故为 $\mathcal{O}(mn)$
 * 空间复杂度：除输入外主要是递归栈，最坏为 $\mathcal{O}(mn)$（蛇形连通时），平均远小于此；若用迭代栈同量级
+
+### 完成「力扣」第 529 题：[扫雷问题](https://leetcode.cn/problems/minesweeper)
+
+#### 算法思路
+
+用 DFS（递归）做 flood fill，函数 `dfs(r,c)` 只负责“揭露一个尚未挖出的空格 `'E'`，并按规则决定是否继续扩展”。
+
+递归停止条件（剪枝）：
+
+* 越界：`r/c` 不在棋盘内
+* 当前格不是 `'E'`：说明它要么是地雷 `'M'`（不能自动揭露），要么已经被揭露为 `'B'` 或数字（避免重复处理）
+
+递归处理逻辑：
+
+1. 统计 `(r,c)` 的 8 邻域里 `'M'` 的数量 `mines`
+2. 若 `mines > 0`：把 `board[r][c]` 改成对应数字字符并返回
+3. 否则：把 `board[r][c]` 改成 `'B'`，并对 8 个方向的邻居递归 `dfs`
+
+这种写法的“回溯”体现在：递归不断深入揭露连通区域，返回上一层后继续处理其它方向分支；同时我们用“原地修改棋盘字符”充当访问标记，避免重复递归。
+
+#### 代码实现
+
+```java
+public class Minesweeper {
+    private int m, n;
+    private char[][] b;
+    private static final int[] DR = {-1, -1, -1, 0, 0, 1, 1, 1};
+    private static final int[] DC = {-1, 0, 1, -1, 1, -1, 0, 1};
+
+    public char[][] updateBoard(char[][] board, int[] click) {
+        this.b = board;
+        this.m = board.length;
+        this.n = board[0].length;
+        int r = click[0], c = click[1];
+        if (b[r][c] == 'M') {
+            b[r][c] = 'X';
+            return b;
+        }
+        dfs(r, c);
+        return b;
+    }
+
+    private void dfs(int r, int c) {
+        if (r < 0 || r >= m || c < 0 || c >= n || b[r][c] != 'E') return;
+        int mines = countAdjMines(r, c);
+        if (mines > 0) {
+            b[r][c] = (char) ('0' + mines);
+            return;
+        }
+        b[r][c] = 'B';
+        for (int k = 0; k < 8; k++) dfs(r + DR[k], c + DC[k]);
+    }
+
+    private int countAdjMines(int r, int c) {
+        int cnt = 0;
+        for (int k = 0; k < 8; k++) {
+            int nr = r + DR[k], nc = c + DC[k];
+            if (nr < 0 || nr >= m || nc < 0 || nc >= n || b[nr][nc] != 'M') continue;
+            cnt++;
+        }
+        return cnt;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 每个格子最多从 `'E'` 被揭露一次，揭露时会做一次 8 邻域统计（常数）
+* 时间复杂度： $\mathcal{O}(mn)$
+* 空间复杂度：递归栈最坏 $\mathcal{O}(mn)$（连通块很大时）
 
 ***
 
