@@ -166,6 +166,10 @@
       * [算法思路](#算法思路-27)
       * [代码实现](#代码实现-19)
       * [复杂度分析](#复杂度分析-33)
+    * [完成「力扣」第 994 题：腐烂的橘子](#完成力扣第-994-题腐烂的橘子)
+      * [算法思路](#算法思路-28)
+      * [代码实现](#代码实现-20)
+      * [复杂度分析](#复杂度分析-34)
 <!-- TOC -->
 
 # 回溯算法
@@ -2938,6 +2942,76 @@ public class Minesweeper {
 * 每个格子最多从 `'E'` 被揭露一次，揭露时会做一次 8 邻域统计（常数）
 * 时间复杂度： $\mathcal{O}(mn)$
 * 空间复杂度：递归栈最坏 $\mathcal{O}(mn)$（连通块很大时）
+
+### 完成「力扣」第 994 题：[腐烂的橘子](https://leetcode.cn/problems/rotting-oranges)
+
+#### 算法思路
+
+1. 扫描网格：
+    * 统计新鲜橘子数量 `fresh`
+    * 把所有腐烂橘子的位置加入队列（多源起点）
+2. 分钟推进（层序遍历）：
+    * 每一轮处理队列当前长度 `size`，表示“这一分钟会扩散的所有腐烂橘子”
+    * 对每个腐烂橘子尝试四方向，如果遇到新鲜橘子 `1`，立刻变为 `2`，`fresh--`，并入队（它将在下一分钟继续扩散）
+    * 如果这一轮确实让橘子腐烂了，分钟数 `minutes++`（更严谨是按层计数：每处理完一层且仍有新鲜橘子就加 1）
+3. 结束条件：
+    * 若 `fresh == 0`，返回 `minutes`
+    * 否则返回 `-1`（存在无法被 4 方向感染到的孤岛）
+
+**核心知识点与技巧**
+
+* 多源 BFS 等价于“同时从多个起点做最短路扩散”，天然给出最小分钟数，因为第一个到达某个新鲜格子的时间一定最早。
+* 用“原地改值”（把 `1` 改成 `2`）当作访问标记，避免额外 `visited`，同时保证不会重复入队。
+* 计时方式推荐按“层”来：队列每一层代表同一分钟内的所有腐烂点，处理完一层再进入下一分钟。
+
+#### 代码实现
+
+```java
+public class RottingOranges {
+    private static final int[] DR = {1, -1, 0, 0};
+    private static final int[] DC = {0, 0, 1, -1};
+
+    public int orangesRotting(int[][] grid) {
+        int m = grid.length;
+        int n = grid[0].length;
+        Deque<Integer> q = new ArrayDeque<>();
+        int fresh = 0;
+        for (int r = 0; r < m; r++) {
+            for (int c = 0; c < n; c++) {
+                if (grid[r][c] == 1) fresh++;
+                else if (grid[r][c] == 2) q.offer(r * n + c);
+            }
+        }
+        if (fresh == 0) return 0;
+        int minutes = 0;
+        while (!q.isEmpty() && fresh > 0) {
+            int size = q.size();
+            for (int i = 0; i < size; i++) {
+                int pos = q.removeFirst();
+                int r = pos / n;
+                int c = pos % n;
+                for (int k = 0; k < 4; k++) {
+                    int nr = r + DR[k];
+                    int nc = c + DC[k];
+                    if (nr < 0 || nr >= m || nc < 0 || nc >= n || grid[nr][nc] != 1) continue;
+                    grid[nr][nc] = 2;
+                    fresh--;
+                    q.addLast(nr * n + nc);
+                }
+            }
+            minutes++;
+        }
+        return fresh == 0 ? minutes : -1;
+    }
+}
+```
+
+#### 复杂度分析
+
+网格每个格子最多入队一次、出队一次，每次处理常数 4 个方向。
+
+* 时间复杂度： $\mathcal{O}(mn)$
+* 空间复杂度：队列最坏存下所有格子， $\mathcal{O}(mn)$
 
 ***
 
