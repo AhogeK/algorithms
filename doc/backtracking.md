@@ -183,6 +183,10 @@
     * [经典解法：回溯（DFS）](#经典解法回溯dfs)
     * [复杂度与性质](#复杂度与性质)
     * [常见优化点](#常见优化点)
+    * [例：「力扣」第 51 题：N 皇后](#例力扣第-51-题n-皇后)
+      * [算法思路](#算法思路-31)
+      * [代码实现](#代码实现-23)
+      * [复杂度分析](#复杂度分析-37)
 <!-- TOC -->
 
 # 回溯算法
@@ -3207,6 +3211,87 @@ public class ShortestPathInBinaryMatrix {
 
 * 用位运算压缩列与对角线占用（bitmask），能大幅减少常数，适合只求解数
 * 利用对称性（例如第一行只枚举一半列再乘 2）进一步剪枝（求数量时常用）
+
+### 例：「力扣」第 51 题：[N 皇后](https://leetcode.cn/problems/n-queens)
+
+#### 算法思路
+
+我们维护三个 bitmask（低 $n$ 位有效）：
+
+* `cols`：哪些列已经放了皇后
+* `diag1`：主对角线（左上到右下）占用情况
+* `diag2`：副对角线（右上到左下）占用情况
+
+在第 $r$ 行，当前可放的位置集合为：
+
+$$\text{avail} = \text{all} \ \\&\ \sim(\text{cols} \ |\ \text{diag1} \ |\ \text{diag2})$$
+
+其中 `all = (1<<n)-1`，`avail` 的每个为 1 的 bit 表示该列可以放皇后。然后不断取出最低位的 1（`lowbit = avail & -avail`），尝试放置并进入下一行。
+
+对角线为什么能用移位维护：
+
+* 若在当前行放在列 bit = `lowbit`，那么下一行对应的主对角线攻击位置会“向左移动一列”，所以用 `((diag1 | lowbit) << 1)`
+* 副对角线攻击位置会“向右移动一列”，所以用 `((diag2 | lowbit) >> 1)`
+
+这样每深入一层递归，三个位集就自然更新到了“下一行受到攻击的列集合”。
+
+**核心知识点与技巧**
+
+* 固定“每行放 1 个”把同行冲突直接消掉，搜索树从 $n^n$ 级别降到接近 $n!$ 的结构。
+* 位掩码把“是否冲突”的判断变成常数时间的位运算，并且能一次性得到所有可选列 `avail`。
+* 枚举 `avail` 用 `lowbit` 技巧：`x & -x` 取最低位 1，能避免从 0..n-1 扫描整行，常数更优。
+
+#### 代码实现
+
+```java
+public class NQueens {
+    private List<List<String>> ans;
+    private int n;
+    private int all;
+    private int[] pos;
+
+    public List<List<String>> solveNQueens(int n) {
+        this.n = n;
+        this.all = (1 << n) - 1;
+        this.pos = new int[n];
+        this.ans = new ArrayList<>();
+        dfs(0, 0, 0, 0);
+        return ans;
+    }
+
+    private void dfs(int row, int cols, int diag1, int diag2) {
+        if (row == n) {
+            ans.add(buildBoard());
+            return;
+        }
+        int avail = all & (~(cols | diag1 | diag2));
+        while (avail != 0) {
+            int bit = avail & -avail;
+            avail -= bit;
+            int col = Integer.numberOfTrailingZeros(bit);
+            pos[row] = col;
+            dfs(row + 1, cols | bit, (diag1 | bit) << 1, (diag2 | bit) >> 1);
+        }
+    }
+
+    private List<String> buildBoard() {
+        List<String> board = new ArrayList<>(n);
+        for (int r = 0; r < n; r++) {
+            char[] row = new char[n];
+            for (int c = 0; c < n; c++) row[c] = '.';
+            row[pos[r]] = 'Q';
+            board.add(new String(row));
+        }
+        return board;
+    }
+}
+```
+
+#### 复杂度分析
+
+搜索的本质是回溯枚举，最坏情况接近 $\mathcal{O}(n!)$ 量级（列不重复的排列，再叠加对角线剪枝）。生成答案的开销是“解的数量 × 每个棋盘大小”，构造字符串总体约为 $\mathcal{O}(\text{solutions} \cdot n^2)$。
+
+空间方面，递归深度为 $n$，外加 `pos` 等数组，因此辅助空间约为 $\mathcal{O}(n)$（不含输出答案占用）。
 
 ***
 
