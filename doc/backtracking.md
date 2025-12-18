@@ -196,6 +196,10 @@
       * [算法思路](#算法思路-33)
       * [代码实现](#代码实现-25)
       * [复杂度分析](#复杂度分析-39)
+    * [完成「力扣」第 131 题：分割回文串](#完成力扣第-131-题分割回文串)
+      * [算法思路](#算法思路-34)
+      * [代码实现](#代码实现-26)
+      * [复杂度分析](#复杂度分析-40)
 <!-- TOC -->
 
 # 回溯算法
@@ -3523,6 +3527,78 @@ public class MatchsticksToSquare {
 * 最坏情况下每根火柴有 4 种选择，时间复杂度上界可写为 $\mathcal{O}(4^n)$
 * 由于降序 + 溢出剪枝 + 对称剪枝，实际搜索远小于上界；在 `n <= 15` 时通常非常快
 * 空间复杂度主要是递归深度与 `sides` 数组： $\mathcal{O}(n)$
+
+### 完成「力扣」第 131 题：[分割回文串](https://leetcode.cn/problems/palindrome-partitioning)
+
+#### 算法思路
+
+核心分两步：
+
+* 预处理 `pal[i][j]`：表示子串 `s[i..j]` 是否为回文，这样回溯时能 $\mathcal{O}(1)$ 判断回文
+
+* 回溯枚举切分点：从 `start` 出发枚举 `end`，只对 `pal[start][end] == true` 的分支继续递归
+
+**回文预处理(动态规划)**
+
+转移关系：
+
+* 单字符必回文：`pal[i][i] = true`
+* 两端字符相等且内部回文则回文：\
+  $pal[i][j] = (s[i] == s[j]) \land \bigl(j - i \le 2 \ \lor\ pal[i+1][j-1]\bigr)$
+
+实现时通常让 `i` 从后往前，`j` 从 `i` 往后，这样 `pal[i+1][j-1]` 已经算好。
+
+**核心知识点与技巧**
+
+* 用 `pal[][]` 把“回文判断”从每次 $\mathcal{O}(len)$ 降到 $\mathcal{O}(1)$，回溯速度差距很明显
+* 回溯路径用 `ArrayList<String>`，递归时 `add`，回溯时删除末尾（`remove(size-1)`）
+* `s.length <= 16` 很小，直接用 `substring` 就足够快且代码清晰（Java 9+ 的 `substring` 会拷贝字符数组，但这里规模很小）
+
+#### 代码实现
+
+```java
+public class PalindromePartitioning {
+    public List<List<String>> partition(String s) {
+        int n = s.length();
+        char[] cs = s.toCharArray();
+        boolean[][] pal = new boolean[n][n];
+        for (int i = n - 1; i >= 0; i--) {
+            pal[i][i] = true;
+            for (int j = i + 1; j < n; j++)
+                if (cs[i] == cs[j])
+                    pal[i][j] = (j - i <= 2) || pal[i + 1][j - 1];
+        }
+        List<List<String>> ans = new ArrayList<>();
+        List<String> path = new ArrayList<>();
+        dfs(0, s, pal, path, ans);
+        return ans;
+    }
+
+    private void dfs(int start, String s, boolean[][] pal, List<String> path, List<List<String>> ans) {
+        int n = s.length();
+        if (start == n) {
+            ans.add(new ArrayList<>(path));
+            return;
+        }
+        for (int end = start; end < n; end++) {
+            if (!pal[start][end]) continue;
+            path.add(s.substring(start, end + 1));
+            dfs(end + 1, s, pal, path, ans);
+            path.removeLast();
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+设字符串长度为 $n$。
+
+* 预处理回文： $\mathcal{O}(n^2)$ 时间， $\mathcal{O}(n^2)$ 空间
+* 回溯枚举：最坏情况下（如全是同字符），方案数接近 $2^{n-1}$，每条方案需要构造并拷贝路径，整体时间通常可表述为\
+  $\mathcal{O}(n^2 + n \cdot 2^{n})$\
+  其中 $n \cdot 2^{n}$ 来自枚举切分与输出规模
+* 额外递归深度：最多 $n$ 层，路径占用 $\mathcal{O}(n)$（不计输出）
 
 ***
 
