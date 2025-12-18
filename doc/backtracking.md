@@ -192,6 +192,10 @@
       * [算法思路](#算法思路-32)
       * [代码实现](#代码实现-24)
       * [复杂度分析](#复杂度分析-38)
+    * [完成「力扣」第 473 题：火柴拼正方形](#完成力扣第-473-题火柴拼正方形)
+      * [算法思路](#算法思路-33)
+      * [代码实现](#代码实现-25)
+      * [复杂度分析](#复杂度分析-39)
 <!-- TOC -->
 
 # 回溯算法
@@ -3440,6 +3444,85 @@ public class SudokuSolver {
 * 最坏情况下分支因子接近 9，时间复杂度上界可写为 $\mathcal{O}(9^E)$（这是回溯问题的典型上界）
 * 实际运行远小于上界：位掩码让“合法性判断”变成常数时间，MRV 显著减少搜索树规模
 * 空间复杂度：掩码数组与空格数组都是常数级，递归深度最多 $E \le 81$，因此为 $\mathcal{O}(E)$
+
+### 完成「力扣」第 473 题：[火柴拼正方形](https://leetcode.cn/problems/matchsticks-to-square)
+
+#### 算法思路
+
+把 4 条边看成 4 个“桶”，每根火柴选择放入哪个桶：
+
+1. 预处理剪枝
+    * 若 $\sum\limits_i matchsticks[i] \not\equiv 0 \pmod 4$ 返回 `false`
+    * 若最长火柴 `max > side` 返回 `false`
+2. 排序：将火柴按长度**降序**，优先放大火柴（更容易触发超边界剪枝）
+3. 回溯状态：`sides[4]` 表示当前 4 条边的已累加长度
+    * 递归处理第 `idx` 根火柴 `len`
+    * 尝试把 `len` 放到每条边 `i`：若 `sides[i] + len <= side` 则可放
+4. 关键剪枝（对称去重）
+    * 如果两条边当前长度相同，把火柴放到其中任意一条边产生的状态等价，只需尝试一次
+    * 实现方式：在枚举 4 条边时，用一个局部变量 `prev` 记录本层已尝试过的 `sides[i]` 值，若相同则跳过
+    * 另一个经典剪枝：如果尝试把火柴放到某条“空边”(长度为 0)失败，则不必再尝试放到其他空边（因为完全对称）
+
+**核心知识点与技巧**
+
+* 这是典型的“k 分组等和”问题，k 固定为 4，适合回溯搜索
+* 降序排序让搜索树更浅：大数更快导致 `> side` 的剪枝
+* 对称剪枝把 4! 等价排列的重复状态砍掉，性能提升非常明显
+* 终止条件：当 `idx == n` 时，只要保证所有火柴用完即可；由于我们始终不让任何边超过 `side` 且总和正确，因此此时必然四边都为 `side`
+
+#### 代码实现
+
+```java
+public class MatchsticksToSquare {
+    public boolean makesquare(int[] matchsticks) {
+        int n = matchsticks.length;
+        if (n < 4) return false;
+        long sum = 0;
+        int max = 0;
+        for (int x : matchsticks) {
+            sum += x;
+            if (x > max) max = x;
+        }
+        if (sum % 4 != 0) return false;
+        int side = (int) (sum / 4);
+        Arrays.sort(matchsticks);
+        reverse(matchsticks);
+        int[] sides = new int[4];
+        return dfs(matchsticks, 0, sides, side);
+    }
+
+    private boolean dfs(int[] a, int idx, int[] sides, int side) {
+        if (idx == a.length) return true;
+        int len = a[idx];
+        int prev = -1;
+        for (int i = 0; i < 4; i++) {
+            int cur = sides[i];
+            if (cur == prev) continue;
+            if (cur + len > side) continue;
+            sides[i] = cur + len;
+            if (dfs(a, idx + 1, sides, side)) return true;
+            sides[i] = cur;
+            prev = cur;
+            if (cur == 0) break;
+        }
+        return false;
+    }
+
+    private void reverse(int[] a) {
+        for (int l = 0, r = a.length - 1; l < r; l++, r--) {
+            int t = a[l];
+            a[l] = a[r];
+            a[r] = t;
+        }
+    }
+}
+```
+
+#### 复杂度分析
+
+* 最坏情况下每根火柴有 4 种选择，时间复杂度上界可写为 $\mathcal{O}(4^n)$
+* 由于降序 + 溢出剪枝 + 对称剪枝，实际搜索远小于上界；在 `n <= 15` 时通常非常快
+* 空间复杂度主要是递归深度与 `sides` 数组： $\mathcal{O}(n)$
 
 ***
 
