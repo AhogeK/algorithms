@@ -200,6 +200,10 @@
       * [算法思路](#算法思路-34)
       * [代码实现](#代码实现-26)
       * [复杂度分析](#复杂度分析-40)
+    * [完成「力扣」第 401 题：二进制手表](#完成力扣第-401-题二进制手表)
+      * [算法思路](#算法思路-35)
+      * [代码实现](#代码实现-27)
+      * [复杂度分析](#复杂度分析-41)
 <!-- TOC -->
 
 # 回溯算法
@@ -3599,6 +3603,89 @@ public class PalindromePartitioning {
   $\mathcal{O}(n^2 + n \cdot 2^{n})$\
   其中 $n \cdot 2^{n}$ 来自枚举切分与输出规模
 * 额外递归深度：最多 $n$ 层，路径占用 $\mathcal{O}(n)$（不计输出）
+
+### 完成「力扣」第 401 题：[二进制手表](https://leetcode.cn/problems/binary-watch)
+
+#### 算法思路
+
+用一个整数 `path` 的低 10 位表示灯的亮灭状态：
+
+* 第 `0..5` 位：分钟的 6 个灯（权值分别为 `1,2,4,8,16,32`）
+* 第 `6..9` 位：小时的 4 个灯（权值分别为 `1,2,4,8`，通过右移映射出来）
+
+回溯过程对每一个灯位 `i` 做二选一决策：
+
+* 不点亮第 `i` 个灯：`backtrack(path, i+1, total)`
+* 点亮第 `i` 个灯：`backtrack(path | (1<<i), i+1, total-1)`
+
+当 `total == 0` 时，表示已经点亮了恰好 `turnedOn` 个灯，此时：
+
+* 小时：`h = path >> 6`
+* 分钟：`m = path & 0b111111`
+
+然后判断 `h < 12 && m < 60`，合法则格式化加入答案。
+
+**核心知识点与技巧**
+
+* **位掩码建模**：用 `int` 直接承载 10 个 LED 的亮灭状态，避免中间集合与额外对象，常数非常小。
+* **固定选 k 个的组合回溯**：`total` 表示“还需要点亮多少个灯”，天然保证最终亮灯数正确。
+* **剪枝：剩余位置不够选**\
+  若剩余灯位数量小于还需要点亮的灯数，则必不可能成功：\
+  `if (len - i < total) return;`
+* **剪枝：turnedOn > 8 直接无解**\
+  合法时间下亮灯数最多为 8：
+    * 小时最大 `11`，二进制 `1011`，亮灯数最多 3
+    * 分钟最大 `59`，二进制 `111011`，亮灯数最多 5\
+      所以最大亮灯数为 $3 + 5 = 8$，当 `turnedOn > 8`，答案必为空。
+* **字符串构造只放在叶子**：只在 `total==0` 时构造时间字符串，避免在搜索中途频繁创建对象。
+* **容量预估**：`new ArrayList<>(256)` 与 `new StringBuilder(5)` 是很实用的常数优化（减少扩容/扩容拷贝）。
+
+#### 代码实现
+
+```java
+public class BinaryWatch {
+    public List<String> readBinaryWatch(int turnedOn) {
+        List<String> ans = new ArrayList<>(256);
+        if (turnedOn > 8) return ans;
+        backtrack(0, 0, 10, turnedOn, ans);
+        return ans;
+    }
+
+    private void backtrack(int path, int i, int len, int total, List<String> ans) {
+        if (total == 0) {
+            int h = path >> 6;
+            int m = path & 0x3F;
+            if (h < 12 && m < 60) {
+                StringBuilder sb = new StringBuilder(5);
+                sb.append(h).append(':');
+                if (m < 10) sb.append('0');
+                sb.append(m);
+                ans.add(sb.toString());
+            }
+            return;
+        }
+        if (len - i < total) return;
+        backtrack(path, i + 1, len, total, ans);
+        backtrack(path | (1 << i), i + 1, len, total - 1, ans);
+    }
+}
+```
+
+#### 复杂度分析
+
+设 `turnedOn = k`。
+
+* 叶子节点数量大约是组合数 $\binom{10}{k}$（每个叶子对应一种“恰好 k 个 1”的选择）。
+* 由于剪枝 `len - i < total`，不会遍历完整的 $2^{10}$ 状态树，而是更接近“只走能凑满 k 的分支”。
+
+因此时间复杂度可写为：\
+$\mathcal{O}\bigl(\binom{10}{k}\bigr)$
+
+空间复杂度是递归栈深度：\
+$\mathcal{O}(10) = \mathcal{O}(1)$\
+（不计输出结果占用）
+
+另外补充一个直观上界： $\binom{10}{5}=252$ 是最大组合数，所以这题本质就是“极小常数规模搜索”。
 
 ***
 
