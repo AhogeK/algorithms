@@ -30,7 +30,7 @@ public class BestTimeToBuyAndSellStockUsingStrategy {
             long s = strategy[i];
             base += p * s;
             sum += p * (1L - s)
-                    - (long) prices[i - m]
+                    - prices[i - m]
                     + (long) prices[i - k] * (long) strategy[i - k];
             if (sum > best) best = sum;
         }
