@@ -187,6 +187,11 @@
       * [算法思路](#算法思路-31)
       * [代码实现](#代码实现-23)
       * [复杂度分析](#复杂度分析-37)
+  * [数独问题](#数独问题)
+    * [例 1：「力扣」第 37 题：解数独](#例-1力扣第-37-题解数独)
+      * [算法思路](#算法思路-32)
+      * [代码实现](#代码实现-24)
+      * [复杂度分析](#复杂度分析-38)
 <!-- TOC -->
 
 # 回溯算法
@@ -3292,6 +3297,149 @@ public class NQueens {
 搜索的本质是回溯枚举，最坏情况接近 $\mathcal{O}(n!)$ 量级（列不重复的排列，再叠加对角线剪枝）。生成答案的开销是“解的数量 × 每个棋盘大小”，构造字符串总体约为 $\mathcal{O}(\text{solutions} \cdot n^2)$。
 
 空间方面，递归深度为 $n$，外加 `pos` 等数组，因此辅助空间约为 $\mathcal{O}(n)$（不含输出答案占用）。
+
+## 数独问题
+
+### 例 1：「力扣」第 37 题：[解数独](https://leetcode.cn/problems/sudoku-solver/)
+
+#### 算法思路
+
+用回溯枚举每个空格填什么数；但如果每次都从 `1..9` 试，会慢。更快的做法是：
+
+1. 用三个数组维护“已占用数字集合”
+    * `rowMask[9]`：第 `r` 行已经用了哪些数
+    * `colMask[9]`：第 `c` 列已经用了哪些数
+    * `boxMask[9]`：第 `b` 个宫已经用了哪些数
+2. 用 9 位二进制表示集合：第 `d` 位为 1 表示数字 `d+1` 已存在
+    * `FULL = (1<<9) - 1` 表示 9 个数字都可用/都占满相关运算的上界
+3. 对某个空格 `(r,c)`：可选数字集合为
+    * `used = rowMask[r] | colMask[c] | boxMask[b]`
+    * `cand = FULL & ~used`
+4. MRV（Minimum Remaining Values）剪枝：每一层递归都从“候选数字最少”的空格开始填，大幅减少分支。
+5. 候选枚举用 lowbit 技巧：每次取 `cand` 的最低位 1（`x & -x`），速度比循环 1..9 更好。
+
+> 这个组合（位掩码 + MRV）通常就是 Java 里这题的最快思路之一。
+
+**核心知识点与技巧**
+
+* **位掩码**表示集合：判定/加入/删除都是 $\mathcal{O}(1)$
+* 候选计算：`cand = FULL & ~(row|col|box)`
+* lowbit 枚举：
+    * `pick = cand & -cand`
+    * `cand -= pick`
+* MRV：每次在剩余空格里找候选最少的那个，并“交换到当前递归位置”，避免额外结构
+
+**正确性要点（为什么一定能解）**
+
+* 回溯保证“尝试所有可能填法”；剪枝只会砍掉**必然不合法**的分支（因为候选集来自现有约束），不会漏解。
+* 题目保证唯一解，因此一旦递归填满空格即可返回，终止搜索。
+
+#### 代码实现
+
+```java
+public class SudokuSolver {
+    private static final int FULL = (1 << 9) - 1;
+    private final int[] rowMask = new int[9];
+    private final int[] colMask = new int[9];
+    private final int[] boxMask = new int[9];
+    private final int[] er = new int[81];
+    private final int[] ec = new int[81];
+    private int emptyCount;
+
+    public void solveSudoku(char[][] board) {
+        for (int r = 0; r < 9; r++) {
+            for (int c = 0; c < 9; c++) {
+                char ch = board[r][c];
+                if (ch == '.') {
+                    er[emptyCount] = r;
+                    ec[emptyCount] = c;
+                    emptyCount++;
+                } else {
+                    int d = ch - '1';
+                    int bit = 1 << d;
+                    int b = (r / 3) * 3 + c / 3;
+                    rowMask[r] |= bit;
+                    colMask[c] |= bit;
+                    boxMask[b] |= bit;
+                }
+            }
+        }
+        dfs(board, 0);
+    }
+
+    private boolean dfs(char[][] board, int pos) {
+        if (pos == emptyCount) return true;
+        int best = pos;
+        int bestCand = 0;
+        int bestCnt = 10;
+        for (int i = pos; i < emptyCount; i++) {
+            int r = er[i];
+            int c = ec[i];
+            int b = (r / 3) * 3 + c / 3;
+            int cand = candidates(r, c, b);
+            int cnt = Integer.bitCount(cand);
+            if (cnt < bestCnt) {
+                bestCnt = cnt;
+                bestCand = cand;
+                best = i;
+                if (cnt == 1) break;
+            }
+        }
+        if (bestCnt == 0) return false;
+        swap(er, pos, best);
+        swap(ec, pos, best);
+        int r = er[pos];
+        int c = ec[pos];
+        int b = (r / 3) * 3 + c / 3;
+        int cand = (best == pos) ? bestCand : candidates(r, c, b);
+        while (cand != 0) {
+            int pick = cand & -cand;
+            cand -= pick;
+            int d = Integer.numberOfTrailingZeros(pick);
+            place(board, r, c, b, d, pick);
+            if (dfs(board, pos + 1)) return true;
+            remove(board, r, c, b, pick);
+        }
+        swap(er, pos, best);
+        swap(ec, pos, best);
+        return false;
+    }
+
+    private void remove(char[][] board, int r, int c, int b, int bit) {
+        board[r][c] = '.';
+        rowMask[r] ^= bit;
+        colMask[c] ^= bit;
+        boxMask[b] ^= bit;
+    }
+
+    private void place(char[][] board, int r, int c, int b, int d, int bit) {
+        board[r][c] = (char) ('1' + d);
+        rowMask[r] |= bit;
+        colMask[c] |= bit;
+        boxMask[b] |= bit;
+    }
+
+    private void swap(int[] a, int i, int j) {
+        if (i == j) return;
+        int t = a[i];
+        a[i] = a[j];
+        a[j] = t;
+    }
+
+    private int candidates(int r, int c, int b) {
+        int used = rowMask[r] | colMask[c] | boxMask[b];
+        return FULL & ~used;
+    }
+}
+```
+
+#### 复杂度分析
+
+设空格数量为 $E$。
+
+* 最坏情况下分支因子接近 9，时间复杂度上界可写为 $\mathcal{O}(9^E)$（这是回溯问题的典型上界）
+* 实际运行远小于上界：位掩码让“合法性判断”变成常数时间，MRV 显著减少搜索树规模
+* 空间复杂度：掩码数组与空格数组都是常数级，递归深度最多 $E \le 81$，因此为 $\mathcal{O}(E)$
 
 ***
 
