@@ -16,6 +16,7 @@
 - [并查集](doc/union-find.md)
 - [二叉树](doc/binary-tree.md)
 - [回溯算法](doc/backtracking.md)
+- [动态规划（上）](doc/dynamic-programming-1.md)
 
 ---
 
