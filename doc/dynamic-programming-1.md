@@ -37,6 +37,11 @@
       * [算法思路](#算法思路-2)
       * [代码实现](#代码实现-2)
       * [复杂度分析](#复杂度分析-2)
+  * [理解「最优子结构」](#理解最优子结构)
+    * [「力扣」第 322 题：零钱兑换](#力扣第-322-题零钱兑换)
+      * [算法思路](#算法思路-3)
+      * [代码实现](#代码实现-3)
+      * [复杂度分析](#复杂度分析-3)
 <!-- TOC -->
 
 # 动态规划（上）
@@ -662,6 +667,59 @@ $dp[i] = \Big(\text{one}(i)\ ?\ dp[i-1] : 0\Big) + \Big(\text{two}(i)\ ?\ dp[i-2
 
 * 时间复杂度： $\mathcal{O}(n)$，其中 `n <= 100`
 * 空间复杂度： $\mathcal{O}(1)$（不算输入字符串）
+
+## 理解「最优子结构」
+
+### 「力扣」第 322 题：[零钱兑换](https://leetcode.cn/problems/coin-change)
+
+#### 算法思路
+
+**动态规划思路（自底向上）**
+
+状态设计很直接：
+
+* 状态： $dp[x]$ 表示凑出金额 $x$ 的最少硬币数
+* 初始化： $dp = 0$，其余设为一个不可能的大值（记为 $INF$）
+* 计算顺序：从小到大计算 $x=1\ldots amount$，保证用到的 $dp[x-c]$ 已经算好
+* 答案：若 $dp[amount]$ 仍为 $INF$，返回 `-1`，否则返回它
+
+为什么 $INF$ 可以取 `amount + 1`？因为当存在面额 $1$ 时，最多用 `amount` 枚硬币；即使不存在面额 $1$，`amount + 1` 也足够作为“不可达”的哨兵值，不会干扰最小值更新。
+
+**核心知识点与技巧**
+
+* 这是完全背包的“最小值”版本，但实现时不必纠结背包模板；用“按金额递推”的一维数组最简洁也最快。
+* 用 `int[] dp` + 常量哨兵值，避免 `Integer.MAX_VALUE` 带来的溢出风险（比如做 `+1`）。
+* 时间上限 $amount \le 10^4$，硬币数 $\le 12$，直接双重循环足够快。
+
+#### 代码实现
+
+```java
+public class CoinChange {
+    public int coinChange(int[] coins, int amount) {
+        int inf = amount + 1;
+        int[] dp = new int[amount + 1];
+        Arrays.fill(dp, inf);
+        dp[0] = 0;
+        for (int x = 1; x <= amount; x++) {
+            int best = inf;
+            for (int c : coins) {
+                if (c <= x) {
+                    int prev = dp[x - c];
+                    if (prev + 1 < best) best = prev + 1;
+                }
+            }
+            dp[x] = best;
+        }
+        return dp[amount] > amount ? -1 : dp[amount];
+    }
+}
+```
+
+#### 复杂度分析
+
+设硬币种类数为 $n$，目标金额为 $A$。
+
+$$\text{时间复杂度} = \mathcal{O}(nA),\quad \text{空间复杂度} = \mathcal{O}(A)$$
 
 ***
 
