@@ -42,6 +42,10 @@
       * [算法思路](#算法思路-3)
       * [代码实现](#代码实现-3)
       * [复杂度分析](#复杂度分析-3)
+    * [「力扣」第 279 题：完全平方数](#力扣第-279-题完全平方数)
+      * [算法思路](#算法思路-4)
+      * [代码实现](#代码实现-4)
+      * [复杂度分析](#复杂度分析-4)
 <!-- TOC -->
 
 # 动态规划（上）
@@ -720,6 +724,73 @@ public class CoinChange {
 设硬币种类数为 $n$，目标金额为 $A$。
 
 $$\text{时间复杂度} = \mathcal{O}(nA),\quad \text{空间复杂度} = \mathcal{O}(A)$$
+
+### 「力扣」第 279 题：[完全平方数](https://leetcode.cn/problems/perfect-squares)
+
+#### 算法思路
+
+把每个平方数 $s \in {1,4,9,\dots}$ 看成“物品”，可以无限次使用；目标是凑出和为 `n`，并让“物品数量”最小。
+
+这本质上是：在所有满足 $\sum a_i^2 = n$ 的表示中，最小化项数。
+
+**动态规划思路（最快的 DP 方案）**
+
+定义状态：
+
+* `dp[i]`：凑出和为 `i` 的最少完全平方数数量
+
+初始条件：
+
+* `dp[0] = 0`（凑出 0 不需要任何数）
+* 其他 `dp[i]` 先设为一个很大的值表示“尚未更新”
+
+状态转移（枚举最后一个使用的平方数）：
+
+* 对每个 `i`，枚举所有平方数 `sq`（且 `sq <= i`）\
+  `dp[i] = min(dp[i], dp[i - sq] + 1)`
+
+直觉是：如果最后选了一个平方数 `sq`，那前面必须用最优方式凑出 `i - sq`，再加上当前这个 `sq`，总数 `+1`。
+
+由于 `n` 不大，直接做双循环即可，时间复杂度稳定，且在 LeetCode 上也是该题 DP 解里非常快的实现方式之一。
+
+**核心知识点与技巧**
+
+* 这是“最小值型 DP”，初始化要用“大数”，转移用 `min`。
+* 预先把所有平方数 `1^2, 2^2, ..., floor(sqrt(n))^2` 存进数组，避免在内层反复计算平方与判断。
+* 本题是“完全背包”的一种表述，但实现上用“按目标值 i 递增 + 枚举平方数”更直观。
+
+#### 代码实现
+
+```java
+public class PerfectSquares {
+    public int numSquares(int n) {
+        int m = (int) Math.sqrt(n);
+        int[] squares = new int[m];
+        for (int i = 1; i <= m; i++) squares[i - 1] = i * i;
+        int large = 10001;
+        int[] dp = new int[n + 1];
+        Arrays.fill(dp, large);
+        dp[0] = 0;
+        for (int i = 1; i <= n; i++) {
+            for (int sq : squares) {
+                if (sq > i) break;
+                int cand = dp[i - sq] + 1;
+                if (cand < dp[i]) dp[i] = cand;
+            }
+        }
+        return dp[n];
+    }
+}
+```
+
+#### 复杂度分析
+
+设 $k = \lfloor \sqrt{n} \rfloor$。
+
+* 时间复杂度： $\mathcal{O}(n \cdot k) = \mathcal{O}(n\sqrt{n})$
+* 空间复杂度： $\mathcal{O}(n)$
+
+在 `n <= 10^4` 时，上界大约是 $10^4 \times 100 = 10^6$ 量级循环，运行非常稳。
 
 ***
 
