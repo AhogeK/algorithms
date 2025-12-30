@@ -352,9 +352,7 @@ void union(int x, int y) {
 ```java
 // 初始化
 int[] id = new int[n];
-for(
-int i = 0;
-i<n;i++)id[i]=i;
+for(int i = 0; i < n; i++) id[i] = i;
 
 // 查找集合编号
 int find(int x) {
