@@ -151,10 +151,8 @@
 ```java
 // 初始化
 int[] parent = new int[n];
-for(
-int i = 0;
-i<n;i++){
-parent[i]=i;
+for(int i = 0; i < n; i++){
+    parent[i] = i;
 }
 
 // 查找根节点 + 路径压缩
