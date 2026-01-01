@@ -20,7 +20,7 @@ public class DesignANumberContainerSystem {
 
         public void change(int index, int number) {
             nums.put(index, number);
-            heaps.computeIfAbsent(number, _ -> new PriorityQueue<>()).add(index);
+            heaps.computeIfAbsent(number, i -> new PriorityQueue<>()).add(index);
         }
 
         public int find(int number) {

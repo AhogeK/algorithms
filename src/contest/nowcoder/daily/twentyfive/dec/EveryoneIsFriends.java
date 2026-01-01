@@ -1,6 +1,5 @@
 package contest.nowcoder.daily.twentyfive.dec;
 
-import java.io.IOError;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -43,7 +42,7 @@ public class EveryoneIsFriends {
             int sign = 1;
             if (c == '-') {
                 sign = -1;
-                c =readByte();
+                c = readByte();
             }
             int x = 0;
             while (c > ' ') {
