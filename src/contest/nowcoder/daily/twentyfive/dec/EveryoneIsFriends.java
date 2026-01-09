@@ -11,8 +11,37 @@ import java.util.Arrays;
  * @since 2025-12-30 14:46:00
  */
 public class EveryoneIsFriends {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        FastScanner fs = new FastScanner(System.in);
+        StringBuilder out = new StringBuilder();
 
+        int T = fs.nextInt();
+        for (int tc = 0; tc < T; tc++) {
+            int n = fs.nextInt();
+
+            // At most 2n unique IDs
+            XorDSU dsu = new XorDSU(Math.max(1, 2 * n));
+            IntIntMap map = new IntIntMap(Math.max(4, 2 * n), dsu);
+
+            boolean ok = true;
+            for (int i = 0; i < n; i++) {
+                int a = fs.nextInt();
+                int b = fs.nextInt();
+                int c = fs.nextInt();
+
+                if (!ok) continue;
+
+                int ia = map.getOrCreate(a);
+                int ib = map.getOrCreate(b);
+                int w = (c == 1) ? 0 : 1;
+
+                if (!dsu.union(ia, ib, w)) ok = false;
+            }
+
+            out.append(ok ? "YES" : "NO").append('\n');
+        }
+
+        System.out.print(out);
     }
 
     static final class FastScanner {
@@ -88,6 +117,67 @@ public class EveryoneIsFriends {
             xr[x] ^= xr[p];
             parent[x] = r;
             return r;
+        }
+
+        boolean union(int a, int b, int w) {
+            int ra = find(a);
+            int rb = find(b);
+            int xa = xr[a];
+            int xb = xr[b];
+            if (ra == rb) return (xa ^ xb) == w;
+            if (size[ra] > size[rb]) {
+                int tmp = ra;
+                ra = rb;
+                rb = tmp;
+                tmp = xa;
+                xa = xb;
+                xb = tmp;
+            }
+
+            parent[ra] = rb;
+            xr[ra] = xa ^ xb ^ w;
+            size[rb] += size[ra];
+            return true;
+        }
+    }
+
+    static final class IntIntMap {
+        final XorDSU dsu;
+        int[] keys;
+        int[] vals;
+        int mask;
+        int size;
+
+        IntIntMap(int expectedKeys, XorDSU dsu) {
+            int cap = 1;
+            int need = (int) (expectedKeys / 0.7f) + 1;
+            while (cap < need) cap <<= 1;
+            keys = new int[cap];
+            vals = new int[cap];
+            mask = cap - 1;
+            size = 0;
+            this.dsu = dsu;
+        }
+
+        private static int mix(int x) {
+            x *= 0x9E3779B9;
+            return x ^ (x >>> 16);
+        }
+
+        int getOrCreate(int key) {
+            int i = mix(key) & mask;
+            while (true) {
+                int k = keys[i];
+                if (k == 0) {
+                    keys[i] = key;
+                    int idx = dsu.addNode();
+                    vals[i] = idx + 1;
+                    size++;
+                    return idx;
+                }
+                if (k == key) return vals[i] - 1;
+                i = (i + 1) & mask;
+            }
         }
     }
 }
