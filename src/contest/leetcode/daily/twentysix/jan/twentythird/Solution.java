@@ -1,4 +1,4 @@
-package contest.leetcode.daily.twentysix.jan.twentysixth;
+package contest.leetcode.daily.twentysix.jan.twentythird;
 
 import java.util.Arrays;
 import java.util.PriorityQueue;
