@@ -83,6 +83,10 @@
       * [算法思路](#算法思路-13)
       * [代码实现](#代码实现-13)
       * [复杂度分析](#复杂度分析-13)
+    * [完成「力扣」第 123 题：买卖股票的最佳时机 III](#完成力扣第-123-题买卖股票的最佳时机-iii)
+      * [算法思路](#算法思路-14)
+      * [代码实现](#代码实现-14)
+      * [复杂度分析](#复杂度分析-14)
 <!-- TOC -->
 
 # 动态规划（上）
@@ -1368,6 +1372,67 @@ public class BestTimeToBuyAndSellStockII {
 
 * 时间复杂度：单次遍历数组，为 $\mathcal{O}(n)$
 * 空间复杂度：仅常数变量，为 $\mathcal{O}(1)$
+
+### 完成「力扣」第 123 题：[买卖股票的最佳时机 III](https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-iii)
+
+#### 算法思路
+
+这题的关键在于：最多做两笔交易、且不能同时持有多份股票，所以每天的选择只会在“持有/不持有、已经完成几笔交易”这些有限状态之间转移，典型用 DP 做到一趟扫描。
+
+* 一笔交易 = 先买入再卖出；卖出后才能进行下一次买入
+* 目标：最大化总利润，最多两笔
+* 数据规模：天数 $n \le 10^5$，因此需要 $\mathcal{O}(n)$ 解法，不能用 $\mathcal{O}(n^2)$ 的枚举分割点
+
+**四状态滚动**
+
+把“最多两笔交易”拆成 4 个按时间推进的最优状态（都是“到今天为止”的最优值）：
+
+* $buy1$：完成第 1 次买入后（手里持股）的最大利润
+* $sell1$：完成第 1 次卖出后（手里无股）的最大利润
+* $buy2$：完成第 2 次买入后（手里持股）的最大利润
+* $sell2$：完成第 2 次卖出后（手里无股）的最大利润
+
+每天股价为 $p$ 时，状态转移只依赖“昨天”的四个值（所以可滚动成常数空间）：
+
+* 第一次买： $buy1 = \max(buy1, -p)$
+* 第一次卖： $sell1 = \max(sell1, buy1 + p)$
+* 第二次买： $buy2 = \max(buy2, sell1 - p)$
+* 第二次卖： $sell2 = \max(sell2, buy2 + p)$
+
+直觉上：
+
+* $buy1$ 代表“用最低价买入”的等价形式（利润为负）
+* $buy2$ 代表“用第一次赚到的钱再买入”（所以从 $sell1$ 出发减去 $p$）
+
+**核心知识点与技巧**
+
+* 这是“有限状态机式”的股票 DP：用“完成第几步操作”来描述状态，比按天开二维表更省内存且更快
+* 更新顺序要从 $buy1 \rightarrow sell1 \rightarrow buy2 \rightarrow sell2$，这样同一天的 $sell1$ 可以立刻用于更新 $buy2$（等价于“同一天先卖再买”，利润不变，不会违规）
+* 初始化时，卖出状态为 $0$（不做交易），买入状态设为极小值或直接用第一天更新
+
+#### 代码实现
+
+```java
+public class BestTimeToBuyAndSellStockIII {
+    public int maxProfit(int[] prices) {
+        long negInf = Long.MIN_VALUE;
+        long buy1 = negInf, sell1 = 0;
+        long buy2 = negInf, sell2 = 0;
+        for (int p : prices) {
+            buy1 = Math.max(buy1, -(long) p);
+            sell1 = Math.max(sell1, buy1 + p);
+            buy2 = Math.max(buy2, sell1 - p);
+            sell2 = Math.max(sell2, buy2 + p);
+        }
+        return (int) sell2;
+    }
+}
+```
+
+#### 复杂度分析
+
+* 时间复杂度：一趟扫描， $\mathcal{O}(n)$
+* 空间复杂度：仅常数个变量， $\mathcal{O}(1)$
 
 ***
 
