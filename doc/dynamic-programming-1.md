@@ -91,6 +91,10 @@
       * [算法思路](#算法思路-15)
       * [代码实现](#代码实现-15)
       * [复杂度分析](#复杂度分析-15)
+    * [完成「力扣」第 309 题：最佳买卖股票时机含冷冻期](#完成力扣第-309-题最佳买卖股票时机含冷冻期)
+      * [算法思路](#算法思路-16)
+      * [代码实现](#代码实现-16)
+      * [复杂度分析](#复杂度分析-16)
 <!-- TOC -->
 
 # 动态规划（上）
@@ -1501,6 +1505,78 @@ public class BestTimeToBuyAndSellStockIV {
     * 虽然是 $nk$，但在现代 CPU 上，其执行效率接近纯线性的内存拷贝速度。
 * **空间复杂度**： $\mathcal{O}(k)$
     * 仅使用 `2 * k` 的整数空间。
+
+### 完成「力扣」第 309 题：[最佳买卖股票时机含冷冻期](https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-with-cooldown)
+
+#### 算法思路
+
+这道题是经典的**状态机动态规划**问题。我们需要在“持有股票”、“不持有股票”这两个基本状态之上，额外引入“冷冻期”这一约束条件，通过精确定义状态并推导转移方程来求解。
+
+问题的核心约束在于：**卖出股票后的第二天无法买入**。这意味着第 $i$ 天的决策不仅依赖于第 $i-1$ 天的利润，还与第 $i-1$ 天是否发生了“卖出”动作有关。
+
+我们可以将每一天的状态细分为三类：
+
+* **持有状态（Hold）**：当天结束后手中握有股票
+* **冷冻期（Sold/Cooldown）**：当天卖出了股票，下一天进入冷冻
+* **自由状态（Rest）**：当天未持有股票，且未处于冷冻期（可以买入）
+
+**三状态 DP**
+
+设第 $i$ 天的三个状态分别用 $hold_i$、 $sold_i$、 $rest_i$ 表示最大利润。
+
+**状态转移方程**如下：
+
+$$\begin{aligned} sold_i &= hold_{i-1} + prices[i] \\ hold_i &= \max(hold_{i-1},\ rest_{i-1} - prices[i]) \\ rest_i &= \max(rest_{i-1},\ sold_{i-1}) \end{aligned}$$
+
+**解释：**
+
+* $sold_i$：今天能卖出，前提是昨天必须持有，利润增加 $prices[i]$
+* $hold_i$：今天保持持有，或者昨天处于自由状态（非冷冻）今天买入
+* $rest_i$：昨天就空闲，或昨天刚卖出（今天进入冷冻期后的恢复）
+
+**初始条件**：
+
+* $hold_0 = -prices$（第一天买入，支出股价）
+* $sold_0 = 0$（第一天无法卖出）
+* $rest_0 = 0$（第一天不操作）
+
+**最终结果**： $\max\limits_{} (sold_{n-1},\ rest_{n-1})$，最后一天持有股票不卖肯定不是最优解。
+
+**核心知识点与技巧**
+
+1. **状态机建模**：将业务规则（冷冻期）转化为状态间的有向边，确保转移合法
+2. **滚动变量优化**：发现状态只依赖前一天的值，可将空间从 $\mathcal{O}(n)$ 压缩至 $\mathcal{O}(1)$
+3. **更新顺序**：计算 $rest_i$ 时需要用到 $sold_{i-1}$，因此需用临时变量保存上一轮的 $sold$ 值
+
+#### 代码实现
+
+```java
+public class BestTimeToBuyAndSellStockWithCooldown {
+    public int maxProfit(int[] prices) {
+        int n = prices.length;
+        if (n <= 1) return 0;
+        int hold = -prices[0];
+        int sold = 0;
+        int cool = 0;
+        for (int i = 1; i < n; i++) {
+            int newHold = Math.max(hold, cool - prices[i]);
+            int newSold = hold + prices[i];
+            int newCool = Math.max(sold, cool);
+            hold = newHold;
+            sold = newSold;
+            cool = newCool;
+        }
+        return Math.max(sold, cool);
+    }
+}
+```
+
+#### 复杂度分析
+
+* **时间复杂度**： $\mathcal{O}(n)$，单次遍历价格数组
+* **空间复杂度**： $\mathcal{O}(1)$，仅用 3 个变量（优化后）
+
+若使用二维数组 `int[][] f = new int[n][3]`，空间为 $\mathcal{O}(n)$，但无性能提升。
 
 ***
 
