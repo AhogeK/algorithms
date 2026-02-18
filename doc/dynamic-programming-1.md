@@ -1033,8 +1033,8 @@ public class UniquePaths {
 
 #### 复杂度分析
 
-* 时间复杂度：$\mathcal{O}(mn)$
-* 空间复杂度：$\mathcal{O}(n)$
+* 时间复杂度： $\mathcal{O}(mn)$
+* 空间复杂度： $\mathcal{O}(n)$
 
 ### 「力扣」第 198 题：[打家劫舍](https://leetcode.cn/problems/house-robber)
 
@@ -1466,7 +1466,7 @@ public class BestTimeToBuyAndSellStockIII {
 
 **动态规划：状态机设计**
 
-我们将问题抽象为一个紧凑的状态机。对于第 $j$ 次交易（$1 \le j \le k$），我们定义两个核心状态：
+我们将问题抽象为一个紧凑的状态机。对于第 $j$ 次交易（ $1 \le j \le k$ ），我们定义两个核心状态：
 
 *   **空仓状态 (Sold)**：对应 `dp[j][0]`。表示恰好进行了 $j$ 次交易，且当前**不持有**股票时的最大利润。
 *   **持仓状态 (Held)**：对应 `dp[j][1]`。表示正在进行第 $j$ 次交易，且当前**持有**股票时的最大利润。
@@ -1480,7 +1480,7 @@ public class BestTimeToBuyAndSellStockIII {
     $$dp[j][0] = \max(dp[j][0], dp[j][1] + p)$$
 
 2.  **买入决策**：
-    要么保持昨天的持仓状态，要么使用上一轮交易（$j-1$）获利后的资金买入当前股票。
+    要么保持昨天的持仓状态，要么使用上一轮交易（ $j-1$ ）获利后的资金买入当前股票。
     $$dp[j][1] = \max(dp[j][1], dp[j-1][0] - p)$$
 
 #### 代码实现
@@ -1599,9 +1599,9 @@ public class BestTimeToBuyAndSellStockWithCooldown {
 
 每天，这两个状态只有两种来源——"什么也不做"或"发生一次操作"，因此状态转移方程为：
 
-$\text{cash}_i = \max\limits(\text{cash}_{i-1},\ \text{hold}_{i-1} + \text{prices}[i] - \text{fee})$
+ $\text{cash}_i = \max\limits(\text{cash}_{i-1},\ \text{hold}_{i-1} + \text{prices}[i] - \text{fee})$
 
-$\text{hold}_i = \max\limits(\text{hold}_{i-1},\ \text{cash}_{i-1} - \text{prices}[i])$
+ $\text{hold}_i = \max\limits(\text{hold}_{i-1},\ \text{cash}_{i-1} - \text{prices}[i])$
 
 由于 $\text{cash}_i$ 和 $\text{hold}_i$ 只依赖上一天的值，两个滚动变量就能完成空间压缩。
 
@@ -1611,7 +1611,7 @@ $\text{hold}_i = \max\limits(\text{hold}_{i-1},\ \text{cash}_{i-1} - \text{price
 
 答案是**不会**。假设当天卖出使 `cash` 变大，紧接着用新 `cash` 尝试买入：
 
-$\text{hold} \leftarrow \text{cash} - \text{prices}[i] = \bigl(\text{hold}_{\text{old}} + \text{prices}[i] - \text{fee}\bigr) - \text{prices}[i] = \text{hold}_{\text{old}} - \text{fee}$
+ $\text{hold} \leftarrow \text{cash} - \text{prices}[i] = \bigl(\text{hold}_{\text{old}} + \text{prices}[i] - \text{fee}\bigr) - \text{prices}[i] = \text{hold}_{\text{old}} - \text{fee}$
 
 由于 $\text{fee} \ge 0$，这个候选值永远不会优于 $\text{hold}_{\text{old}}$，`hold` 不会被更新。✅ 先更新 `cash` 再更新 `hold` 是完全安全的。
 
