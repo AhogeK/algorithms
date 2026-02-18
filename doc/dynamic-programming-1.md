@@ -95,6 +95,10 @@
       * [算法思路](#算法思路-16)
       * [代码实现](#代码实现-16)
       * [复杂度分析](#复杂度分析-16)
+    * [完成「力扣」第 714 题：买卖股票的最佳时机含手续费](#完成力扣第-714-题买卖股票的最佳时机含手续费)
+      * [算法思路](#算法思路-17)
+      * [代码实现](#代码实现-17)
+      * [复杂度分析](#复杂度分析-17)
 <!-- TOC -->
 
 # 动态规划（上）
@@ -1577,6 +1581,60 @@ public class BestTimeToBuyAndSellStockWithCooldown {
 * **空间复杂度**： $\mathcal{O}(1)$，仅用 3 个变量（优化后）
 
 若使用二维数组 `int[][] f = new int[n][3]`，空间为 $\mathcal{O}(n)$，但无性能提升。
+
+### 完成「力扣」第 714 题：[买卖股票的最佳时机含手续费](https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-with-transaction-fee)
+
+#### 算法思路
+
+本题的核心限制是：每笔交易支付一次 `fee`，且不能同时持有两只股票。目标是通过任意次完整的"买入→卖出"循环来最大化总利润。
+
+关键在于 **何时值得卖出**：只有当卖出价格减去买入成本再减去手续费为正时，这笔交易才划算。但我们并不知道未来的价格，所以需要一种能动态"追踪最优时机"的方法。
+
+**状态机 DP**
+
+把每一天的状态抽象为两种互斥情形，这是整道题的核心建模：
+
+* `cash`：**不持有**股票时，我们手中的最大利润
+* `hold`：**持有**股票时，我们手中的最大利润（买入已花出去了，所以初始为负）
+
+每天，这两个状态只有两种来源——"什么也不做"或"发生一次操作"，因此状态转移方程为：
+
+$\text{cash}_i = \max\limits(\text{cash}_{i-1},\ \text{hold}_{i-1} + \text{prices}[i] - \text{fee})$
+
+$\text{hold}_i = \max\limits(\text{hold}_{i-1},\ \text{cash}_{i-1} - \text{prices}[i])$
+
+由于 $\text{cash}_i$ 和 $\text{hold}_i$ 只依赖上一天的值，两个滚动变量就能完成空间压缩。
+
+**更新顺序的关键细节**
+
+压缩后有个微妙问题：先更新 `cash` 再用**新 `cash`** 更新 `hold`，是否会导致"当天卖出后又当天买入"的非法操作？
+
+答案是**不会**。假设当天卖出使 `cash` 变大，紧接着用新 `cash` 尝试买入：
+
+$\text{hold} \leftarrow \text{cash} - \text{prices}[i] = \bigl(\text{hold}_{\text{old}} + \text{prices}[i] - \text{fee}\bigr) - \text{prices}[i] = \text{hold}_{\text{old}} - \text{fee}$
+
+由于 $\text{fee} \ge 0$，这个候选值永远不会优于 $\text{hold}_{\text{old}}$，`hold` 不会被更新。✅ 先更新 `cash` 再更新 `hold` 是完全安全的。
+
+#### 代码实现
+
+```java
+public class BestTimeToBuyAndSellStockWithTransactionFee {
+    public int maxProfit(int[] prices, int fee) {
+        int cash = 0;
+        int hold = -prices[0];
+        for (int i = 1; i < prices.length; i++) {
+            cash = Math.max(cash, hold + prices[i] - fee);
+            hold = Math.max(hold, cash - prices[i]);
+        }
+        return cash;
+    }
+}
+```
+
+#### 复杂度分析
+
+1. **时间复杂度**： $\mathcal{O}(n)$，单次遍历价格数组， $n$ 为数组长度。
+2. **空间复杂度**： $\mathcal{O}(1)$，只用了两个滚动变量。
 
 ***
 
