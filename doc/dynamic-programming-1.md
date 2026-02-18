@@ -1599,9 +1599,9 @@ public class BestTimeToBuyAndSellStockWithCooldown {
 
 每天，这两个状态只有两种来源——"什么也不做"或"发生一次操作"，因此状态转移方程为：
 
- $\text{cash}_i = \max\limits(\text{cash}_{i-1},\ \text{hold}_{i-1} + \text{prices}[i] - \text{fee})$
+$$\text{cash}_i = \max\limits(\text{cash}_{i-1},\ \text{hold}_{i-1} + \text{prices}[i] - \text{fee})$$
 
- $\text{hold}_i = \max\limits(\text{hold}_{i-1},\ \text{cash}_{i-1} - \text{prices}[i])$
+$$\text{hold}_i = \max\limits(\text{hold}_{i-1},\ \text{cash}_{i-1} - \text{prices}[i])$$
 
 由于 $\text{cash}_i$ 和 $\text{hold}_i$ 只依赖上一天的值，两个滚动变量就能完成空间压缩。
 
@@ -1611,7 +1611,7 @@ public class BestTimeToBuyAndSellStockWithCooldown {
 
 答案是**不会**。假设当天卖出使 `cash` 变大，紧接着用新 `cash` 尝试买入：
 
- $\text{hold} \leftarrow \text{cash} - \text{prices}[i] = \bigl(\text{hold}_{\text{old}} + \text{prices}[i] - \text{fee}\bigr) - \text{prices}[i] = \text{hold}_{\text{old}} - \text{fee}$
+$$\text{hold} \leftarrow \text{cash} - \text{prices}[i] = \bigl(\text{hold}_{\text{old}} + \text{prices}[i] - \text{fee}\bigr) - \text{prices}[i] = \text{hold}_{\text{old}} - \text{fee}$$
 
 由于 $\text{fee} \ge 0$，这个候选值永远不会优于 $\text{hold}_{\text{old}}$，`hold` 不会被更新。✅ 先更新 `cash` 再更新 `hold` 是完全安全的。
 
