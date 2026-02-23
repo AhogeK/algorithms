@@ -99,6 +99,11 @@
       * [算法思路](#算法思路-17)
       * [代码实现](#代码实现-17)
       * [复杂度分析](#复杂度分析-17)
+    * [完成「力扣」第 256 题：粉刷房子 (会员题暂且pass)](#完成力扣第-256-题粉刷房子-会员题暂且pass)
+    * [完成「力扣」第 213 题：打家劫舍 II](#完成力扣第-213-题打家劫舍-ii)
+      * [算法思路](#算法思路-18)
+      * [代码实现](#代码实现-18)
+      * [复杂度分析](#复杂度分析-18)
 <!-- TOC -->
 
 # 动态规划（上）
@@ -1635,6 +1640,66 @@ public class BestTimeToBuyAndSellStockWithTransactionFee {
 
 1. **时间复杂度**： $\mathcal{O}(n)$，单次遍历价格数组， $n$ 为数组长度。
 2. **空间复杂度**： $\mathcal{O}(1)$，只用了两个滚动变量。
+
+### 完成「力扣」第 256 题：粉刷房子 (会员题暂且pass)
+
+### 完成「力扣」第 213 题：[打家劫舍 II](https://leetcode.cn/problems/house-robber-ii)
+
+#### 算法思路
+
+这道题是经典"打家劫舍"的环形升级版。与线性版本的唯一差异在于：房子首尾相连，即第 0 号房和第 n-1 号房是邻居。
+这个约束让问题看起来更复杂，但其实只需要一个关键观察就能化简回去。
+
+既然首尾不能同时被偷，二者必然是互斥的，可以穷举两种"破环"情形：
+
+```
+原数组：  [1, 2, 3, 1]   (0 号与 3 号相邻，形成环)
+
+方案 A（锁定不偷最后一间）：  [1, 2, 3]  →  max rob = 4
+方案 B（锁定不偷第一间）：    [2, 3, 1]  →  max rob = 3
+
+ans = max(4, 3) = 4 ✓
+```
+
+每种方案都退化成一段连续数组上的线性打家劫舍问题，直接套 House Robber I 的 DP 即可。最终答案：
+
+$$\boxed{\text{ans} = \max\bigl(\text{rob}[0,\, n-2],\\;\\; \text{rob}[1,\, n-1]\bigr)}$$
+
+**核心知识点**
+
+**线性打家劫舍的滚动 DP**：设 $dp[i]$ 为前 $i$ 间房能偷到的最大金额，转移方程为
+
+$$dp[i] = \max{dp[i-1],\\;\\; dp[i-2] + \text{nums}[i]}$$
+
+由于每步只依赖前两项，可以用两个滚动变量 `prev2`、`prev1` 代替整个数组，空间从 $\mathcal{O}(n)$ 压缩到 $\mathcal{O}(1)$。
+
+**破环枚举**是解决环形约束的通用技巧：找到环上的"互斥关系"，枚举一个端点的两种状态（选或不选），把每种情形都转化成线性问题求解，取最优。
+
+#### 代码实现
+
+```java
+public class HouseRobberII {
+    public int rob(int[] nums) {
+        int n = nums.length;
+        if (n == 1) return nums[0];
+        return Math.max(robRange(nums, 0, n - 2), robRange(nums, 1, n - 1));
+    }
+
+    private static int robRange(int[] nums, int lo, int hi) {
+        int prev2 = 0, prev1 = 0;
+        for (int i = lo; i <= hi; i++) {
+            int cur = Math.max(prev1, prev2 + nums[i]);
+            prev2 = prev1;
+            prev1 = cur;
+        }
+        return prev1;
+    }
+}
+```
+
+#### 复杂度分析
+
+时间复杂度为 $\mathcal{O}(n)$，对数组做了两次线性扫描，常数因子为 2，渐进意义上仍是线性。空间复杂度为 $\mathcal{O}(1)$，仅使用了常数个滚动变量。
 
 ***
 
