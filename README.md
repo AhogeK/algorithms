@@ -1,5 +1,7 @@
 # Algorithms
 
+# ⚠️由于作者深刻意识到这样的笔记记录是一种虚假努力且拖慢了算法的学习，此项目将暂停更新⚠️
+
 > 个人算法学习练习记录<br>
 > [零起步学算法](https://leetcode.cn/leetbook/detail/learning-algorithms-with-leetcode/)
 
